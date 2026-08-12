@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FOUNDRY — Some founders need fire.</title>
+<meta name="description" content="Foundry builds the founder before the company. An identity-first incubator led by Ethan Starke that rounds the founder across leadership, finance, and culture, so the whole venture becomes investor-grade." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0a0908;
+    --ink-2:#12100e;
+    --panel:#17140f;
+    --line:rgba(255,255,255,0.08);
+    --paper:#f4efe7;
+    --paper-dim:#b7ad9e;
+    --paper-faint:#8a8072;
+    --ember:#ff6a1a;
+    --ember-2:#ff9d2e;
+    --coal:#b5341a;
+    --glow:rgba(255,106,26,0.45);
+    --serif:'Fraunces',Georgia,'Times New Roman',serif;
+    --sans:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--sans);
+    font-size:18px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  #embers{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.55}
+  .wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:0 28px}
+  h1,h2,h3,.serif{font-family:var(--serif);font-weight:500;letter-spacing:-0.01em;line-height:1.08}
+  a{color:inherit;text-decoration:none}
+  .eyebrow{font-size:13px;letter-spacing:0.32em;text-transform:uppercase;color:var(--ember-2);font-weight:600}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(10,9,8,0.72);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:66px;max-width:1120px;margin:0 auto;padding:0 28px}
+  .brand{font-family:var(--serif);font-weight:600;font-size:22px;letter-spacing:0.18em}
+  .brand b{color:var(--ember)}
+  .nav-links{display:flex;gap:30px;align-items:center}
+  .nav-links a{font-size:14px;color:var(--paper-dim);transition:color .2s}
+  .nav-links a:hover{color:var(--paper)}
+  .btn{display:inline-block;font-family:var(--sans);font-weight:600;font-size:15px;letter-spacing:0.01em;padding:13px 24px;border-radius:2px;cursor:pointer;transition:transform .15s ease, box-shadow .2s ease, background .2s}
+  .btn-fire{color:#160b04;background:linear-gradient(180deg,var(--ember-2),var(--ember));box-shadow:0 0 0 1px rgba(255,157,46,0.4), 0 14px 40px -12px var(--glow)}
+  .btn-fire:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(255,157,46,0.6), 0 20px 52px -12px var(--glow)}
+  .btn-ghost{color:var(--paper);border:1px solid rgba(255,255,255,0.18)}
+  .btn-ghost:hover{border-color:var(--ember);color:var(--ember-2)}
+  .nav-cta{padding:10px 18px;font-size:14px}
+  @media(max-width:760px){.nav-links a:not(.nav-cta){display:none}}
+
+  /* HERO */
+  header{position:relative;padding:118px 0 96px;overflow:hidden}
+  .hero-glow{position:absolute;left:50%;top:-8%;transform:translateX(-50%);width:min(1200px,140vw);height:760px;
+    background:radial-gradient(ellipse 50% 50% at 50% 42%, rgba(255,106,26,0.30), rgba(181,52,26,0.14) 45%, transparent 70%);
+    filter:blur(20px);z-index:0;pointer-events:none}
+  .hero-in{position:relative;z-index:2;max-width:920px}
+  .hero h1{font-size:clamp(44px,7.2vw,86px);margin:22px 0 0}
+  .hero h1 .fire{background:linear-gradient(92deg,var(--ember-2),var(--ember) 55%,var(--coal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .lede{font-size:clamp(19px,2.4vw,23px);color:var(--paper-dim);margin-top:26px;max-width:620px}
+  .hero .lede b{color:var(--paper);font-weight:500}
+  .cta-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:38px}
+  .selective{margin-top:26px;font-size:14px;color:var(--paper-faint);letter-spacing:0.04em}
+  .selective b{color:var(--ember-2);font-weight:600}
+
+  /* SECTION SHELL */
+  section{padding:96px 0;position:relative}
+  .kicker{margin-bottom:18px}
+  .section-title{font-size:clamp(30px,4.4vw,50px);max-width:16ch}
+  .lead{font-size:clamp(18px,2vw,21px);color:var(--paper-dim);max-width:64ch;margin-top:20px}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent)}
+
+  /* GAP list */
+  .gap-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:44px;border-radius:4px;overflow:hidden}
+  .gap-cell{background:var(--ink-2);padding:26px 26px}
+  .gap-cell h4{font-family:var(--sans);font-size:14px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ember-2);font-weight:600;margin-bottom:8px}
+  .gap-cell p{color:var(--paper-dim);font-size:16px}
+  @media(max-width:680px){.gap-grid{grid-template-columns:1fr}}
+  .pull{font-family:var(--serif);font-size:clamp(26px,4vw,40px);line-height:1.18;margin-top:64px;max-width:20ch}
+  .pull .em{color:var(--ember-2)}
+
+  /* METHOD */
+  .method{background:var(--ink-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .four{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:48px}
+  .dim{background:linear-gradient(180deg,var(--panel),rgba(23,20,15,0.4));border:1px solid var(--line);border-radius:6px;padding:26px 22px 28px;position:relative;overflow:hidden}
+  .dim::before{content:"";position:absolute;left:0;top:0;height:3px;width:100%;background:linear-gradient(90deg,var(--ember),var(--ember-2))}
+  .dim .n{font-family:var(--serif);font-size:15px;color:var(--paper-faint)}
+  .dim h3{font-size:23px;margin:10px 0 10px}
+  .dim p{font-size:15px;color:var(--paper-dim)}
+  .method-note{margin-top:34px;font-size:16px;color:var(--paper-faint)}
+  .method-note b{color:var(--paper);font-weight:500}
+  @media(max-width:900px){.four{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.four{grid-template-columns:1fr}}
+
+  /* PROGRAMS */
+  .progs{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+  .prog{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:30px 26px 28px;transition:transform .2s ease,border-color .2s ease,box-shadow .25s}
+  .prog:hover{transform:translateY(-4px);border-color:rgba(255,106,26,0.4);box-shadow:0 26px 60px -30px var(--glow)}
+  .prog .flame{font-size:22px;line-height:1}
+  .prog .pname{font-family:var(--serif);font-size:30px;margin-top:14px;letter-spacing:0.02em}
+  .prog .len{display:inline-block;margin-top:6px;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ember-2);font-weight:600}
+  .prog .arc{margin-top:14px;padding-top:13px;border-top:1px solid var(--line);font-size:12.5px;letter-spacing:0.03em;color:var(--paper-faint);font-weight:500}
+  .prog .forwho{margin-top:18px;font-size:15px;color:var(--paper);font-weight:500}
+  .prog .work{margin-top:10px;font-size:15px;color:var(--paper-dim);flex-grow:1}
+  .prog .plink{margin-top:22px;font-size:14px;font-weight:600;color:var(--ember-2)}
+  .prog .plink:hover{color:var(--ember)}
+  @media(max-width:860px){.progs{grid-template-columns:1fr}}
+  .cadence{margin-top:34px;background:rgba(255,106,26,0.06);border:1px solid rgba(255,106,26,0.16);border-radius:8px;padding:22px 24px;font-size:16px;color:var(--paper-dim)}
+  .cadence b{color:var(--paper);font-weight:500}
+  .placed{margin-top:18px;font-size:15px;color:var(--paper-faint)}
+
+  /* ETHAN */
+  .ethan{background:var(--ink-2);border-top:1px solid var(--line)}
+  .ethan-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:56px;align-items:start;margin-top:40px}
+  .ethan p.bio{font-size:18px;color:var(--paper-dim);margin-top:4px}
+  .ethan p.bio b{color:var(--paper);font-weight:500}
+  .ethan blockquote{font-family:var(--serif);font-size:26px;line-height:1.28;margin:30px 0;padding-left:22px;border-left:2px solid var(--ember);color:var(--paper)}
+  .proof{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:26px 24px}
+  .proof h4{font-family:var(--sans);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ember-2);font-weight:600;margin-bottom:12px}
+  .proof p{font-size:15px;color:var(--paper-dim);margin-bottom:20px}
+  .proof p:last-child{margin-bottom:0}
+  .proof .roster{color:var(--paper);font-weight:500}
+  @media(max-width:840px){.ethan-grid{grid-template-columns:1fr;gap:32px}}
+
+  /* FIT */
+  .fit{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:44px}
+  .fit .col{padding:28px 26px;border-radius:8px;border:1px solid var(--line)}
+  .fit .yes{background:linear-gradient(180deg,rgba(255,106,26,0.08),transparent)}
+  .fit .no{background:var(--ink-2)}
+  .fit h4{font-family:var(--serif);font-size:22px;margin-bottom:14px}
+  .fit ul{list-style:none}
+  .fit li{position:relative;padding-left:26px;margin-bottom:12px;font-size:16px;color:var(--paper-dim)}
+  .fit .yes li::before{content:"";position:absolute;left:0;top:9px;width:9px;height:9px;border-radius:50%;background:var(--ember)}
+  .fit .no li::before{content:"";position:absolute;left:2px;top:11px;width:12px;height:1.5px;background:var(--paper-faint)}
+  @media(max-width:680px){.fit{grid-template-columns:1fr}}
+
+  /* CTA */
+  .final{position:relative;text-align:center;padding:120px 0 128px;overflow:hidden}
+  .final .hero-glow{top:auto;bottom:-30%;height:620px}
+  .final h2{font-size:clamp(34px,5.4vw,60px);max-width:18ch;margin:0 auto}
+  .final p{color:var(--paper-dim);font-size:19px;margin:24px auto 0;max-width:52ch}
+  .final .cta-row{justify-content:center}
+  .final .fineprint{margin-top:26px;font-size:14px;color:var(--paper-faint)}
+
+  footer{border-top:1px solid var(--line);padding:44px 0}
+  .foot-in{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+  .foot-brand{font-family:var(--serif);font-weight:600;letter-spacing:0.2em;font-size:18px}
+  .foot-brand b{color:var(--ember)}
+  .foot-tag{color:var(--paper-faint);font-size:14px}
+  footer a{color:var(--paper-dim);font-size:14px}
+  footer a:hover{color:var(--ember-2)}
+
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease, transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}#embers{display:none}}
+</style>
+</head>
+<body>
+<canvas id="embers"></canvas>
+
+<nav>
+  <div class="nav-in">
+    <div class="brand">FO<b>U</b>NDRY</div>
+    <div class="nav-links">
+      <a href="#gap">The Gap</a>
+      <a href="#method">The Method</a>
+      <a href="#programs">Programs</a>
+      <a href="#ethan">Ethan</a>
+      <a class="btn btn-fire nav-cta" href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call</a>
+    </div>
+  </div>
+</nav>
+
+<header>
+  <div class="hero-glow"></div>
+  <div class="wrap hero-in">
+    <div class="eyebrow">Foundry, the founder incubator</div>
+    <h1>Not every founder needs funding first.<br/>Some need <span class="fire">fire</span>.</h1>
+    <p class="lede">Foundry builds the founder before the company. We develop who you are, how you lead, and the story you tell, then we round you across leadership, finance, and culture, until <b>the venture is investor-grade because the person carrying it is.</b></p>
+    <div class="cta-row">
+      <a class="btn btn-fire" href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call with Ethan</a>
+      <a class="btn btn-ghost" href="#method">See how it works</a>
+    </div>
+    <p class="selective">By application. <b>Foundry chooses its founders.</b> Pricing is a conversation, not a checkout.</p>
+  </div>
+</header>
+
+<div class="divider"></div>
+
+<section id="gap">
+  <div class="wrap">
+    <div class="eyebrow kicker">The gap</div>
+    <h2 class="section-title">The market is crowded with resources and starved of the one thing that decides who makes it.</h2>
+    <p class="lead">Most founders do not fail for lack of an idea or lack of capital. They fail for lack of the identity, judgment, and story to carry one through. Everyone will sell you the resource. Almost no one will build the founder.</p>
+    <div class="gap-grid reveal">
+      <div class="gap-cell"><h4>Accelerators</h4><p>Optimize the company and gate on capital. They assume a founder who is already formed, and turn away the ones who are not yet fundable.</p></div>
+      <div class="gap-cell"><h4>Coworking</h4><p>Sell space and proximity. Resource only. A desk has never once made a founder.</p></div>
+      <div class="gap-cell"><h4>Masterminds</h4><p>Sell peers and accountability. Peer only. No method, no curated expertise, no one developing the person.</p></div>
+      <div class="gap-cell"><h4>Courses</h4><p>Sell mechanics to anyone who pays. Content only. No selection, no identity, no transformation.</p></div>
+    </div>
+    <p class="pull reveal">Most incubators make the company presentable.<br/><span class="em">Foundry makes the founder undeniable.</span></p>
+  </div>
+</section>
+
+<section id="method" class="method">
+  <div class="wrap">
+    <div class="eyebrow kicker">The method</div>
+    <h2 class="section-title">We build the four things an investor actually underwrites.</h2>
+    <p class="lead">A polished deck does not get funded. A founder does. Foundry develops the four dimensions capital, talent, and customers respond to, with identity as the foundation everything else compounds on.</p>
+    <div class="four">
+      <div class="dim reveal"><div class="n">01</div><h3>Identity &amp; Narrative</h3><p>Who you are beneath the performance, and the story that makes others believe. The non-negotiable first principle.</p></div>
+      <div class="dim reveal"><div class="n">02</div><h3>Leadership</h3><p>Decision-making under pressure and the move from operator to leader. Ethan's core body of work.</p></div>
+      <div class="dim reveal"><div class="n">03</div><h3>Finance</h3><p>Real fluency in the numbers a founder must own to be credible in a room full of investors.</p></div>
+      <div class="dim reveal"><div class="n">04</div><h3>Culture</h3><p>The operating system your company runs on, built on purpose instead of by accident.</p></div>
+    </div>
+    <p class="method-note reveal"><b>High agency is trained, not discussed.</b> Every stretch of the work ends in a move made in the real world. Foundry is an action environment, not a classroom, and it is candid by design.</p>
+  </div>
+</section>
+
+<section id="programs">
+  <div class="wrap">
+    <div class="eyebrow kicker">The programs</div>
+    <h2 class="section-title">Three ways into the fire. You are placed by readiness, not by price.</h2>
+    <p class="lead">One method, one bench, one monthly rhythm. Every path runs the same three stages, Foundation, Growth, then Scale and Exit, and every path ends the same way: a founder investors back, and the Foundry certificate. You simply begin where you already stand. The rawer the founder, the longer the fire.</p>
+    <div class="progs">
+      <div class="prog reveal">
+        <div class="flame">&#128293;</div>
+        <div class="pname">The Sovereign</div>
+        <div class="len">15 weeks</div>
+        <div class="arc">Scale &amp; Exit</div>
+        <div class="forwho">For the founder who already knows a lot.</div>
+        <div class="work">You have the foundation and the scars. You come for the summit: raising well, boards, expansion, exit, and the Foundry certificate that says you were built, not just advised.</div>
+        <a class="plink" href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call &#8250;</a>
+      </div>
+      <div class="prog reveal">
+        <div class="flame">&#128293;</div>
+        <div class="pname">The Builder</div>
+        <div class="len">30 weeks</div>
+        <div class="arc">Growth &#8594; Scale &amp; Exit</div>
+        <div class="forwho">For the founder building the company.</div>
+        <div class="work">You have a foundation and conviction, but no durable momentum. We build the founder and the venture's spine together: the model, your leadership, your financial fluency, and the culture the company will run on, straight through to fundable.</div>
+        <a class="plink" href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call &#8250;</a>
+      </div>
+      <div class="prog reveal">
+        <div class="flame">&#128293;</div>
+        <div class="pname">The Seeker</div>
+        <div class="len">45 weeks</div>
+        <div class="arc">Foundation &#8594; Growth &#8594; Scale &amp; Exit</div>
+        <div class="forwho">For the founder building from the fire up.</div>
+        <div class="work">Earliest, rawest, highest ceiling. The complete arc: identity and agency, narrative, leadership, finance, and culture, from the foundation up to a founder an investor can back.</div>
+        <a class="plink" href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call &#8250;</a>
+      </div>
+    </div>
+    <div class="cadence reveal"><b>The rhythm.</b> Every format runs weekly: three focused hours a month with Ethan and the Foundry bench, two 60-minute working sessions and two 30-minute sessions, plus the moves you make in the real world between them.</div>
+    <p class="placed">Which format is yours is decided in the call, from your readiness and experience, not from a menu.</p>
+  </div>
+</section>
+
+<section id="ethan" class="ethan">
+  <div class="wrap">
+    <div class="eyebrow kicker">Led by</div>
+    <h2 class="section-title">Ethan Starke</h2>
+    <div class="ethan-grid">
+      <div>
+        <p class="bio">Executive advisor, leadership strategist, author, and entrepreneur. Twenty years building and advising ventures across many countries, from Dubai to Mexico City, at the intersection of entrepreneurship, leadership, finance, and culture.</p>
+        <p class="bio" style="margin-top:16px">He does not coach one lane. <b>He rounds the founder across leadership, finance, and culture, on top of identity and narrative, so the whole venture becomes investor-grade, not just the pitch.</b></p>
+        <blockquote>When the stakes are high, clarity matters more than speed.</blockquote>
+        <p class="bio">The goal is not to hand you answers. It is to improve your judgment, strengthen your alignment, and make you a founder others can back.</p>
+      </div>
+      <div class="proof reveal">
+        <h4>The proof</h4>
+        <p class="roster">Advisor and speaker to teams at American Airlines, CrowdStrike, YETI, Kendra Scott, Buc-ee's, Insperity, The Friedkin Group, Torchy's Tacos, David Weekley Homes, and Southwest Research Institute.</p>
+        <p>Author of nine books, including <i>The Stoic Entrepreneur</i> and <i>The Fire That Consumes Nothing</i>. Host of <i>Starke Conversations</i>. Publisher of <i>The Starke Perspective</i>.</p>
+        <p><b style="color:var(--paper)">The bench.</b> A curated bench of specialist coaches in leadership, finance, and culture, decades of operating experience between them. At Foundry, mentors are chosen, not accepted.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="fit">
+  <div class="wrap">
+    <div class="eyebrow kicker">The fit</div>
+    <h2 class="section-title">Foundry is not for everyone. On purpose.</h2>
+    <div class="fit">
+      <div class="col yes reveal">
+        <h4>Foundry is for you if</h4>
+        <ul>
+          <li>You are high agency, or ready to become so, and you move.</li>
+          <li>You are building for real, not collecting another program.</li>
+          <li>You are willing to be challenged, candidly, because you want the truth more than the comfort.</li>
+          <li>You believe the founder is the venture's most important asset. Starting with you.</li>
+        </ul>
+      </div>
+      <div class="col no reveal">
+        <h4>Foundry is not for you if</h4>
+        <ul>
+          <li>You want only capital. An accelerator serves that.</li>
+          <li>You want only space. Coworking serves that.</li>
+          <li>You want only a network. A mastermind serves that.</li>
+          <li>You want to be told you are already finished. Foundry will not.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="apply" class="final">
+  <div class="hero-glow"></div>
+  <div class="wrap">
+    <div class="eyebrow kicker" style="text-align:center">The next move</div>
+    <h2>If you are ready to be built, not just advised, it starts with a call.</h2>
+    <p>Tell Ethan who you are and what you are here to build. If there is a fit, you will be placed into the format that matches where you actually stand.</p>
+    <div class="cta-row">
+      <a class="btn btn-fire" href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call with Ethan</a>
+      <a class="btn btn-ghost" href="#programs">Revisit the programs</a>
+    </div>
+    <p class="fineprint">By application. Pricing is a conversation. Foundry chooses its founders.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-in">
+    <div>
+      <div class="foot-brand">FO<b>U</b>NDRY</div>
+      <div class="foot-tag">Some founders need fire.</div>
+    </div>
+    <div style="display:flex;gap:26px;align-items:center">
+      <a href="mailto:ethan@ethanstarke.com">ethan@ethanstarke.com</a>
+      <a href="https://ethanstarke.com" target="_blank" rel="noopener">ethanstarke.com</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Reveal on scroll
+(function(){
+  var els=document.querySelectorAll('.reveal');
+  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return;}
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}});
+  },{threshold:0.14});
+  els.forEach(function(e){io.observe(e);});
+})();
+
+// Ember particles
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce) return;
+  var c=document.getElementById('embers'), x=c.getContext('2d');
+  var W,H,parts=[];
+  function size(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  size();
+  var N=Math.min(70, Math.floor(window.innerWidth/22));
+  for(var i=0;i<N;i++){parts.push(spawn(Math.random()*H));}
+  function spawn(y){
+    return {x:Math.random()*W, y:y==null?H+10:y, r:0.6+Math.random()*2.1,
+      vy:0.25+Math.random()*0.75, drift:(Math.random()-0.5)*0.5, life:Math.random(), tw:0.004+Math.random()*0.01};
+  }
+  function tick(){
+    x.clearRect(0,0,W,H);
+    for(var i=0;i<parts.length;i++){
+      var p=parts[i];
+      p.y-=p.vy; p.x+=p.drift; p.life+=p.tw;
+      var a=0.5+0.5*Math.sin(p.life*6.28);
+      var grd=x.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*3);
+      grd.addColorStop(0,'rgba(255,175,80,'+(0.75*a)+')');
+      grd.addColorStop(0.4,'rgba(255,106,26,'+(0.5*a)+')');
+      grd.addColorStop(1,'rgba(181,52,26,0)');
+      x.fillStyle=grd;
+      x.beginPath();x.arc(p.x,p.y,p.r*3,0,6.2832);x.fill();
+      if(p.y< -20 || p.x< -30 || p.x>W+30){parts[i]=spawn();}
+    }
+    requestAnimationFrame(tick);
+  }
+  window.addEventListener('resize',size);
+  tick();
+})();
+</script>
+</body>
+</html>
