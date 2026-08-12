@@ -123,6 +123,9 @@
   .ethan p.bio{font-size:18px;color:var(--paper-dim);margin-top:4px}
   .ethan p.bio b{color:var(--paper);font-weight:500}
   .ethan blockquote{font-family:var(--serif);font-size:26px;line-height:1.28;margin:30px 0;padding-left:22px;border-left:2px solid var(--ember);color:var(--paper)}
+  .ethan-head{display:flex;align-items:center;gap:26px;margin-bottom:6px}
+  .ethan-photo{width:164px;height:205px;object-fit:cover;object-position:50% 28%;border-radius:8px;border:1px solid rgba(255,106,26,0.4);box-shadow:0 20px 55px -22px var(--glow);flex-shrink:0}
+  @media(max-width:600px){.ethan-head{gap:16px}.ethan-photo{width:112px;height:140px}}
   .proof{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:26px 24px}
   .proof h4{font-family:var(--sans);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ember-2);font-weight:600;margin-bottom:12px}
   .proof p{font-size:15px;color:var(--paper-dim);margin-bottom:20px}
@@ -266,8 +269,13 @@
 
 <section id="ethan" class="ethan">
   <div class="wrap">
-    <div class="eyebrow kicker">Led by</div>
-    <h2 class="section-title">Ethan Starke</h2>
+    <div class="ethan-head">
+      <img class="ethan-photo" src="ethan.jpg" alt="Ethan Starke" />
+      <div>
+        <div class="eyebrow kicker">Led by</div>
+        <h2 class="section-title">Ethan Starke</h2>
+      </div>
+    </div>
     <div class="ethan-grid">
       <div>
         <p class="bio">Executive advisor, leadership strategist, author, and entrepreneur. Twenty years building and advising ventures across many countries, from Dubai to Mexico City, at the intersection of entrepreneurship, leadership, finance, and culture.</p>
