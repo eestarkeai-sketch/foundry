@@ -55,7 +55,7 @@
   label.opt:hover{border-color:rgba(255,106,26,0.4)}
   label.opt input{margin-top:3px;accent-color:var(--ember);flex-shrink:0}
   label.opt.sel{border-color:var(--ember);background:rgba(255,106,26,0.06);color:var(--paper)}
-  input[type=text],input[type=email],select,textarea{width:100%;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;color:var(--paper);font-family:var(--sans);font-size:15px;padding:12px 14px;margin-top:8px}
+  input[type=text],input[type=email],input[type=url],select,textarea{width:100%;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;color:var(--paper);font-family:var(--sans);font-size:15px;padding:12px 14px;margin-top:8px}
   textarea{min-height:120px;resize:vertical;line-height:1.55}
   input[type=file]{width:100%;color:var(--paper-dim);font-size:14px;margin-top:8px}
   .fieldlbl{font-weight:500;font-size:15px}
@@ -193,10 +193,12 @@
     <div id="slope"></div>
 
     <div class="q">
-      <div class="qh">The thirty-day test</div>
-      <div class="qs">One scenario. There are no wrong words here; write plainly.</div>
-      <p style="color:var(--paper-dim);font-size:15px;margin-bottom:4px">Thirty days ago, an investor gave you hard, specific feedback: your core assumption is probably wrong, and here is exactly why. It is now thirty days later and you are back in the room. What would you have done, and what would you put on the table today?</p>
-      <textarea name="Thirty-day test" placeholder="Be concrete." required></textarea>
+      <div class="qh">The slope test</div>
+      <div class="qs">One real moment, not a hypothetical.</div>
+      <p style="color:var(--paper-dim);font-size:15px;margin-bottom:8px">In the last 90 days, someone gave you hard, specific feedback that a core assumption of yours was probably wrong, and told you why. An investor, a customer, a mentor, a cofounder, or the market itself. Name who and when, what they said, and then, with dates, what you actually did in the weeks after: what you built, who you talked to, what you changed, and what you can show for it.</p>
+      <input type="text" name="Slope who and when" placeholder="Who gave the feedback, and roughly when" />
+      <textarea name="Slope what they said" placeholder="What they told you, specifically"></textarea>
+      <textarea name="Slope what you did" placeholder="What you did in the weeks after: dates, what you built or changed, and what you can show"></textarea>
     </div>
     <div class="cta-row">
       <button type="button" class="btn btn-ghost" data-back="1">&#8249; Back</button>
@@ -249,6 +251,13 @@
       <div class="qh">3. Your non-obvious truth</div>
       <div class="qs">The one thing about your space, customer, or model that is true, that you learned the hard way, and that most people would disagree with.</div>
       <textarea name="Essay 3 the non-obvious truth" required></textarea>
+    </div>
+
+    <div class="sec-h" style="margin-top:26px">The ninety-second video</div>
+    <div class="sec-s">Record a short video, 60 to 90 seconds, on your phone or laptop, upload it unlisted (Loom, YouTube, or Google Drive), and paste the link. Speak to camera, in your own words. This is asked of every applicant.</div>
+    <div class="q">
+      <div class="qh" id="videoQ">Your prompt appears here.</div>
+      <input type="url" name="Verification video link" id="videoLink" placeholder="Paste your unlisted video link" required />
     </div>
 
     <div class="sec-h" style="margin-top:26px">Agreements</div>
@@ -315,11 +324,19 @@
   var PROOF = {
     b3:"Earned insight: your primary research artifact (notes, transcripts, data).",
     b6:"Talent gravity: who joined and what they gave up (a name, a note, a message).",
+    b8:"Customer obsession: a thread or notes that show your continuous loop with users.",
     b9:"One metric: your current dashboard or figure.",
     b10:"GTM channel: the channel and its result (analytics, a post, a funnel).",
     b11:"Speed to revenue: a receipt, invoice, or payment record.",
     b12:"Operational transparency: the data room, model, or cap table.",
     b13:"Product velocity: a changelog, commit history, or release record."
+  };
+  var INSTANCE = {
+    b1:"Show it. The feedback, roughly when, what you shipped in response, and how fast.",
+    b4:"Show it. The blocker, exactly how you routed around it, and the outcome.",
+    b5:"Show it. The last hard pushback, from whom, and what you did with it on the spot.",
+    b7:"Show it. The plan you killed, when, why, and how fast.",
+    b8:"Name your top three users and their exact pains, in their words."
   };
   var TIERS = {
     Sovereign:{len:"15 weeks",rate:"750",why:"You already demonstrate the behavioral mechanics and the commercial execution the summit assumes. You come to master capital and narrative, and to earn the certificate."},
@@ -360,6 +377,9 @@
       var v = ["a","b","c","d"][i];
       html += '<label class="opt"><input type="radio" name="'+q.id+'_'+q.h+'" value="'+v+'" data-q="'+q.id+'" data-v="'+v+'"><span>'+txt+'</span></label>';
     });
+    if(INSTANCE[q.id]){
+      html += '<div class="inst" data-inst="'+q.id+'" style="display:none;margin-top:12px"><div class="fieldlbl">'+INSTANCE[q.id]+'</div><textarea name="Instance '+q.h+'" data-instq="'+q.id+'" placeholder="Be specific: a name or role, when, and the outcome."></textarea></div>';
+    }
     el.innerHTML = html; qwrap.appendChild(el);
   });
 
@@ -371,6 +391,8 @@
       var group = inp.closest(".q");
       group.querySelectorAll("label.opt").forEach(function(l){l.classList.remove("sel");});
       inp.closest("label.opt").classList.add("sel");
+      var instEl = group.querySelector('[data-inst="'+inp.dataset.q+'"]');
+      if(instEl){ instEl.style.display = (inp.dataset.v==="d") ? "block" : "none"; }
     }
     if(inp.type==="radio" && inp.dataset.sq){
       slopeVal[inp.dataset.sq] = parseInt(inp.dataset.sv);
@@ -452,6 +474,11 @@
     }
   }
 
+  function setVideoPrompt(){
+    var q=document.getElementById("videoQ");
+    if(q) q.textContent = "Speak to camera, no notes: tell us about the hard-feedback moment you described earlier and what you actually did in the weeks after, then name the one thing about your venture you are most certain of, and why.";
+  }
+
   function show(n){
     Array.prototype.forEach.call(document.querySelectorAll(".step"),function(s){s.classList.toggle("on", s.dataset.step==String(n));});
     Array.prototype.forEach.call(document.querySelectorAll(".pip"),function(p){
@@ -468,8 +495,11 @@
     }
     if(n==2){
       for(var j=0;j<QUESTIONS.length;j++){ if(!val[QUESTIONS[j].id]) return "Please answer all thirteen questions."; }
+      for(var m in INSTANCE){ if(val[m]==="d"){ var ta=document.querySelector('[data-instq="'+m+'"]'); if(!ta || ta.value.trim().length<30) return "For a top answer you chose, add the specific instance: a name or role, when, and the outcome."; } }
       for(var k=0;k<SLOPE.length;k++){ if(slopeVal[SLOPE[k].id]===undefined) return "Please answer all five recent-slope questions."; }
-      var vt=document.querySelector('[name="Thirty-day test"]'); if(!vt.value.trim()) return "Please answer the thirty-day test.";
+      var sw=document.querySelector('[name="Slope who and when"]'), ss=document.querySelector('[name="Slope what they said"]'), sd=document.querySelector('[name="Slope what you did"]');
+      if(!sw.value.trim()||!ss.value.trim()||!sd.value.trim()) return "Please complete the slope test: who and when, what they said, and what you did.";
+      if(sd.value.trim().length<40) return "For the slope test, describe concretely what you did in the weeks after, with dates and what you can show.";
       return "";
     }
     return "";
@@ -485,6 +515,7 @@
       if(errEl) errEl.textContent="";
       var nx=+b.dataset.next;
       if(nx==3) renderPlacement();
+      if(nx==4) setVideoPrompt();
       show(nx);
     }
     if(bb){ show(+bb.dataset.back); }
@@ -500,6 +531,7 @@
     var ok=true; all.forEach(function(c){ if(!c.checked) ok=false; });
     var essays=document.querySelectorAll('[data-step="4"] textarea');
     essays.forEach(function(t){ if(!t.value.trim()) ok=false; });
+    var vl=document.getElementById("videoLink"); if(!vl || !vl.value.trim()) ok=false;
     document.getElementById("submitBtn").disabled=!ok;
   }
   document.querySelectorAll(".ag").forEach(function(c){c.addEventListener("change",checkAgrees);});
