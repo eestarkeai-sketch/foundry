@@ -108,6 +108,7 @@
     <div class="eyebrow">The placement application</div>
     <h1>Find your fire, and your stage.</h1>
     <p>This is a self-assessment before commitment. You will answer honestly, and the application will show you the one stage you are eligible for and what it costs. Then you will submit proof and write a few short essays. It takes about twenty minutes, and it is worth doing carefully. Nothing here is scored by a person until you submit.</p>
+    <p style="color:var(--ember-2);font-size:14px;font-weight:500;margin-top:10px;border:1px solid rgba(255,106,26,0.3);border-radius:8px;padding:10px 14px;display:inline-block">Foundry is currently open to founders based in the United States only. Your books ship to a US address.</p>
     <div class="steps">
       <div class="pip active" data-pip="1">1 &middot; Orientation</div>
       <div class="pip" data-pip="2">2 &middot; Assessment</div>
@@ -138,6 +139,20 @@
       <input type="text" name="Full name" placeholder="Full name" required />
       <input type="text" name="Location" placeholder="City, country" />
       <input type="email" name="Email" placeholder="Email address" required />
+    </div>
+    <div class="q">
+      <div class="qh">Where should your books ship?</div>
+      <div class="qs">Each movement's books are included in your fees and shipped to you, bundled, with a note. United States addresses only for now.</div>
+      <input type="text" name="Ship to name" placeholder="Recipient name" required />
+      <input type="text" name="Street address" placeholder="Street address" required />
+      <input type="text" name="Apartment or unit" placeholder="Apartment, suite, or unit (optional)" />
+      <input type="text" name="Ship city" placeholder="City" required />
+      <select name="State" required>
+        <option value="" disabled selected>State</option>
+        <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>DC</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
+      </select>
+      <input type="text" name="ZIP code" placeholder="ZIP code" required />
+      <input type="hidden" name="Country" value="United States" />
     </div>
     <div class="q">
       <div class="qh">What are you building, or trying to become the founder of?</div>
@@ -199,7 +214,7 @@
       <div class="rwhy" id="rv_why"></div>
       <div id="rv_traj" style="font-size:13px;letter-spacing:0.14em;text-transform:uppercase;font-weight:600;color:var(--ember-2);margin-bottom:16px"></div>
       <div class="price">You start at <b id="rv_rate">$250</b> per week</div>
-      <div class="pricesub">Paid five weeks at a time. The rate rises by stage as you advance: Seeker $250/week, Builder $500/week, Sovereign $750/week. Leave any time; no refunds.</div>
+      <div class="pricesub">Paid five weeks at a time. The rate rises by stage as you advance: Seeker $250/week, Builder $500/week, Sovereign $750/week. Leave any time; no refunds. Your books for each movement are included and shipped to you.</div>
     </div>
     <div class="ack">
       <label class="agree"><input type="checkbox" id="ack" name="Acknowledged placement" value="Yes" />
