@@ -512,5 +512,41 @@
   }
 })();
 </script>
+
+<script>
+// Send the shipping address into Wix so it lives in the ShippingAddresses collection,
+// not only in the notification email. Non-blocking: if the endpoint is unavailable the
+// application still submits normally through the form action above.
+(function(){
+  var WIX_ADDRESS_ENDPOINT = "https://www.ethanstarke.com/_functions/saveApplicantAddress";
+  var form = document.getElementById("app");
+  if(!form) return;
+  function val(n){ var el = form.querySelector('[name="'+n+'"]'); return el ? (el.value||"").trim() : ""; }
+  form.addEventListener("submit", function(){
+    try{
+      var payload = {
+        applicantEmail: val("Email"),
+        shipToName: val("Ship to name"),
+        street: val("Street address"),
+        unit: val("Apartment or unit"),
+        city: val("Ship city"),
+        state: val("State"),
+        zip: val("ZIP code"),
+        country: val("Country") || "United States",
+        stageApplied: val("Current stage"),
+        fullName: val("Full name")
+      };
+      if(!payload.applicantEmail || !payload.zip) return;
+      fetch(WIX_ADDRESS_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        keepalive: true,
+        mode: "cors"
+      }).catch(function(){});
+    }catch(e){}
+  });
+})();
+</script>
 </body>
 </html>
