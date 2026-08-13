@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>FOUNDRY — Some founders need fire.</title>
-<meta name="description" content="Foundry builds the founder before the company. An identity-first incubator led by Ethan Starke that rounds the founder across leadership, finance, and culture, so the whole venture becomes investor-grade." />
+<title>Starke Foundry, some founders need fire.</title>
+<meta name="description" content="Starke Foundry builds the founder before the company. An identity-first incubator led by Ethan Starke that rounds the founder across leadership, finance, and culture, so the whole venture becomes investor-grade." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/png" href="/shield_mark.png" />
 <style>
   :root{
     --ink:#0a0908;
@@ -164,6 +165,17 @@
   .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease, transform .7s ease}
   .reveal.in{opacity:1;transform:none}
   @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}#embers{display:none}}
+
+  /* STARKE FOUNDRY brand lockup */
+  .brandlock{display:flex;align-items:center;gap:12px;text-decoration:none}
+  .brandmark{height:42px;width:auto;display:block;filter:drop-shadow(0 5px 12px rgba(0,0,0,.55))}
+  .brandwm{display:flex;flex-direction:column;line-height:1}
+  .bw-s{font-family:var(--sans);font-size:10px;letter-spacing:0.36em;color:var(--ember-2);font-weight:600;margin-bottom:3px}
+  .bw-f{font-family:var(--serif);font-weight:600;font-size:21px;letter-spacing:0.16em;color:var(--paper)}
+  .bw-f b{color:var(--ember)}
+  .foot-lock{display:flex;align-items:center;gap:12px}
+  .foot-lock img{height:40px;width:auto}
+  .hero-crest{height:158px;width:auto;display:block;margin:0 0 22px;filter:drop-shadow(0 26px 50px rgba(0,0,0,.6))}
 </style>
 </head>
 <body>
@@ -171,7 +183,7 @@
 
 <nav>
   <div class="nav-in">
-    <div class="brand">FO<b>U</b>NDRY</div>
+    <a class="brandlock" href="/"><img class="brandmark" src="/shield_mark.png" alt="Starke Foundry" /><span class="brandwm"><span class="bw-s">STARKE</span><span class="bw-f">FO<b>U</b>NDRY</span></span></a>
     <div class="nav-links">
       <a href="#gap">The Gap</a>
       <a href="#method">The Method</a>
@@ -185,14 +197,15 @@
 <header>
   <div class="hero-glow"></div>
   <div class="wrap hero-in">
-    <div class="eyebrow">Foundry, the founder incubator</div>
+    <img class="hero-crest" src="/shield_mark.png" alt="The Starke Foundry shield" />
+    <div class="eyebrow">Starke Foundry, the founder incubator</div>
     <h1>Not every founder needs funding first.<br/>Some need <span class="fire">fire</span>.</h1>
-    <p class="lede">Foundry builds the founder before the company. We develop who you are, how you lead, and the story you tell, then we round you across leadership, finance, and culture, until <b>the venture is investor-grade because the person carrying it is.</b></p>
+    <p class="lede">Starke Foundry builds the founder before the company. We develop who you are, how you lead, and the story you tell, then we round you across leadership, finance, and culture, until <b>the venture is investor-grade because the person carrying it is.</b></p>
     <div class="cta-row">
       <a class="btn btn-fire" href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call with Ethan</a>
       <a class="btn btn-ghost" href="#method">See how it works</a>
     </div>
-    <p class="selective">By application. <b>Foundry chooses its founders.</b> Pricing is a conversation, not a checkout.</p>
+    <p class="selective">By application. <b>Starke Foundry chooses its founders.</b> Pricing is a conversation, not a checkout.</p>
   </div>
 </header>
 
@@ -241,7 +254,7 @@
         <div class="arc">Scale &amp; Exit</div>
         <div class="forwho">For the founder who already knows a lot.</div>
         <div class="work">You have the foundation and the scars. You come for the summit: raising well, boards, expansion, exit, and the Foundry certificate that says you were built, not just advised.</div>
-        <a class="plink" href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call &#8250;</a>
+        <a class="plink" href="/sovereign.html">Explore The Sovereign &#8250;</a>
       </div>
       <div class="prog reveal">
         <div class="flame">&#128293;</div>
@@ -250,7 +263,7 @@
         <div class="arc">Growth &#8594; Scale &amp; Exit</div>
         <div class="forwho">For the founder building the company.</div>
         <div class="work">You have a foundation and conviction, but no durable momentum. We build the founder and the venture's spine together: the model, your leadership, your financial fluency, and the culture the company will run on, straight through to fundable.</div>
-        <a class="plink" href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call &#8250;</a>
+        <a class="plink" href="/builder.html">Explore The Builder &#8250;</a>
       </div>
       <div class="prog reveal">
         <div class="flame">&#128293;</div>
@@ -259,7 +272,7 @@
         <div class="arc">Foundation &#8594; Growth &#8594; Scale &amp; Exit</div>
         <div class="forwho">For the founder building from the fire up.</div>
         <div class="work">Earliest, rawest, highest ceiling. The complete arc: identity and agency, narrative, leadership, finance, and culture, from the foundation up to a founder an investor can back.</div>
-        <a class="plink" href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call &#8250;</a>
+        <a class="plink" href="/seeker.html">Explore The Seeker &#8250;</a>
       </div>
     </div>
     <div class="cadence reveal"><b>The rhythm.</b> Every format runs weekly: three focused hours a month with Ethan and the Foundry bench, two 60-minute working sessions and two 30-minute sessions, plus the moves you make in the real world between them.</div>
@@ -337,7 +350,7 @@
 <footer>
   <div class="wrap foot-in">
     <div>
-      <div class="foot-brand">FO<b>U</b>NDRY</div>
+      <div class="foot-lock"><img src="/shield_mark.png" alt="Starke Foundry" /><div class="foot-brand" style="letter-spacing:0.14em;font-size:20px">Starke <b>Foundry</b></div></div>
       <div class="foot-tag">Some founders need fire.</div>
     </div>
     <div style="display:flex;gap:26px;align-items:center">
