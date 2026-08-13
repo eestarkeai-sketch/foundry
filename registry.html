@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Registry &middot; Starke Foundry</title>
+<meta name="description" content="The public registry of Starke Foundry certificate holders. Every founder who cleared the final gate, verifiable by credential ID." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/png" href="/shield_mark.png" />
+<style>
+  :root{
+    --ink:#0a0908;--panel:#15120e;--panel2:#1b1712;--line:rgba(255,255,255,0.09);
+    --paper:#f4efe7;--dim:#b7ad9e;--faint:#8a8072;--ember:#ff6a1a;--ember2:#ff9d2e;--ok:#5fce8f;--gold:#e9c98a;
+    --serif:'Fraunces',Georgia,serif;--sans:'Inter',system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(10,9,8,0.72);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:62px;max-width:1000px;margin:0 auto;padding:0 22px}
+  .brandlock{display:flex;align-items:center;gap:10px}
+  .brandmark{height:34px}
+  .bw-s{font-size:9px;letter-spacing:0.36em;color:var(--ember2);font-weight:600;display:block}
+  .bw-f{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:0.16em}
+  .bw-f b{color:var(--ember)}
+  .nav-back{font-size:13.5px;color:var(--dim)}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 22px}
+  header{padding:56px 0 8px}
+  .eyebrow{font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:var(--ember2);font-weight:600}
+  header h1{font-family:var(--serif);font-weight:500;font-size:clamp(30px,5vw,44px);margin:10px 0 12px;letter-spacing:-0.01em}
+  header p{color:var(--dim);max-width:66ch}
+  .verify{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px 22px;margin:30px 0 10px}
+  .verify .vh{font-family:var(--serif);font-size:19px;margin-bottom:4px}
+  .verify .vs{color:var(--faint);font-size:13.5px;margin-bottom:14px}
+  .vrow{display:flex;gap:10px;flex-wrap:wrap}
+  .vrow input{flex:1;min-width:200px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--paper);font-family:var(--sans);font-size:15px;padding:12px 14px}
+  .vrow input:focus{outline:none;border-color:var(--ember)}
+  .btn{font-family:var(--sans);font-weight:600;font-size:15px;padding:12px 22px;border-radius:3px;cursor:pointer;border:none;background:linear-gradient(92deg,var(--ember),var(--ember2));color:#180c03}
+  .vout{margin-top:14px;font-size:15px;min-height:22px}
+  .vout.ok{color:var(--ok)} .vout.no{color:var(--faint)}
+  .vout b{color:var(--paper)}
+  .sec{margin:40px 0 60px}
+  .sec .sh{font-family:var(--serif);font-size:22px;margin-bottom:4px}
+  .sec .ss{color:var(--faint);font-size:14px;margin-bottom:18px}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:13px 12px;border-bottom:1px solid var(--line);font-size:14.5px}
+  th{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--faint);font-weight:600}
+  td.id{font-family:var(--serif);color:var(--gold)}
+  td .stg{color:var(--ember2)}
+  .empty{border:1px dashed rgba(255,255,255,0.14);border-radius:12px;padding:44px 26px;text-align:center;background:linear-gradient(180deg,rgba(255,106,26,0.05),transparent)}
+  .empty .es{font-family:var(--serif);font-size:20px;margin-bottom:8px}
+  .empty .ed{color:var(--dim);max-width:52ch;margin:0 auto;font-size:15px}
+  .note{color:var(--faint);font-size:13px;margin-top:16px;line-height:1.6}
+  footer{border-top:1px solid var(--line);padding:28px 0;color:var(--faint);font-size:13px;text-align:center}
+  footer a{color:var(--ember2)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-in">
+    <a class="brandlock" href="/">
+      <img class="brandmark" src="/shield_mark.png" alt="Starke Foundry" onerror="this.style.display='none'" />
+      <span><span class="bw-s">STARKE</span><span class="bw-f">FO<b>U</b>NDRY</span></span>
+    </a>
+    <a class="nav-back" href="/">&#8249; Back to site</a>
+  </div>
+</nav>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">The public registry</div>
+  <h1>Every founder who cleared the gate.</h1>
+  <p>The Foundry certificate is conferred on one thing: clearing the final gate. There is no separate exam and no cap on how many earn it; the gate is the standard, and the standard is the scarcity. Each certificate is recorded here, in public, and can be verified by anyone who holds its credential ID.</p>
+</header>
+
+<div class="verify">
+  <div class="vh">Verify a certificate</div>
+  <div class="vs">Enter a credential ID, for example SF-0001, to confirm it is genuine.</div>
+  <div class="vrow">
+    <input type="text" id="vid" placeholder="Credential ID" autocomplete="off" />
+    <button class="btn" id="vbtn">Verify</button>
+  </div>
+  <div class="vout no" id="vout"></div>
+</div>
+
+<div class="sec">
+  <div class="sh">The register</div>
+  <div class="ss">Listed in the order founders cleared the summit.</div>
+  <div id="tablewrap"></div>
+</div>
+</div>
+
+<footer>
+  Starke Foundry &middot; Builds the founder before the company. &middot; <a href="/">foundry.ethanstarke.com</a>
+</footer>
+
+<script>
+(function(){
+  // The register. Each entry: {id, name, stage, date}. Empty until the first founder clears the summit.
+  var HOLDERS = [];
+
+  function render(){
+    var wrap = document.getElementById("tablewrap");
+    if(!HOLDERS.length){
+      wrap.innerHTML =
+        '<div class="empty"><div class="es">The registry opens with the first founder to clear the summit.</div>'+
+        '<div class="ed">No certificate has been conferred yet. When the first founder clears the final gate, their name and credential ID appear here, permanently and in public.</div></div>'+
+        '<div class="note">Foundry does not pad this list. An empty registry is the honest state of a young forge, and it is worth more than a padded one.</div>';
+      return;
+    }
+    var rows = HOLDERS.map(function(h){
+      return '<tr><td class="id">'+h.id+'</td><td>'+h.name+'</td><td><span class="stg">'+h.stage+'</span></td><td>'+h.date+'</td></tr>';
+    }).join("");
+    wrap.innerHTML = '<table><thead><tr><th>Credential ID</th><th>Founder</th><th>Summit</th><th>Conferred</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }
+
+  function verify(raw){
+    var out = document.getElementById("vout");
+    var q = (raw||"").trim().toUpperCase();
+    if(!q){ out.className="vout no"; out.textContent="Enter a credential ID above."; return; }
+    var hit = HOLDERS.filter(function(h){ return h.id.toUpperCase()===q; })[0];
+    if(hit){
+      out.className="vout ok";
+      out.innerHTML = "Genuine. <b>"+hit.name+"</b> cleared the "+hit.stage+" and was certified on "+hit.date+".";
+    } else {
+      out.className="vout no";
+      out.innerHTML = "No certificate with the ID <b>"+q+"</b> is on the registry. If you were handed one bearing this ID, treat it with suspicion.";
+    }
+  }
+
+  document.getElementById("vbtn").addEventListener("click", function(){ verify(document.getElementById("vid").value); });
+  document.getElementById("vid").addEventListener("keydown", function(e){ if(e.key==="Enter") verify(this.value); });
+
+  // deep link: registry.html?id=SF-0001 auto-verifies
+  var pid = new URLSearchParams(location.search).get("id");
+  if(pid){ document.getElementById("vid").value = pid; verify(pid); }
+
+  render();
+})();
+</script>
+</body>
+</html>

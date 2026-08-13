@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Certificate &middot; Starke Foundry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/png" href="/shield_mark.png" />
+<style>
+  :root{
+    --ink:#0a0908;--panel:#14110d;--line:rgba(255,255,255,0.10);
+    --paper:#f4efe7;--dim:#b7ad9e;--faint:#8a8072;--ember:#ff6a1a;--ember2:#ff9d2e;--gold:#e9c98a;
+    --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'Inter',system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#050403;color:var(--paper);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:34px 18px}
+  .sheet{max-width:960px;margin:0 auto;background:
+      radial-gradient(120% 80% at 50% -10%,rgba(255,106,26,0.10),transparent 60%),
+      linear-gradient(180deg,#0d0b09,#100d0a);
+    border:1px solid rgba(233,201,138,0.28);border-radius:8px;padding:64px 66px 54px;position:relative;
+    box-shadow:0 40px 120px -40px rgba(0,0,0,0.9),inset 0 0 0 1px rgba(255,255,255,0.02)}
+  .sheet::before{content:"";position:absolute;inset:14px;border:1px solid rgba(233,201,138,0.18);border-radius:4px;pointer-events:none}
+  .top{display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;z-index:1}
+  .shield{height:74px;width:auto;margin-bottom:16px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.6))}
+  .brand{font-family:var(--serif);font-weight:600;font-size:22px;letter-spacing:0.22em}
+  .brand .u{color:var(--ember)}
+  .kicker{font-size:11px;letter-spacing:0.42em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-top:6px}
+  .rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--ember),transparent);margin:26px auto 22px}
+  .lead{font-family:var(--serif);font-size:16px;color:var(--dim);font-style:italic}
+  .name{font-family:var(--serif);font-weight:600;font-size:clamp(34px,6vw,50px);margin:14px 0 6px;color:var(--paper);letter-spacing:-0.01em;line-height:1.05}
+  .nameline{width:min(560px,80%);height:1px;background:rgba(233,201,138,0.35);margin:6px auto 22px}
+  .body{max-width:60ch;margin:0 auto;text-align:center;color:var(--dim);font-size:16px;line-height:1.7}
+  .body b{color:var(--paper);font-weight:500}
+  .stage{font-family:var(--serif);font-size:20px;color:var(--ember2);margin:20px 0 2px;font-weight:600}
+  .stagesub{font-size:12.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--faint);font-weight:600}
+  .meta{display:flex;justify-content:center;gap:54px;flex-wrap:wrap;margin:38px 0 6px}
+  .meta .m{text-align:center}
+  .meta .ml{font-size:10.5px;letter-spacing:0.24em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:7px}
+  .meta .mv{font-family:var(--serif);font-size:16px;color:var(--paper)}
+  .sig{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-top:44px}
+  .sigblock{flex:1;text-align:center}
+  .sigmark{font-family:'Fraunces',cursive;font-size:26px;color:var(--paper);padding-bottom:6px}
+  .sigline{border-top:1px solid rgba(233,201,138,0.4);padding-top:8px;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--faint);font-weight:600}
+  .verify{text-align:center;margin-top:34px;font-size:12px;color:var(--faint);line-height:1.7}
+  .verify b{color:var(--gold);font-weight:600;letter-spacing:0.04em}
+  .verify a{color:var(--ember2);text-decoration:none}
+  .actions{max-width:960px;margin:22px auto 0;display:flex;gap:12px;justify-content:center}
+  .btn{font-family:var(--sans);font-weight:600;font-size:14px;padding:11px 22px;border-radius:3px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--paper)}
+  .btn.fire{background:linear-gradient(92deg,var(--ember),var(--ember2));color:#180c03;border:none}
+  .tmplnote{max-width:960px;margin:16px auto 0;text-align:center;color:var(--faint);font-size:12.5px}
+  @media print{
+    body{background:#fff;color:#111;padding:0}
+    .sheet{background:#fff;border:2px solid #b8892f;box-shadow:none;max-width:100%;color:#111}
+    .sheet::before{border-color:#d8b877}
+    .lead,.body,.meta .mv,.name{color:#111}
+    .body b{color:#111}
+    .kicker,.stagesub,.meta .ml,.sigline{color:#7a6a44}
+    .brand{color:#111}.brand .u{color:#a8460f}.stage{color:#a8460f}
+    .verify{color:#555}.verify b{color:#8a6a1f}
+    .actions,.tmplnote{display:none}
+    .nameline,.sigline{border-color:#b8892f}
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <div class="top">
+    <img class="shield" src="/shield_mark.png" alt="Starke Foundry" onerror="this.style.display='none'" />
+    <div class="brand">STARKE&nbsp;FO<span class="u">U</span>NDRY</div>
+    <div class="kicker">Certificate of the Forged Founder</div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div style="text-align:center">
+    <div class="lead">This certifies that</div>
+    <div class="name" id="c_name">Founder Name</div>
+    <div class="nameline"></div>
+    <div class="body">
+      entered the Starke Foundry, ran the full arc, and <b>cleared the final gate</b>. The gate is the standard, and clearing it is the whole of finishing. This founder was measured against their own slope, on evidence, at every gate along the way, and was found to have built the person an investor-grade venture is built on.
+      <div class="stage" id="c_stage">The Sovereign Summit</div>
+      <div class="stagesub">Behavioral mechanics &middot; commercial execution &middot; capital trajectory</div>
+    </div>
+  </div>
+
+  <div class="meta">
+    <div class="m"><div class="ml">Conferred</div><div class="mv" id="c_date">Date of certification</div></div>
+    <div class="m"><div class="ml">Credential ID</div><div class="mv" id="c_id">SF-0000</div></div>
+  </div>
+
+  <div class="sig">
+    <div class="sigblock">
+      <div class="sigmark">Ethan Starke</div>
+      <div class="sigline">Founder, Starke Foundry</div>
+    </div>
+    <div class="sigblock">
+      <div class="sigmark" id="c_seal">&#9670;</div>
+      <div class="sigline">The Forge Seal</div>
+    </div>
+  </div>
+
+  <div class="verify">
+    <b>Verify this credential</b><br/>
+    Every certificate is recorded in the public registry. Confirm this one by its Credential ID at
+    <a href="/registry.html" id="c_verify">foundry.ethanstarke.com/registry.html</a>.
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn fire" onclick="window.print()">Print or save as PDF</button>
+</div>
+<div class="tmplnote">
+  Template. This certificate fills from the link it is opened with, for example
+  <code>certificate.html?name=Jordan%20Reyes&amp;id=SF-0001&amp;stage=Sovereign&amp;date=12%20August%202026</code>. With no link values it shows the placeholder above.
+</div>
+
+<script>
+(function(){
+  var p = new URLSearchParams(location.search);
+  function set(id,key){ var v=p.get(key); if(v) document.getElementById(id).textContent=v; }
+  set("c_name","name");
+  set("c_id","id");
+  set("c_date","date");
+  var stage=p.get("stage");
+  if(stage){
+    var label = /sovereign/i.test(stage) ? "The Sovereign Summit"
+      : /builder/i.test(stage) ? "The Builder Stage"
+      : /seeker/i.test(stage) ? "The Seeker Stage" : stage;
+    document.getElementById("c_stage").textContent = label;
+  }
+  var id=p.get("id");
+  if(id){ document.getElementById("c_verify").textContent = "foundry.ethanstarke.com/registry.html?id="+id; document.getElementById("c_verify").href="/registry.html?id="+encodeURIComponent(id); }
+})();
+</script>
+</body>
+</html>

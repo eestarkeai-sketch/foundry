@@ -126,6 +126,9 @@
   <input type="hidden" name="Computed placement" id="f_tier" value="" />
   <input type="hidden" name="Category 1 score" id="f_c1" value="" />
   <input type="hidden" name="Category 2 score" id="f_c2" value="" />
+  <input type="hidden" name="Slope self-report" id="f_slope" value="" />
+  <input type="hidden" name="Trajectory read" id="f_band" value="" />
+  <input type="hidden" name="Placement note for review" id="f_note" value="" />
 
   <!-- STEP 1 ORIENTATION -->
   <section class="step on" data-step="1">
@@ -169,6 +172,11 @@
     <div class="sec-h">The assessment</div>
     <div class="sec-s">Answer for what you have actually done, not what you intend. The strongest answers require evidence you can show, and you will be asked for it later. Be honest: placing too high sets you up to fail the summit.</div>
     <div id="questions"></div>
+
+    <div class="sec-h" style="margin-top:26px">Your recent slope</div>
+    <div class="sec-s">The markers above measure what you have built. These five measure how you move. Picture your single most demanding real thirty-day stretch in the last few months, the one where the most was at stake, and rate it honestly. This does not decide the stage you are eligible for; it reads your trajectory, which we weigh at review.</div>
+    <div id="slope"></div>
+
     <div class="q">
       <div class="qh">The thirty-day test</div>
       <div class="qs">One scenario. There are no wrong words here; write plainly.</div>
@@ -189,6 +197,7 @@
       <div class="rt" id="rv_tier">The Seeker</div>
       <div class="rlen" id="rv_len">45 weeks</div>
       <div class="rwhy" id="rv_why"></div>
+      <div id="rv_traj" style="font-size:13px;letter-spacing:0.14em;text-transform:uppercase;font-weight:600;color:var(--ember-2);margin-bottom:16px"></div>
       <div class="price">You start at <b id="rv_rate">$250</b> per week</div>
       <div class="pricesub">Paid five weeks at a time. The rate rises by stage as you advance: Seeker $250/week, Builder $500/week, Sovereign $750/week. Leave any time; no refunds.</div>
     </div>
@@ -303,7 +312,31 @@
     Seeker:{len:"45 weeks",rate:"250",why:"The honest, deepest start. You bring conviction and agency; you build identity, commercial execution, and capital trajectory from the base. The longest climb, the largest transformation."}
   };
 
+  var SLOPE = [
+    {id:"s1",h:"Rate of iteration",s:"How fast did you close loops?",
+     o:["No movement.","Planned only, nothing shipped.","One loop, and it was slow.","Multiple loops, at a days-not-weeks cadence.","Relentless cadence, with metrics at every turn."]},
+    {id:"s2",h:"Quality of iteration",s:"Were the loops aimed at the thing that actually mattered?",
+     o:["No real loops.","Motion without direction.","Aimed at easier targets than the real one.","Aimed squarely at the core problem.","High-leverage, hit the core assumption itself."]},
+    {id:"s3",h:"Agency",s:"How much did you move without waiting for permission?",
+     o:["Waited for permission or a steer.","Asked what to do next.","Moved, but needed prompting.","Self-directed throughout.","Self-directed, routed around blockers, sourced help on my own."]},
+    {id:"s4",h:"Coachability",s:"When you got a hard, specific note, what did you do?",
+     o:["Rejected or ignored it.","Acknowledged it, did not act.","Engaged with part of it.","Took the note and acted on it.","Metabolized it fully, discarded what failed, no ego."]},
+    {id:"s5",h:"Earned insight",s:"What did you come out of that stretch knowing?",
+     o:["A story, not evidence.","Something vague and general.","Some data, still thin.","Metrics and specifics I can produce.","A non-obvious insight from primary evidence I gathered myself."]}
+  ];
+
   var val = {};
+  var slopeVal = {};
+  var swrap = document.getElementById("slope");
+  SLOPE.forEach(function(q){
+    var el = document.createElement("div"); el.className="q";
+    var html = '<div class="qh">'+q.h+'</div><div class="qs">'+q.s+'</div>';
+    q.o.forEach(function(txt,i){
+      html += '<label class="opt"><input type="radio" name="slope_'+q.id+'_'+q.h+'" value="'+i+'" data-sq="'+q.id+'" data-sv="'+i+'"><span>'+txt+'</span></label>';
+    });
+    el.innerHTML = html; swrap.appendChild(el);
+  });
+
   var qwrap = document.getElementById("questions");
   QUESTIONS.forEach(function(q){
     var el = document.createElement("div"); el.className="q";
@@ -324,6 +357,12 @@
       group.querySelectorAll("label.opt").forEach(function(l){l.classList.remove("sel");});
       inp.closest("label.opt").classList.add("sel");
     }
+    if(inp.type==="radio" && inp.dataset.sq){
+      slopeVal[inp.dataset.sq] = parseInt(inp.dataset.sv);
+      var sgroup = inp.closest(".q");
+      sgroup.querySelectorAll("label.opt").forEach(function(l){l.classList.remove("sel");});
+      inp.closest("label.opt").classList.add("sel");
+    }
   });
 
   function computePlacement(){
@@ -338,6 +377,30 @@
     return {tier:tier,c1:c1,c2:c2};
   }
 
+  function computeSlope(){
+    var raw=0, answered=0;
+    SLOPE.forEach(function(q){ if(slopeVal[q.id]!==undefined){ raw+=slopeVal[q.id]; answered++; } });
+    var band, key;
+    if(raw>=16){band="Strong slope";key="strong";}
+    else if(raw>=11){band="Solid slope";key="solid";}
+    else if(raw>=6){band="Modest slope";key="modest";}
+    else {band="Low slope";key="low";}
+    return {raw:raw,answered:answered,band:band,key:key};
+  }
+
+  function placementNote(r, sl){
+    // Borderline detection against the marker thresholds (c1 needs 5 of 7, c2 needs 4 of 6).
+    if(r.tier==="Builder" && r.c2===3 && sl.key==="strong")
+      return "Borderline Builder / Sovereign (one commercial marker short), strong self-reported slope. Consider Sovereign at review.";
+    if(r.tier==="Seeker" && r.c1===4 && sl.key==="strong")
+      return "Borderline Seeker / Builder (one behavioral marker short), strong self-reported slope. Consider Builder at review.";
+    if(r.tier!=="Seeker" && sl.key==="low")
+      return "Placed by markers, but low self-reported slope. Probe trajectory at review; consider a conservative placement.";
+    if(r.tier!=="Seeker" && sl.key==="modest")
+      return "Markers hold, slope is modest. Place at this stage but flag trajectory for early Velocity attention.";
+    return "Markers and slope are consistent. No adjustment indicated.";
+  }
+
   function renderPlacement(){
     var r = computePlacement();
     var t = TIERS[r.tier];
@@ -350,6 +413,12 @@
     document.getElementById("f_tier").value = "The "+r.tier+" ("+t.len+")";
     document.getElementById("f_c1").value = r.c1+" of 7 (need 5)";
     document.getElementById("f_c2").value = r.c2+" of 6 (need 4)";
+    // slope overlay
+    var sl = computeSlope();
+    document.getElementById("rv_traj").textContent = "Your trajectory read: "+sl.band;
+    document.getElementById("f_slope").value = sl.raw+" of 20 ("+sl.band+")";
+    document.getElementById("f_band").value = sl.band;
+    document.getElementById("f_note").value = placementNote(r, sl);
     // build conditional proof fields
     var pv = document.getElementById("proof"); pv.innerHTML="";
     var any=false;
@@ -384,6 +453,7 @@
     }
     if(n==2){
       for(var j=0;j<QUESTIONS.length;j++){ if(!val[QUESTIONS[j].id]) return "Please answer all thirteen questions."; }
+      for(var k=0;k<SLOPE.length;k++){ if(slopeVal[SLOPE[k].id]===undefined) return "Please answer all five recent-slope questions."; }
       var vt=document.querySelector('[name="Thirty-day test"]'); if(!vt.value.trim()) return "Please answer the thirty-day test.";
       return "";
     }
