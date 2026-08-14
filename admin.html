@@ -374,8 +374,36 @@
     v.querySelectorAll("[data-act]").forEach(function(b){ b.addEventListener("click",function(){
       var act=b.dataset.act;
       if(act==="review"){ toast("Opens the coach review console with this application loaded."); return; }
-      toast("The action endpoints deploy next. Welcome will then create and approve the native member and send the set-password link.");
+      if(!appItem) return;
+      doAction(act, b);
     }); });
+  }
+
+  var EP="https://www.ethanstarke.com/_functions/";
+  function refreshData(){
+    fetch(EP+"adminData",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminKey:ADMIN_KEY})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ if(j && !j.error){ mapLive(j); render(); } })
+      .catch(function(){});
+  }
+  function doAction(act, btn){
+    var it=appItem, q=appQueue, orig=btn.textContent, url, payload;
+    if(act==="welcome" && q==="founder"){ url="welcomeFounder"; payload={adminKey:ADMIN_KEY, applicationId:it.id}; }
+    else if(act==="welcome" && q==="coachApps"){ url="welcomeCoach"; payload={adminKey:ADMIN_KEY, applicationId:it.id, placement:{tier:it.tier||"", primaryLane:it.lane||"", secondaryLanes:""}}; }
+    else if(act==="invite"){ url="inviteCoach"; payload={adminKey:ADMIN_KEY, interestId:it.id}; }
+    else if(act==="reject"){ var coll=q==="founder"?"FounderApplications":q==="coachApps"?"CoachApplications":"CoachInterest"; url="decideReject"; payload={adminKey:ADMIN_KEY, collection:coll, applicationId:it.id}; }
+    else { return; }
+    btn.textContent="Working..."; btn.disabled=true;
+    fetch(EP+url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+      .then(function(r){ return r.json().then(function(j){ return {status:r.status,j:j}; }); })
+      .then(function(res){
+        if(res.status!==200 || !res.j || res.j.error){ toast("That did not go through: "+((res.j&&res.j.error)||("HTTP "+res.status))); btn.textContent=orig; btn.disabled=false; return; }
+        if(act==="welcome"){ toast("Welcomed. Native member created; the set-password link is on its way."); }
+        else if(act==="invite"){ toast("Invited to the deep application."); }
+        else { toast(q==="coachInterest"?"Declined.":"Rejected."); }
+        appItem=null; refreshData();
+      })
+      .catch(function(){ toast("Could not reach the server. Try again."); btn.textContent=orig; btn.disabled=false; });
   }
 
   function mapLive(d){
