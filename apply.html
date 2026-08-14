@@ -55,7 +55,7 @@
   label.opt:hover{border-color:rgba(255,106,26,0.4)}
   label.opt input{margin-top:3px;accent-color:var(--ember);flex-shrink:0}
   label.opt.sel{border-color:var(--ember);background:rgba(255,106,26,0.06);color:var(--paper)}
-  input[type=text],input[type=email],input[type=url],select,textarea{width:100%;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;color:var(--paper);font-family:var(--sans);font-size:15px;padding:12px 14px;margin-top:8px}
+  input[type=text],input[type=email],select,textarea{width:100%;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;color:var(--paper);font-family:var(--sans);font-size:15px;padding:12px 14px;margin-top:8px}
   textarea{min-height:120px;resize:vertical;line-height:1.55}
   input[type=file]{width:100%;color:var(--paper-dim);font-size:14px;margin-top:8px}
   .fieldlbl{font-weight:500;font-size:15px}
@@ -108,7 +108,6 @@
     <div class="eyebrow">The placement application</div>
     <h1>Find your fire, and your stage.</h1>
     <p>This is a self-assessment before commitment. You will answer honestly, and the application will show you the one stage you are eligible for and what it costs. Then you will submit proof and write a few short essays. It takes about twenty minutes, and it is worth doing carefully. Nothing here is scored by a person until you submit.</p>
-    <p style="color:var(--ember-2);font-size:14px;font-weight:500;margin-top:10px;border:1px solid rgba(255,106,26,0.3);border-radius:8px;padding:10px 14px;display:inline-block">Foundry is currently open to founders based in the United States only. Your books ship to a US address.</p>
     <div class="steps">
       <div class="pip active" data-pip="1">1 &middot; Orientation</div>
       <div class="pip" data-pip="2">2 &middot; Assessment</div>
@@ -118,14 +117,15 @@
   </div>
 </header>
 
-<form id="app" class="wrap" autocomplete="off">
+<form id="app" class="wrap" action="https://formsubmit.co/e8850b7408d0d73a5c64368b3c29b7fe" method="POST" enctype="multipart/form-data" autocomplete="off">
+  <input type="hidden" name="_subject" value="New Starke Foundry application" />
+  <input type="hidden" name="_template" value="table" />
+  <input type="hidden" name="_captcha" value="false" />
   <input type="text" name="_honey" style="display:none" />
+  <input type="hidden" name="_next" value="https://foundry.ethanstarke.com/apply.html?done=1" />
   <input type="hidden" name="Computed placement" id="f_tier" value="" />
   <input type="hidden" name="Category 1 score" id="f_c1" value="" />
   <input type="hidden" name="Category 2 score" id="f_c2" value="" />
-  <input type="hidden" name="Slope self-report" id="f_slope" value="" />
-  <input type="hidden" name="Trajectory read" id="f_band" value="" />
-  <input type="hidden" name="Placement note for review" id="f_note" value="" />
 
   <!-- STEP 1 ORIENTATION -->
   <section class="step on" data-step="1">
@@ -135,20 +135,6 @@
       <input type="text" name="Full name" placeholder="Full name" required />
       <input type="text" name="Location" placeholder="City, country" />
       <input type="email" name="Email" placeholder="Email address" required />
-    </div>
-    <div class="q">
-      <div class="qh">Where should your books ship?</div>
-      <div class="qs">Each movement's books are included in your fees and shipped to you, bundled, with a note. United States addresses only for now.</div>
-      <input type="text" name="Ship to name" placeholder="Recipient name" required />
-      <input type="text" name="Street address" placeholder="Street address" required />
-      <input type="text" name="Apartment or unit" placeholder="Apartment, suite, or unit (optional)" />
-      <input type="text" name="Ship city" placeholder="City" required />
-      <select name="State" required>
-        <option value="" disabled selected>State</option>
-        <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>DC</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
-      </select>
-      <input type="text" name="ZIP code" placeholder="ZIP code" required />
-      <input type="hidden" name="Country" value="United States" />
     </div>
     <div class="q">
       <div class="qh">What are you building, or trying to become the founder of?</div>
@@ -183,18 +169,11 @@
     <div class="sec-h">The assessment</div>
     <div class="sec-s">Answer for what you have actually done, not what you intend. The strongest answers require evidence you can show, and you will be asked for it later. Be honest: placing too high sets you up to fail the summit.</div>
     <div id="questions"></div>
-
-    <div class="sec-h" style="margin-top:26px">Your recent slope</div>
-    <div class="sec-s">The markers above measure what you have built. These five measure how you move. Picture your single most demanding real thirty-day stretch in the last few months, the one where the most was at stake, and rate it honestly. This does not decide the stage you are eligible for; it reads your trajectory, which we weigh at review.</div>
-    <div id="slope"></div>
-
     <div class="q">
-      <div class="qh">The slope test</div>
-      <div class="qs">One real moment, not a hypothetical.</div>
-      <p style="color:var(--paper-dim);font-size:15px;margin-bottom:8px">In the last 90 days, someone gave you hard, specific feedback that a core assumption of yours was probably wrong, and told you why. An investor, a customer, a mentor, a cofounder, or the market itself. Name who and when, what they said, and then, with dates, what you actually did in the weeks after: what you built, who you talked to, what you changed, and what you can show for it.</p>
-      <input type="text" name="Slope who and when" placeholder="Who gave the feedback, and roughly when" />
-      <textarea name="Slope what they said" placeholder="What they told you, specifically"></textarea>
-      <textarea name="Slope what you did" placeholder="What you did in the weeks after: dates, what you built or changed, and what you can show"></textarea>
+      <div class="qh">The thirty-day test</div>
+      <div class="qs">One scenario. There are no wrong words here; write plainly.</div>
+      <p style="color:var(--paper-dim);font-size:15px;margin-bottom:4px">Thirty days ago, an investor gave you hard, specific feedback: your core assumption is probably wrong, and here is exactly why. It is now thirty days later and you are back in the room. What would you have done, and what would you put on the table today?</p>
+      <textarea name="Thirty-day test" placeholder="Be concrete." required></textarea>
     </div>
     <div class="cta-row">
       <button type="button" class="btn btn-ghost" data-back="1">&#8249; Back</button>
@@ -210,9 +189,8 @@
       <div class="rt" id="rv_tier">The Seeker</div>
       <div class="rlen" id="rv_len">45 weeks</div>
       <div class="rwhy" id="rv_why"></div>
-      <div id="rv_traj" style="font-size:13px;letter-spacing:0.14em;text-transform:uppercase;font-weight:600;color:var(--ember-2);margin-bottom:16px"></div>
       <div class="price">You start at <b id="rv_rate">$250</b> per week</div>
-      <div class="pricesub">Paid five weeks at a time. The rate rises by stage as you advance: Seeker $250/week, Builder $500/week, Sovereign $750/week. Leave any time; no refunds. Your books for each movement are included and shipped to you.</div>
+      <div class="pricesub">Paid five weeks at a time. The rate rises by stage as you advance: Seeker $250/week, Builder $500/week, Sovereign $750/week. Leave any time; no refunds.</div>
     </div>
     <div class="ack">
       <label class="agree"><input type="checkbox" id="ack" name="Acknowledged placement" value="Yes" />
@@ -249,20 +227,12 @@
       <textarea name="Essay 3 the non-obvious truth" required></textarea>
     </div>
 
-    <div class="sec-h" style="margin-top:26px">The ninety-second video</div>
-    <div class="sec-s">Record a short video, 60 to 90 seconds, on your phone or laptop, upload it unlisted (Loom, YouTube, or Google Drive), and paste the link. Speak to camera, in your own words. This is asked of every applicant.</div>
-    <div class="q">
-      <div class="qh" id="videoQ">Your prompt appears here.</div>
-      <input type="url" name="Verification video link" id="videoLink" placeholder="Paste your unlisted video link" required />
-    </div>
-
     <div class="sec-h" style="margin-top:26px">Agreements</div>
     <div class="sec-s">Submitting is a commitment, not an enquiry.</div>
     <div class="q">
       <label class="agree"><input type="checkbox" class="ag" name="Agree stage" value="Yes" /><span>I am applying to <b class="ack_tier2">The Seeker</b>, the stage I am eligible for, and not another.</span></label>
       <label class="agree"><input type="checkbox" class="ag" name="Agree price" value="Yes" /><span>I agree to the price: paid weekly in five-week blocks, at the stage rate ($250, then $500, then $750 per week as I advance).</span></label>
-      <label class="agree"><input type="checkbox" class="ag" name="Age confirmed" value="Yes" /><span>I am at least 18 years old and a U.S. resident.</span></label>
-      <label class="agree"><input type="checkbox" class="ag" name="Agree terms" value="Yes" /><span>I have read and agree to the <a href="/terms.html" target="_blank" rel="noopener" style="color:#f0a35e">Terms of Service</a> and <a href="/privacy.html" target="_blank" rel="noopener" style="color:#f0a35e">Privacy Policy</a>: placement is to one stage; paid weekly in five-week blocks at the stage rate; the schedule is fixed and does not pause; missed weeks are not made up; there are no refunds; and there is no certificate without meeting the bar.</span></label>
+      <label class="agree"><input type="checkbox" class="ag" name="Agree terms" value="Yes" /><span>I have read and agree to the terms: placement is to one stage; paid weekly in five-week blocks at the stage rate; I may leave any time; no refunds; no certificate without finishing; a pause is capped at 20% of the program.</span></label>
       <label class="agree"><input type="checkbox" class="ag" name="Agree payment" value="Yes" /><span>If approved, I will process my first payment within five days of receiving my approval and welcome letter.</span></label>
       <label class="agree"><input type="checkbox" class="ag" name="Work is my own" value="Yes" /><span>The work in this application, including the essays, is my own and not written by AI.</span></label>
     </div>
@@ -281,6 +251,16 @@
     <h2>Your application is in.</h2>
     <p>Thank you for the care you put into it. Ethan reviews every application himself, on the evidence you submitted. If it is a fit, you will receive an approval and welcome letter, and your place is held when you complete the first payment within five days.</p>
     <p style="color:var(--paper-faint);margin-top:14px">You can close this page.</p>
+  </div>
+</div>
+
+<div id="paused" style="display:none">
+  <div class="done-card wrap">
+    <img class="shield" src="/shield_mark.png" alt="Starke Foundry" />
+    <h2>Applications are paused right now.</h2>
+    <p>We hold intake when our coaches are at capacity, so every founder who joins gets the attention the program promises. This is temporary &mdash; please check back soon.</p>
+    <p id="paused_wait" style="display:none">Want to be first to know when we reopen? Email <a href="mailto:ethan@ethanstarke.com?subject=Foundry%20waitlist" style="color:var(--ember-2)">ethan@ethanstarke.com</a> and we&rsquo;ll add you to the list.</p>
+    <p style="color:var(--paper-faint);margin-top:14px">Thank you for your interest in Starke Foundry.</p>
   </div>
 </div>
 
@@ -321,19 +301,11 @@
   var PROOF = {
     b3:"Earned insight: your primary research artifact (notes, transcripts, data).",
     b6:"Talent gravity: who joined and what they gave up (a name, a note, a message).",
-    b8:"Customer obsession: a thread or notes that show your continuous loop with users.",
     b9:"One metric: your current dashboard or figure.",
     b10:"GTM channel: the channel and its result (analytics, a post, a funnel).",
     b11:"Speed to revenue: a receipt, invoice, or payment record.",
     b12:"Operational transparency: the data room, model, or cap table.",
     b13:"Product velocity: a changelog, commit history, or release record."
-  };
-  var INSTANCE = {
-    b1:"Show it. The feedback, roughly when, what you shipped in response, and how fast.",
-    b4:"Show it. The blocker, exactly how you routed around it, and the outcome.",
-    b5:"Show it. The last hard pushback, from whom, and what you did with it on the spot.",
-    b7:"Show it. The plan you killed, when, why, and how fast.",
-    b8:"Name your top three users and their exact pains, in their words."
   };
   var TIERS = {
     Sovereign:{len:"15 weeks",rate:"750",why:"You already demonstrate the behavioral mechanics and the commercial execution the summit assumes. You come to master capital and narrative, and to earn the certificate."},
@@ -341,31 +313,7 @@
     Seeker:{len:"45 weeks",rate:"250",why:"The honest, deepest start. You bring conviction and agency; you build identity, commercial execution, and capital trajectory from the base. The longest climb, the largest transformation."}
   };
 
-  var SLOPE = [
-    {id:"s1",h:"Rate of iteration",s:"How fast did you close loops?",
-     o:["No movement.","Planned only, nothing shipped.","One loop, and it was slow.","Multiple loops, at a days-not-weeks cadence.","Relentless cadence, with metrics at every turn."]},
-    {id:"s2",h:"Quality of iteration",s:"Were the loops aimed at the thing that actually mattered?",
-     o:["No real loops.","Motion without direction.","Aimed at easier targets than the real one.","Aimed squarely at the core problem.","High-leverage, hit the core assumption itself."]},
-    {id:"s3",h:"Agency",s:"How much did you move without waiting for permission?",
-     o:["Waited for permission or a steer.","Asked what to do next.","Moved, but needed prompting.","Self-directed throughout.","Self-directed, routed around blockers, sourced help on my own."]},
-    {id:"s4",h:"Coachability",s:"When you got a hard, specific note, what did you do?",
-     o:["Rejected or ignored it.","Acknowledged it, did not act.","Engaged with part of it.","Took the note and acted on it.","Metabolized it fully, discarded what failed, no ego."]},
-    {id:"s5",h:"Earned insight",s:"What did you come out of that stretch knowing?",
-     o:["A story, not evidence.","Something vague and general.","Some data, still thin.","Metrics and specifics I can produce.","A non-obvious insight from primary evidence I gathered myself."]}
-  ];
-
   var val = {};
-  var slopeVal = {};
-  var swrap = document.getElementById("slope");
-  SLOPE.forEach(function(q){
-    var el = document.createElement("div"); el.className="q";
-    var html = '<div class="qh">'+q.h+'</div><div class="qs">'+q.s+'</div>';
-    q.o.forEach(function(txt,i){
-      html += '<label class="opt"><input type="radio" name="slope_'+q.id+'_'+q.h+'" value="'+i+'" data-sq="'+q.id+'" data-sv="'+i+'"><span>'+txt+'</span></label>';
-    });
-    el.innerHTML = html; swrap.appendChild(el);
-  });
-
   var qwrap = document.getElementById("questions");
   QUESTIONS.forEach(function(q){
     var el = document.createElement("div"); el.className="q";
@@ -374,9 +322,6 @@
       var v = ["a","b","c","d"][i];
       html += '<label class="opt"><input type="radio" name="'+q.id+'_'+q.h+'" value="'+v+'" data-q="'+q.id+'" data-v="'+v+'"><span>'+txt+'</span></label>';
     });
-    if(INSTANCE[q.id]){
-      html += '<div class="inst" data-inst="'+q.id+'" style="display:none;margin-top:12px"><div class="fieldlbl">'+INSTANCE[q.id]+'</div><textarea name="Instance '+q.h+'" data-instq="'+q.id+'" placeholder="Be specific: a name or role, when, and the outcome."></textarea></div>';
-    }
     el.innerHTML = html; qwrap.appendChild(el);
   });
 
@@ -387,14 +332,6 @@
       val[inp.dataset.q] = inp.dataset.v;
       var group = inp.closest(".q");
       group.querySelectorAll("label.opt").forEach(function(l){l.classList.remove("sel");});
-      inp.closest("label.opt").classList.add("sel");
-      var instEl = group.querySelector('[data-inst="'+inp.dataset.q+'"]');
-      if(instEl){ instEl.style.display = (inp.dataset.v==="d") ? "block" : "none"; }
-    }
-    if(inp.type==="radio" && inp.dataset.sq){
-      slopeVal[inp.dataset.sq] = parseInt(inp.dataset.sv);
-      var sgroup = inp.closest(".q");
-      sgroup.querySelectorAll("label.opt").forEach(function(l){l.classList.remove("sel");});
       inp.closest("label.opt").classList.add("sel");
     }
   });
@@ -411,30 +348,6 @@
     return {tier:tier,c1:c1,c2:c2};
   }
 
-  function computeSlope(){
-    var raw=0, answered=0;
-    SLOPE.forEach(function(q){ if(slopeVal[q.id]!==undefined){ raw+=slopeVal[q.id]; answered++; } });
-    var band, key;
-    if(raw>=16){band="Strong slope";key="strong";}
-    else if(raw>=11){band="Solid slope";key="solid";}
-    else if(raw>=6){band="Modest slope";key="modest";}
-    else {band="Low slope";key="low";}
-    return {raw:raw,answered:answered,band:band,key:key};
-  }
-
-  function placementNote(r, sl){
-    // Borderline detection against the marker thresholds (c1 needs 5 of 7, c2 needs 4 of 6).
-    if(r.tier==="Builder" && r.c2===3 && sl.key==="strong")
-      return "Borderline Builder / Sovereign (one commercial marker short), strong self-reported slope. Consider Sovereign at review.";
-    if(r.tier==="Seeker" && r.c1===4 && sl.key==="strong")
-      return "Borderline Seeker / Builder (one behavioral marker short), strong self-reported slope. Consider Builder at review.";
-    if(r.tier!=="Seeker" && sl.key==="low")
-      return "Placed by markers, but low self-reported slope. Probe trajectory at review; consider a conservative placement.";
-    if(r.tier!=="Seeker" && sl.key==="modest")
-      return "Markers hold, slope is modest. Place at this stage but flag trajectory for early Velocity attention.";
-    return "Markers and slope are consistent. No adjustment indicated.";
-  }
-
   function renderPlacement(){
     var r = computePlacement();
     var t = TIERS[r.tier];
@@ -447,12 +360,6 @@
     document.getElementById("f_tier").value = "The "+r.tier+" ("+t.len+")";
     document.getElementById("f_c1").value = r.c1+" of 7 (need 5)";
     document.getElementById("f_c2").value = r.c2+" of 6 (need 4)";
-    // slope overlay
-    var sl = computeSlope();
-    document.getElementById("rv_traj").textContent = "Your trajectory read: "+sl.band;
-    document.getElementById("f_slope").value = sl.raw+" of 20 ("+sl.band+")";
-    document.getElementById("f_band").value = sl.band;
-    document.getElementById("f_note").value = placementNote(r, sl);
     // build conditional proof fields
     var pv = document.getElementById("proof"); pv.innerHTML="";
     var any=false;
@@ -471,11 +378,6 @@
     }
   }
 
-  function setVideoPrompt(){
-    var q=document.getElementById("videoQ");
-    if(q) q.textContent = "Speak to camera, no notes: tell us about the hard-feedback moment you described earlier and what you actually did in the weeks after, then name the one thing about your venture you are most certain of, and why.";
-  }
-
   function show(n){
     Array.prototype.forEach.call(document.querySelectorAll(".step"),function(s){s.classList.toggle("on", s.dataset.step==String(n));});
     Array.prototype.forEach.call(document.querySelectorAll(".pip"),function(p){
@@ -492,11 +394,7 @@
     }
     if(n==2){
       for(var j=0;j<QUESTIONS.length;j++){ if(!val[QUESTIONS[j].id]) return "Please answer all thirteen questions."; }
-      for(var m in INSTANCE){ if(val[m]==="d"){ var ta=document.querySelector('[data-instq="'+m+'"]'); if(!ta || ta.value.trim().length<30) return "For a top answer you chose, add the specific instance: a name or role, when, and the outcome."; } }
-      for(var k=0;k<SLOPE.length;k++){ if(slopeVal[SLOPE[k].id]===undefined) return "Please answer all five recent-slope questions."; }
-      var sw=document.querySelector('[name="Slope who and when"]'), ss=document.querySelector('[name="Slope what they said"]'), sd=document.querySelector('[name="Slope what you did"]');
-      if(!sw.value.trim()||!ss.value.trim()||!sd.value.trim()) return "Please complete the slope test: who and when, what they said, and what you did.";
-      if(sd.value.trim().length<40) return "For the slope test, describe concretely what you did in the weeks after, with dates and what you can show.";
+      var vt=document.querySelector('[name="Thirty-day test"]'); if(!vt.value.trim()) return "Please answer the thirty-day test.";
       return "";
     }
     return "";
@@ -512,7 +410,6 @@
       if(errEl) errEl.textContent="";
       var nx=+b.dataset.next;
       if(nx==3) renderPlacement();
-      if(nx==4) setVideoPrompt();
       show(nx);
     }
     if(bb){ show(+bb.dataset.back); }
@@ -528,7 +425,6 @@
     var ok=true; all.forEach(function(c){ if(!c.checked) ok=false; });
     var essays=document.querySelectorAll('[data-step="4"] textarea');
     essays.forEach(function(t){ if(!t.value.trim()) ok=false; });
-    var vl=document.getElementById("videoLink"); if(!vl || !vl.value.trim()) ok=false;
     document.getElementById("submitBtn").disabled=!ok;
   }
   document.querySelectorAll(".ag").forEach(function(c){c.addEventListener("change",checkAgrees);});
@@ -541,70 +437,24 @@
   }
 })();
 </script>
-
 <script>
-// The full application is written into Wix (FounderApplications + ShippingAddresses),
-// which is the system of record shown on the admin dashboard. The email is a
-// notification only: it announces that an application arrived and to review it there.
+/* Waitlist brake: if intake is closed in the Settings collection, show the paused panel
+   instead of the application. Any failure leaves the application open (fail-open). */
 (function(){
-  var WIX_ENDPOINT = "https://www.ethanstarke.com/_functions/saveApplicantAddress";
-  var form = document.getElementById("app");
-  var notify = document.getElementById("notify");
-  if(!form) return;
-  function val(n){ var el = form.querySelector('[name="'+n+'"]'); return el ? (el.value||"").trim() : ""; }
-  function setNotify(n, v){ var el = notify && notify.querySelector('[name="'+n+'"]'); if(el) el.value = v || ""; }
-  form.addEventListener("submit", function(e){
-    if(e && e.preventDefault) e.preventDefault();
-    if(val("_honey")) return;
-    var stage = val("Current stage") || val("Computed placement");
-    var payload = {
-      applicantEmail: val("Email"),
-      fullName: val("Full name"),
-      location: val("Location"),
-      shipToName: val("Ship to name"),
-      street: val("Street address"),
-      unit: val("Apartment or unit"),
-      city: val("Ship city"),
-      state: val("State"),
-      zip: val("ZIP code"),
-      country: val("Country") || "United States",
-      stageApplied: stage,
-      computedPlacement: val("Computed placement"),
-      whatBuilding: val("What you are building"),
-      whyNow: val("Why now"),
-      essay1: val("Essay 1 the specific scene"),
-      essay2: val("Essay 2 the honest failure"),
-      essay3: val("Essay 3 the non-obvious truth"),
-      slopeWhen: val("Slope who and when"),
-      slopeSaid: val("Slope what they said"),
-      slopeDid: val("Slope what you did"),
-      videoLink: val("Verification video link")
-    };
-    try{
-      fetch(WIX_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), keepalive: true, mode: "cors" }).catch(function(){});
-    }catch(e2){}
-    if(notify){
-      setNotify("Applicant", payload.fullName || payload.applicantEmail);
-      setNotify("Email", payload.applicantEmail);
-      setNotify("Stage applied", payload.stageApplied);
-      notify.submit();
-    } else {
-      window.location.href = "https://foundry.ethanstarke.com/apply.html?done=1";
-    }
-  });
+  if(location.search.indexOf("done=1")>-1) return; // just submitted -> keep thank-you
+  function show(id,disp){ var e=document.getElementById(id); if(e) e.style.display=disp; }
+  fetch("https://www.ethanstarke.com/_functions/getPublicSettings",{cache:"no-store"})
+    .then(function(r){ return r.json(); })
+    .then(function(s){
+      if(s && s.intakeOpen===false){
+        show("intro","none");
+        show("thanks","none");
+        show("paused","block");
+        if(s.waitlistOpen===true) show("paused_wait","block");
+      }
+    })
+    .catch(function(){ /* leave application open on any error */ });
 })();
 </script>
-<!-- Notification-only email: carries no application content, just a ping to review
-     the full application on the admin dashboard. Native POST keeps delivery reliable. -->
-<form id="notify" action="https://formsubmit.co/e8850b7408d0d73a5c64368b3c29b7fe" method="POST" style="display:none">
-  <input type="hidden" name="_subject" value="New Starke Foundry application: review on the admin dashboard" />
-  <input type="hidden" name="_template" value="table" />
-  <input type="hidden" name="_captcha" value="false" />
-  <input type="hidden" name="_next" value="https://foundry.ethanstarke.com/apply.html?done=1" />
-  <input type="hidden" name="Notice" value="A new Foundry application arrived. The full application is on your admin dashboard. Open the Foundry admin desk to review, welcome, or decline it." />
-  <input type="hidden" name="Applicant" value="" />
-  <input type="hidden" name="Email" value="" />
-  <input type="hidden" name="Stage applied" value="" />
-</form>
 </body>
 </html>
