@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Foundry Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--ink:#0a0908;--ink2:#141110;--panel:#17140f;--panel2:#1c1712;--line:rgba(255,255,255,0.10);--paper:#f4efe7;--dim:#b7ad9e;--faint:#8a8072;--ember:#ff6a1a;--ember2:#ff9d2e;--gold:#e9c98a;--ok:#5fce8f;--bad:#ff5470;--blue:#5cc8ff;--serif:'Fraunces',Georgia,serif;--sans:'Inter',system-ui,-apple-system,Segoe UI,Arial,sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .app{display:grid;grid-template-columns:212px 1fr;min-height:100vh}
+  .nav{border-right:1px solid var(--line);padding:18px 12px;background:var(--ink2);position:sticky;top:0;height:100vh;overflow-y:auto}
+  .brand{display:flex;flex-direction:column;padding:4px 8px 16px;border-bottom:1px solid var(--line);margin-bottom:12px}
+  .bw-s{font-size:9px;letter-spacing:0.34em;color:var(--ember2);font-weight:600}
+  .bw-f{font-family:var(--serif);font-weight:600;font-size:16px;letter-spacing:0.14em}
+  .bw-f b{color:var(--ember)}
+  .brand .sub{font-size:11px;color:var(--faint);margin-top:3px}
+  .navitem{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:8px;color:var(--dim);cursor:pointer;font-size:13.5px;margin-bottom:2px}
+  .navitem:hover{background:var(--panel)}
+  .navitem.on{background:var(--panel);color:var(--paper)}
+  .navitem .badge{background:var(--ember);color:#160b04;font-size:10.5px;font-weight:600;border-radius:999px;padding:1px 7px}
+  .main{padding:22px 26px 60px;overflow-y:auto}
+  .demo{background:linear-gradient(180deg,rgba(255,106,26,0.06),transparent);border:1px dashed rgba(255,157,46,0.3);border-radius:8px;padding:9px 14px;font-size:12px;color:var(--ember2);margin-bottom:18px}
+  h1{font-family:var(--serif);font-weight:500;font-size:26px;margin-bottom:2px}
+  .sub2{color:var(--faint);font-size:13px;margin-bottom:20px}
+  h2{font-family:var(--serif);font-weight:500;font-size:18px;margin:24px 0 10px}
+  /* metric cards */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:8px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 16px}
+  .card .lbl{font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--faint);font-weight:600}
+  .card .val{font-family:var(--serif);font-size:30px;margin:4px 0 2px}
+  .card .val small{font-size:14px;color:var(--faint)}
+  .card .delta{font-size:12px;color:var(--ok)}
+  .card .delta.flat{color:var(--faint)}
+  .cols{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-top:8px}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .box h3{font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ember2);margin-bottom:12px;display:flex;justify-content:space-between}
+  /* attention */
+  .att{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .att:last-child{border-bottom:none}
+  .att .dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+  .att .dot.hi{background:var(--bad)} .att .dot.md{background:var(--gold)} .att .dot.lo{background:var(--blue)}
+  .att .t{font-size:13.5px}
+  .att .m{color:var(--faint);font-size:12px}
+  .att .go{margin-left:auto;color:var(--ember2);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+  /* stage bars */
+  .stagebar{margin-bottom:11px}
+  .stagebar .sh{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px}
+  .stagebar .sh .c{color:var(--faint)}
+  .track{height:8px;background:var(--panel2);border-radius:5px;overflow:hidden}
+  .fill{height:100%;border-radius:5px}
+  .fill.s{background:linear-gradient(90deg,#8a6a2e,var(--gold))}
+  .fill.b{background:linear-gradient(90deg,var(--ember),var(--ember2))}
+  .fill.v{background:linear-gradient(90deg,#2e6ea0,var(--blue))}
+  /* coverage grid */
+  .cov{width:100%;border-collapse:collapse;font-size:12.5px}
+  .cov th,.cov td{padding:7px 8px;text-align:center;border-bottom:1px solid var(--line)}
+  .cov th{color:var(--faint);font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em}
+  .cov td.lane{text-align:left;color:var(--paper);font-weight:600}
+  .cell{display:inline-block;min-width:24px;padding:2px 7px;border-radius:6px;font-weight:600}
+  .cell.ok{background:rgba(95,206,143,0.14);color:var(--ok)}
+  .cell.warn{background:rgba(233,201,138,0.16);color:var(--gold)}
+  .cell.risk{background:rgba(255,84,112,0.16);color:var(--bad)}
+  .cell.none{color:var(--faint)}
+  /* tables */
+  table.t{width:100%;border-collapse:collapse;font-size:13px}
+  table.t th,table.t td{text-align:left;padding:10px 10px;border-bottom:1px solid var(--line)}
+  table.t th{color:var(--faint);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;font-weight:600}
+  table.t tr{cursor:pointer}
+  table.t tbody tr:hover{background:var(--panel)}
+  table.t td.nm{font-family:var(--serif);font-size:14.5px}
+  .pill{font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;letter-spacing:0.03em}
+  .pill.active{background:rgba(95,206,143,0.14);color:var(--ok)}
+  .pill.paused{background:rgba(233,201,138,0.16);color:var(--gold)}
+  .pill.unpaid{background:rgba(255,84,112,0.16);color:var(--bad)}
+  .pill.seeker{background:rgba(233,201,138,0.14);color:var(--gold)}
+  .pill.builder{background:rgba(255,106,26,0.14);color:var(--ember2)}
+  .pill.sovereign{background:rgba(92,200,255,0.14);color:var(--blue)}
+  .tag{font-size:11px;color:var(--faint);border:1px solid var(--line);border-radius:5px;padding:1px 7px}
+  .actions{display:flex;gap:8px;margin:10px 0}
+  .btn{border:none;border-radius:6px;padding:9px 16px;font-family:var(--sans);font-weight:600;font-size:12.5px;cursor:pointer}
+  .btn.welcome{background:linear-gradient(180deg,var(--ok),#3fae74);color:#06210f}
+  .btn.reject{background:var(--panel);color:var(--bad);border:1px solid rgba(255,84,112,0.4)}
+  .btn.invite{background:linear-gradient(180deg,var(--blue),#3aa8e0);color:#04222e}
+  .btn.review{background:linear-gradient(180deg,var(--ember2),var(--ember));color:#160b04}
+  .btn.ghost{background:var(--panel);color:var(--paper);border:1px solid var(--line)}
+  .locked{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:10px 0}
+  .locked .lg{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px}
+  .locked .k{color:var(--faint);font-size:11px}
+  .block2{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+  .block2 h4{font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  .block2 p{color:var(--dim);font-size:13px;white-space:pre-wrap}
+  .hide{display:none}
+  .gate{position:fixed;inset:0;background:var(--ink);z-index:100;display:flex;align-items:center;justify-content:center}
+  .gatebox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:34px 32px;width:380px;max-width:92vw;text-align:center}
+  .gatebox .bw-f{font-size:20px;display:block;margin-bottom:6px}
+  .gatebox h2{font-family:var(--serif);font-weight:500;font-size:22px;margin:10px 0 6px}
+  .gatebox p{color:var(--faint);font-size:13px;margin-bottom:18px}
+  .gatebox input{width:100%;background:var(--ink2);border:1px solid var(--line);border-radius:8px;color:var(--paper);font-family:var(--sans);font-size:15px;padding:12px 13px;margin-bottom:12px}
+  .gatebox input:focus{outline:none;border-color:var(--ember)}
+  .gatebox button{width:100%;background:linear-gradient(180deg,var(--ember2),var(--ember));color:#160b04;border:none;border-radius:8px;padding:12px;font-family:var(--sans);font-weight:600;font-size:14px;cursor:pointer}
+  .gatebox .err{color:var(--bad);font-size:12.5px;margin-top:10px;min-height:16px}
+  .loading{color:var(--faint);font-size:13px;padding:40px}
+  .back{color:var(--faint);font-size:13px;cursor:pointer;margin-bottom:10px;display:inline-block}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--ok);border-radius:10px;padding:11px 18px;font-size:13px;color:var(--ok);display:none;z-index:50}
+  .revrow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+  .revrow:last-child{border-bottom:none}
+  .revrow .v{font-family:var(--serif);font-size:15px}
+  .msgthread{padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer}
+  .msgthread .who{font-weight:600;font-size:13.5px}
+  .msgthread .prev{color:var(--faint);font-size:12px;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="gate" id="gate">
+  <div class="gatebox">
+    <span class="bw-s">STARKE</span><span class="bw-f">FO<b>U</b>NDRY</span>
+    <h2>Admin</h2>
+    <p>Enter your admin key to open the cockpit.</p>
+    <input type="password" id="keyInput" placeholder="Admin key" autocomplete="off" />
+    <button id="keyBtn">Open dashboard</button>
+    <div class="err" id="keyErr"></div>
+  </div>
+</div>
+<div class="app" id="appRoot" style="display:none">
+  <div class="nav">
+    <div class="brand"><span class="bw-s">STARKE</span><span class="bw-f">FO<b>U</b>NDRY</span><span class="sub">Admin, Ethan</span></div>
+    <div id="navitems"></div>
+  </div>
+  <div class="main">
+    <div class="demo">Live, reading your Foundry collections. The Welcome, Reject, and Invite actions connect in the next deploy; everything you see here is your real data.</div>
+    <div id="view"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var esc=function(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});};
+  function toast(t){var el=document.getElementById("toast");el.textContent=t;el.style.display="block";setTimeout(function(){el.style.display="none";},2600);}
+  function money(n){return "$"+n.toLocaleString();}
+
+  // ------- sample data -------
+  var RATES = { Seeker:250, Builder:500, Sovereign:750 };
+  var founders = [
+    { id:"f1", name:"Marcus Reed", stage:"Seeker", week:4, coach:"Ethan", plan:"active", nextGate:"Foundation, wk15", status:"active" },
+    { id:"f2", name:"Priya Anand", stage:"Builder", week:19, coach:"Sam Okafor", plan:"active", nextGate:"Momentum, wk30", status:"active" },
+    { id:"f3", name:"Sam Nakamura", stage:"Sovereign", week:33, coach:"Ethan", plan:"active", nextGate:"Certificate, wk45", status:"active" },
+    { id:"f4", name:"Leah Gold", stage:"Seeker", week:8, coach:"Dana Cole", plan:"active", nextGate:"Foundation, wk15", status:"active" },
+    { id:"f5", name:"Tom Ferris", stage:"Builder", week:22, coach:"Sam Okafor", plan:"paused", nextGate:"Momentum, wk30", status:"paused" },
+    { id:"f6", name:"Ana Ruiz", stage:"Seeker", week:1, coach:"unassigned", plan:"unpaid", nextGate:"Foundation, wk15", status:"welcomed, unpaid" }
+  ];
+  var coaches = [
+    { id:"c1", name:"Ethan Starke", lane:"Identity, narrative, gates", tier:"Owner", gate:true, cap:12, load:2 },
+    { id:"c2", name:"Sam Okafor", lane:"Product", tier:"Principal", gate:false, cap:6, load:2 },
+    { id:"c3", name:"Dana Cole", lane:"Go to Market", tier:"Principal", gate:false, cap:6, load:1 },
+    { id:"c4", name:"Ravi Menon", lane:"Finance", tier:"Master", gate:false, cap:5, load:0 },
+    { id:"c5", name:"Nadia Fen", lane:"Legal", tier:"Practitioner", gate:false, cap:6, load:0 }
+  ];
+  var apps = {
+    founder: [
+      { id:"fa1", name:"Marcus Reed", email:"marcus@reed.io", phone:"+1 415 555 0110", address:"820 Valencia St, San Francisco, CA", placed:"Seeker", status:"pending",
+        essays:"The scene: the night I shut down my first product...\nThe failure: I hired for comfort...\nThe truth: our moat is the onboarding data.", proof:"Stripe receipts; changelog; data room." },
+      { id:"fa2", name:"Dana Whitfield", email:"dana@whitfield.co", phone:"+1 512 555 0148", address:"1904 E 6th St, Austin, TX", placed:"Builder", status:"pending",
+        essays:"The scene: our first enterprise pilot...\nThe failure: I raised before I had a metric...\nThe truth: distribution is the product.", proof:"ARR chart 0 to 40k; two design-partner contracts." }
+    ],
+    coachInterest: [
+      { id:"ci1", name:"Priya Kapoor", email:"priya@kapoor.vc", expertise:"Growth capital and the raise", built:"Seed-fund partner; 14 rounds; one exit as founder.", status:"pending" }
+    ],
+    coachApps: [
+      { id:"ca1", name:"Sam Okafor Jr", email:"sam2@okafor.dev", phone:"+44 20 7946 0102", address:"14 Rivington St, London", lane:"Product", tier:"Principal", status:"pending",
+        outcome:"0 to 1.2M MAU in 2 years as owner of activation; team of 18.", bar:"Built and sold a product company.", founders:"Coached 6 founders; two raised seed.",
+        sample:"I would not touch the raise. I would ask what one number makes an investor believe...", refs:[{name:"J. Cole",rel:"Former manager"},{name:"A. Reyes",rel:"Peer"}] }
+    ]
+  };
+  var upcoming = [
+    { who:"Marcus Reed", when:"Tue 10:00", what:"Seeker wk4, Environment and Place", coach:"Ethan" },
+    { who:"Priya Anand", when:"Tue 14:00", what:"Builder wk19, Iteration Discipline", coach:"Sam Okafor" },
+    { who:"Leah Gold", when:"Wed 09:00", what:"Seeker wk8, Legal Structure", coach:"Dana Cole" }
+  ];
+  var velocity = [
+    { who:"Sam Nakamura", stage:"Sovereign", state:"Charge set day 6 of 30", due:"Return in 24 days" },
+    { who:"Priya Anand", stage:"Builder", state:"Window, day 18 of 30", due:"Return in 12 days" }
+  ];
+  var bookOrders = [
+    { who:"Marcus Reed", movement:"Seeker, Movement I", status:"shipped", tracking:"1Z..." },
+    { who:"Leah Gold", movement:"Seeker, Movement II", status:"ordered", tracking:"pending" }
+  ];
+  var threads = [
+    { who:"Priya Anand, founder", prev:"Quick question on the demand test before Tuesday..." },
+    { who:"Sam Okafor, coach", prev:"Handoff on Priya is in. She is ahead on the loop." },
+    { who:"Foundry System", prev:"Ana Ruiz was welcomed but has not paid in 3 days." }
+  ];
+
+  var LANES = ["Finance","Legal","Product","Go to Market","Media","Enterprise","Growth Capital"];
+  var TIERS = ["Practitioner","Principal","Master"];
+
+  // ------- nav -------
+  var NAV = [
+    {k:"overview",label:"Overview"},
+    {k:"applications",label:"Applications",badge:function(){return apps.founder.filter(pending).length+apps.coachInterest.filter(pending).length+apps.coachApps.filter(pending).length;}},
+    {k:"founders",label:"Founders",badge:function(){return founders.length;}},
+    {k:"bench",label:"The bench",badge:function(){return coaches.length;}},
+    {k:"sessions",label:"Sessions and Velocity"},
+    {k:"revenue",label:"Revenue"},
+    {k:"messages",label:"Messages",badge:function(){return threads.length;}},
+    {k:"content",label:"Curriculum"}
+  ];
+  function pending(x){var s=x.status||"pending";return s!=="welcomed"&&s!=="rejected"&&s!=="invited"&&s!=="declined";}
+  var cur="overview";
+  var ADMIN_KEY="";
+  function renderNav(){
+    document.getElementById("navitems").innerHTML = NAV.map(function(n){
+      var b = n.badge ? '<span class="badge">'+n.badge()+'</span>' : '';
+      return '<div class="navitem'+(n.k===cur?' on':'')+'" data-k="'+n.k+'"><span>'+n.label+'</span>'+b+'</div>';
+    }).join('');
+    document.querySelectorAll(".navitem").forEach(function(el){ el.addEventListener("click",function(){ cur=el.dataset.k; renderNav(); render(); }); });
+  }
+
+  // ------- helpers -------
+  function stageCount(s){return founders.filter(function(f){return f.stage===s;}).length;}
+  function laneTierCount(lane,tier){ return coaches.filter(function(c){return c.lane===lane && c.tier===tier;}).length; }
+  function laneCoachCount(lane){ return coaches.filter(function(c){return c.lane===lane;}).length; }
+  function committedWeekly(){ return founders.filter(function(f){return f.plan==="active";}).reduce(function(a,f){return a+(RATES[f.stage]||0);},0); }
+  function pendingTotal(){ return apps.founder.filter(pending).length+apps.coachInterest.filter(pending).length+apps.coachApps.filter(pending).length; }
+
+  // ------- views -------
+  function vOverview(){
+    var wk = committedWeekly();
+    var cards = [
+      {lbl:"Active founders", val:founders.filter(function(f){return f.plan==="active";}).length, delta:"+2 this month"},
+      {lbl:"On the bench", val:coaches.length+"", delta:"1 lane at risk", cls:"flat"},
+      {lbl:"Pending decisions", val:pendingTotal()+"", delta:"awaiting you", cls:"flat"},
+      {lbl:"Committed weekly", val:money(wk), delta:money(wk*5)+" per block", cls:"flat"},
+      {lbl:"Sessions this week", val:upcoming.length+"", delta:"across "+new Set(upcoming.map(function(u){return u.coach;})).size+" coaches", cls:"flat"},
+      {lbl:"Velocity Tests live", val:velocity.length+"", delta:"in flight", cls:"flat"}
+    ];
+    var attention = [
+      {sev:"hi",t:pendingTotal()+" applications await your decision",m:"2 founders, 1 coach interest, 1 coach application",go:"applications"},
+      {sev:"hi",t:"Ana Ruiz welcomed but unpaid, day 3",m:"The 5-day welcome clock is running",go:"founders"},
+      {sev:"md",t:"Legal lane is single-covered",m:"Nadia Fen only. Key-person risk against the standard of two per lane",go:"bench"},
+      {sev:"md",t:"Tom Ferris is paused",m:"Builder wk22. A pause near a gate, watch the slope",go:"founders"},
+      {sev:"lo",t:"Sam Nakamura Certificate Gate approaches",m:"Sovereign wk33, gate at wk45, Velocity Charge set",go:"sessions"}
+    ];
+    var html='<h1>Overview</h1><div class="sub2">What Foundry looks like right now, and what needs you.</div>';
+    html+='<div class="cards">'+cards.map(function(c){return '<div class="card"><div class="lbl">'+c.lbl+'</div><div class="val">'+c.val+'</div><div class="delta '+(c.cls||'')+'">'+c.delta+'</div></div>';}).join('')+'</div>';
+    html+='<div class="cols"><div class="box"><h3>Needs your attention</h3>'+attention.map(function(a){
+      return '<div class="att"><span class="dot '+a.sev+'"></span><div><div class="t">'+esc(a.t)+'</div><div class="m">'+esc(a.m)+'</div></div><span class="go" data-go="'+a.go+'">Open</span></div>';
+    }).join('')+'</div>';
+    html+='<div><div class="box"><h3>Cohort by stage</h3>'+
+      ['Seeker','Builder','Sovereign'].map(function(s){var c=stageCount(s);var pct=founders.length?Math.round(c/founders.length*100):0;var cl=s==="Seeker"?"s":s==="Builder"?"b":"v";return '<div class="stagebar"><div class="sh"><span>'+s+'</span><span class="c">'+c+' founders</span></div><div class="track"><div class="fill '+cl+'" style="width:'+pct+'%"></div></div></div>';}).join('')+'</div>';
+    html+='<div class="box" style="margin-top:16px"><h3>Bench coverage, gaps in red</h3>'+covGrid()+'</div></div></div>';
+    return html;
+  }
+  function covGrid(){
+    var h='<table class="cov"><thead><tr><th class="lane" style="text-align:left">Lane</th>'+TIERS.map(function(t){return '<th>'+t+'</th>';}).join('')+'<th>Total</th></tr></thead><tbody>';
+    LANES.forEach(function(lane){
+      var total=laneCoachCount(lane);
+      h+='<tr><td class="lane">'+lane+'</td>'+TIERS.map(function(tier){
+        var n=laneTierCount(lane,tier);
+        var cls=n===0?"none":"ok";
+        return '<td>'+(n>0?'<span class="cell '+cls+'">'+n+'</span>':'<span class="cell none">-</span>')+'</td>';
+      }).join('')+'<td><span class="cell '+(total>=2?"ok":total===1?"risk":"none")+'">'+(total||"-")+'</span></td></tr>';
+    });
+    h+='</tbody></table><div style="color:var(--faint);font-size:11.5px;margin-top:8px">The standard is at least two coaches per lane. A lane at one is key-person risk; an empty lane cannot be staffed.</div>';
+    return h;
+  }
+
+  var appQueue="founder", appItem=null;
+  function vApplications(){
+    if(appItem) return appDetail();
+    var queues=[{k:"founder",label:"Founder applications",arr:apps.founder},{k:"coachInterest",label:"Coach interest",arr:apps.coachInterest},{k:"coachApps",label:"Coach applications",arr:apps.coachApps}];
+    var html='<h1>Applications</h1><div class="sub2">Email only pinged you. You read and decide here. Welcome provisions a native Wix member and sends their set-password link.</div>';
+    html+='<div class="actions">'+queues.map(function(q){return '<button class="btn '+(appQueue===q.k?"review":"ghost")+'" data-q="'+q.k+'">'+q.label+' ('+q.arr.filter(pending).length+')</button>';}).join('')+'</div>';
+    var arr=queues.find(function(q){return q.k===appQueue;}).arr;
+    html+='<table class="t"><thead><tr><th>Name</th><th>Detail</th><th>Status</th></tr></thead><tbody>';
+    html+=arr.map(function(it){
+      var d=appQueue==="coachInterest"?esc(it.expertise):appQueue==="coachApps"?(esc(it.lane)+", "+esc(it.tier)):("Placed "+esc(it.placed));
+      return '<tr data-id="'+it.id+'"><td class="nm">'+esc(it.name)+'</td><td>'+d+'</td><td><span class="tag">'+it.status+'</span></td></tr>';
+    }).join('')+'</tbody></table>';
+    return html;
+  }
+  function appDetail(){
+    var it=appItem;
+    var lock = it.address ? '<div class="locked"><div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ember2);margin-bottom:8px">Identity, locked from the application</div><div class="lg"><div><div class="k">Name</div>'+esc(it.name)+'</div><div><div class="k">Email</div>'+esc(it.email)+'</div>'+(it.phone?'<div><div class="k">Phone</div>'+esc(it.phone)+'</div>':'')+(it.address?'<div><div class="k">Address</div>'+esc(it.address)+'</div>':'')+'</div></div>' : '';
+    var body="", btns="";
+    if(appQueue==="founder"){
+      body='<div class="block2"><h4>Essays</h4><p>'+esc(it.essays)+'</p></div><div class="block2"><h4>Proof</h4><p>'+esc(it.proof)+'</p></div>';
+      btns='<button class="btn welcome" data-act="welcome">Welcome, place in '+esc(it.placed)+'</button><button class="btn reject" data-act="reject">Reject</button>';
+    } else if(appQueue==="coachInterest"){
+      body='<div class="block2"><h4>Expertise</h4><p>'+esc(it.expertise)+'</p></div><div class="block2"><h4>What they built</h4><p>'+esc(it.built)+'</p></div>';
+      btns='<button class="btn invite" data-act="invite">Invite to deep application</button><button class="btn reject" data-act="reject">Decline</button>';
+    } else {
+      body='<div class="block2"><h4>Strongest outcome</h4><p>'+esc(it.outcome)+'</p></div><div class="block2"><h4>Bar cleared</h4><p>'+esc(it.bar)+'</p></div><div class="block2"><h4>Founders developed</h4><p>'+esc(it.founders)+'</p></div><div class="block2"><h4>Work sample</h4><p>'+esc(it.sample)+'</p></div>';
+      btns='<button class="btn review" data-act="review">Open review console</button><button class="btn welcome" data-act="welcome">Welcome to the bench</button><button class="btn reject" data-act="reject">Reject</button>';
+    }
+    var status = it.status!=="pending" ? '<div class="tag" style="color:var(--ok)">This application is '+it.status+'</div>' : '<div class="actions">'+btns+'</div>';
+    return '<span class="back" data-back="1">&#8249; Back to applications</span><h1>'+esc(it.name)+'</h1><div class="sub2">'+appQueue+' application</div>'+lock+body+status;
+  }
+
+  function vFounders(){
+    var html='<h1>Founders</h1><div class="sub2">The active cohort, their stage, coach, plan, and next gate.</div>';
+    html+='<table class="t"><thead><tr><th>Name</th><th>Stage</th><th>Week</th><th>Coach</th><th>Plan</th><th>Next gate</th></tr></thead><tbody>';
+    html+=founders.map(function(f){
+      var pl=f.plan==="active"?'<span class="pill active">active</span>':f.plan==="paused"?'<span class="pill paused">paused</span>':'<span class="pill unpaid">unpaid</span>';
+      var st='<span class="pill '+f.stage.toLowerCase()+'">'+f.stage+'</span>';
+      return '<tr><td class="nm">'+esc(f.name)+'</td><td>'+st+'</td><td>'+f.week+'</td><td>'+esc(f.coach)+'</td><td>'+pl+'</td><td style="color:var(--faint)">'+esc(f.nextGate)+'</td></tr>';
+    }).join('')+'</tbody></table>';
+    return html;
+  }
+
+  function vBench(){
+    var html='<h1>The bench</h1><div class="sub2">Coaches by lane and tier, their load against capacity, and gate authority.</div>';
+    html+='<table class="t"><thead><tr><th>Coach</th><th>Lane</th><th>Tier</th><th>Load</th><th>Gate authority</th></tr></thead><tbody>';
+    html+=coaches.map(function(c){
+      var loadPct=Math.round(c.load/c.cap*100);
+      var band=loadPct>85?"risk":loadPct>0?"ok":"none";
+      return '<tr><td class="nm">'+esc(c.name)+'</td><td>'+esc(c.lane)+'</td><td>'+esc(c.tier)+'</td><td><span class="cell '+band+'">'+c.load+' / '+c.cap+'</span></td><td>'+(c.gate?'<span class="pill active">yes</span>':'<span class="tag">no</span>')+'</td></tr>';
+    }).join('')+'</tbody></table>';
+    html+='<h2>Coverage</h2><div class="box">'+covGrid()+'</div>';
+    return html;
+  }
+
+  function vSessions(){
+    var html='<h1>Sessions and Velocity</h1><div class="sub2">This week, and the Velocity Tests in flight.</div>';
+    html+='<h2>This week</h2><table class="t"><thead><tr><th>Founder</th><th>When</th><th>Session</th><th>Coach</th></tr></thead><tbody>';
+    html+=upcoming.map(function(u){return '<tr><td class="nm">'+esc(u.who)+'</td><td>'+esc(u.when)+'</td><td>'+esc(u.what)+'</td><td>'+esc(u.coach)+'</td></tr>';}).join('')+'</tbody></table>';
+    html+='<h2>Velocity Tests</h2><table class="t"><thead><tr><th>Founder</th><th>Stage</th><th>State</th><th>Return</th></tr></thead><tbody>';
+    html+=velocity.map(function(v){return '<tr><td class="nm">'+esc(v.who)+'</td><td>'+esc(v.stage)+'</td><td>'+esc(v.state)+'</td><td style="color:var(--ember2)">'+esc(v.due)+'</td></tr>';}).join('')+'</tbody></table>';
+    return html;
+  }
+
+  function vRevenue(){
+    var wk=committedWeekly();
+    var byStage=['Seeker','Builder','Sovereign'].map(function(s){var fs=founders.filter(function(f){return f.stage===s&&f.plan==="active";});return {s:s,n:fs.length,wk:fs.length*RATES[s]};});
+    var html='<h1>Revenue</h1><div class="sub2">Committed weekly and per five-week block, from active plans. Billing lives in Wix Pricing Plans.</div>';
+    html+='<div class="cards"><div class="card"><div class="lbl">Committed weekly</div><div class="val">'+money(wk)+'</div><div class="delta flat">from active plans</div></div>'+
+      '<div class="card"><div class="lbl">Per five-week block</div><div class="val">'+money(wk*5)+'</div><div class="delta flat">the billing unit</div></div>'+
+      '<div class="card"><div class="lbl">Books shipped</div><div class="val">'+bookOrders.filter(function(b){return b.status==="shipped";}).length+'<small> / '+bookOrders.length+'</small></div><div class="delta flat">via Zinc</div></div></div>';
+    html+='<div class="box" style="margin-top:12px"><h3>By stage</h3>'+byStage.map(function(r){return '<div class="revrow"><span>'+r.s+' &middot; '+r.n+' active &middot; '+money(RATES[r.s])+'/wk</span><span class="v">'+money(r.wk)+'/wk</span></div>';}).join('')+'</div>';
+    html+='<h2>Book fulfillment</h2><table class="t"><thead><tr><th>Founder</th><th>Movement bundle</th><th>Status</th></tr></thead><tbody>'+bookOrders.map(function(b){return '<tr><td class="nm">'+esc(b.who)+'</td><td>'+esc(b.movement)+'</td><td><span class="tag" style="color:'+(b.status==="shipped"?"var(--ok)":"var(--gold)")+'">'+b.status+'</span></td></tr>';}).join('')+'</tbody></table>';
+    return html;
+  }
+
+  function vMessages(){
+    var html='<h1>Messages</h1><div class="sub2">Your inbox with founders, coaches, and the system. Person-to-person runs on Wix Inbox; system notices are stored.</div>';
+    html+='<div class="box">'+threads.map(function(t){return '<div class="msgthread"><div class="who">'+esc(t.who)+'</div><div class="prev">'+esc(t.prev)+'</div></div>';}).join('')+'</div>';
+    return html;
+  }
+
+  function vContent(){
+    var html='<h1>Curriculum</h1><div class="sub2">The teaching material behind the platform. All seeded.</div>';
+    html+='<div class="cards"><div class="card"><div class="lbl">Week content</div><div class="val">45</div><div class="delta flat">Seeker, Builder, Sovereign</div></div>'+
+      '<div class="card"><div class="lbl">Homework moves</div><div class="val">135</div><div class="delta flat">3 per week</div></div>'+
+      '<div class="card"><div class="lbl">Reading pairings</div><div class="val">45</div><div class="delta flat">your books plus the canon</div></div></div>';
+    html+='<div class="box" style="margin-top:12px"><h3>What lives here in the live build</h3><div style="color:var(--dim);font-size:13.5px">Edit a week\'s teaching notes, its homework, and its reading; adjust the bench positioning rules; and manage the founding-cohort target list, all from here.</div></div>';
+    return html;
+  }
+
+  function render(){
+    var v=document.getElementById("view");
+    var map={overview:vOverview,applications:vApplications,founders:vFounders,bench:vBench,sessions:vSessions,revenue:vRevenue,messages:vMessages,content:vContent};
+    v.innerHTML=(map[cur]||vOverview)();
+    // wire
+    v.querySelectorAll("[data-go]").forEach(function(el){ el.addEventListener("click",function(){ cur=el.dataset.go; renderNav(); render(); }); });
+    v.querySelectorAll("[data-q]").forEach(function(el){ el.addEventListener("click",function(){ appQueue=el.dataset.q; appItem=null; render(); }); });
+    v.querySelectorAll("table.t [data-id]").forEach(function(row){ if(cur==="applications"){ row.addEventListener("click",function(){ var arr=appQueue==="founder"?apps.founder:appQueue==="coachInterest"?apps.coachInterest:apps.coachApps; appItem=arr.find(function(x){return x.id===row.dataset.id;}); render(); }); } });
+    var back=v.querySelector("[data-back]"); if(back) back.addEventListener("click",function(){ appItem=null; render(); });
+    v.querySelectorAll("[data-act]").forEach(function(b){ b.addEventListener("click",function(){
+      var act=b.dataset.act;
+      if(act==="review"){ toast("Opens the coach review console with this application loaded."); return; }
+      toast("The action endpoints deploy next. Welcome will then create and approve the native member and send the set-password link.");
+    }); });
+  }
+
+  function mapLive(d){
+    var byId={}; (d.coaches||[]).forEach(function(c){ byId[c._id]=c.name; });
+    apps.founder = (d.founderApps||[]).map(function(x){ return { id:x._id, name:x.name, email:x.email, phone:x.phone, address:x.address, placed:x.stagePlaced||"Seeker", status:x.status||"pending", essays:x.essays||"", proof:x.proofLinks||x.proof||"" }; });
+    apps.coachInterest = (d.coachInterest||[]).map(function(x){ return { id:x._id, name:x.name, email:x.email, expertise:x.expertise||"", built:x.builtWhat||"", status:x.status||"pending" }; });
+    apps.coachApps = (d.coachApps||[]).map(function(x){ var refs=[]; try{refs=JSON.parse(x.references||"[]");}catch(e){} return { id:x._id, name:x.name, email:x.email, phone:x.phone, address:x.address, lane:x.primaryLane||"", tier:x.tierClaim||"", outcome:x.headlineOutcome||"", bar:x.barCleared||"", founders:x.foundersDeveloped||"", sample:x.workSample||"", refs:refs, status:x.status||"pending" }; });
+    founders = (d.founders||[]).map(function(x){ return { id:x._id, name:x.name, stage:x.stage||"Seeker", week:x.week||1, coach:x.coachId?(byId[x.coachId]||"assigned"):"unassigned", plan:x.status==="paused"?"paused":(x.status==="unpaid"?"unpaid":"active"), nextGate:"", status:x.status||"active" }; });
+    coaches = (d.coaches||[]).map(function(x){ return { id:x._id, name:x.name, lane:x.primaryLane||x.role||"", tier:x.tier||"", gate:!!x.gateAuthority, cap:x.capacity||6, load:0 }; });
+    upcoming=[]; velocity=[]; bookOrders=[]; threads=[];
+  }
+  function boot(key){
+    var err=document.getElementById("keyErr"), btn=document.getElementById("keyBtn");
+    err.textContent=""; btn.textContent="Opening...";
+    fetch("https://www.ethanstarke.com/_functions/adminData",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminKey:key})})
+      .then(function(r){ return r.json().then(function(j){ return {status:r.status,j:j}; }); })
+      .then(function(res){
+        if(res.status!==200 || (res.j&&res.j.error)){ err.textContent="That key was not accepted."; btn.textContent="Open dashboard"; return; }
+        ADMIN_KEY=key; mapLive(res.j);
+        document.getElementById("gate").style.display="none";
+        document.getElementById("appRoot").style.display="grid";
+        renderNav(); render();
+      })
+      .catch(function(){ err.textContent="Could not reach the server. Check your connection and try again."; btn.textContent="Open dashboard"; });
+  }
+  document.getElementById("keyBtn").addEventListener("click",function(){ var k=document.getElementById("keyInput").value.trim(); if(k) boot(k); });
+  document.getElementById("keyInput").addEventListener("keydown",function(e){ if(e.key==="Enter"){ var k=this.value.trim(); if(k) boot(k); } });
+  document.getElementById("keyInput").focus();
+})();
+</script>
+</body>
+</html>
