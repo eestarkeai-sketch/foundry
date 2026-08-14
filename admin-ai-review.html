@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>AI Review — Foundry Admin</title>
+<style>
+:root{--bg:#0d0b0a;--panel:#161311;--panel2:#1d1917;--line:#2a2523;--ink:#f3ede6;--dim:#b8afa5;--faint:#8a807a;--ember:#e8763a;--gold:#c9a24a;--good:#5fa463;--warn:#c9a24a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.55}
+.wrap{max-width:820px;margin:0 auto;padding:40px 22px 90px}
+.k{font-size:11px;letter-spacing:.34em;color:var(--ember);font-weight:700}
+h1{font-family:Georgia,serif;font-size:24px;margin:4px 0 2px}
+.sub{color:var(--dim);font-size:13px;margin:0 0 26px}
+label{display:block;font-size:12px;letter-spacing:.02em;color:var(--dim);margin:16px 0 5px;text-transform:uppercase}
+input,select,textarea{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:11px 13px;font-size:14px;font-family:inherit}
+textarea{min-height:180px;resize:vertical}
+.row{display:flex;gap:14px}
+.row>div{flex:1}
+button{margin-top:20px;background:var(--ember);color:#140d08;font-weight:700;border:none;padding:12px 22px;border-radius:9px;font-size:14px;cursor:pointer;letter-spacing:.02em}
+button:disabled{opacity:.5;cursor:default}
+.hint{color:var(--faint);font-size:12px;margin-top:6px}
+#out{margin-top:30px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-top:16px}
+.dim{border-top:1px solid var(--line);padding:12px 0}
+.dim:first-child{border-top:none;padding-top:2px}
+.dim h3{margin:0 0 4px;font-size:14px;color:var(--gold);font-family:Georgia,serif;display:flex;justify-content:space-between;align-items:center}
+.score{font-family:Georgia,serif;font-size:16px;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:1px 12px}
+.dim p{margin:0;color:var(--dim);font-size:13.5px}
+.overall{font-family:Georgia,serif;font-size:18px;color:var(--ink)}
+.rec{color:var(--ink);margin:8px 0 0}
+.concerns{color:var(--warn);font-size:13.5px;margin-top:10px}
+.err{color:#e06a5a;background:#241412;border:1px solid #45201c;border-radius:9px;padding:12px 14px;margin-top:16px;font-size:13.5px;white-space:pre-wrap}
+pre{white-space:pre-wrap;word-break:break-word;font-size:12px;color:var(--faint);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:12px}
+.meta{color:var(--faint);font-size:12px;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="k">STARKE FOUNDRY · ADMIN</div>
+  <h1>AI Review &amp; Scoring</h1>
+  <p class="sub">Scores a submission against the rubric and cites evidence. Advisory only — you make the call. The AI never sees or sets a gate.</p>
+
+  <label>Admin key</label>
+  <input id="adminKey" type="password" autocomplete="off" placeholder="Your Foundry admin key" />
+  <div class="hint">Used only to authorize this request. Not stored.</div>
+
+  <div class="row">
+    <div>
+      <label>Kind</label>
+      <select id="kind">
+        <option value="application">Application (first-pass review)</option>
+        <option value="velocity">Velocity Test (stage gate)</option>
+      </select>
+    </div>
+    <div>
+      <label>Stage</label>
+      <input id="stage" type="text" placeholder="Seeker / Builder / Sovereign" />
+    </div>
+  </div>
+
+  <label>Submission material</label>
+  <textarea id="material" placeholder="Paste the applicant's essays, self-assessment answers, and any evidence here."></textarea>
+  <div class="hint">Up to ~12,000 characters are sent.</div>
+
+  <button id="run" type="button">Run AI review</button>
+
+  <div id="out"></div>
+</div>
+
+<script>
+(function(){
+  var ENDPOINT = "https://www.ethanstarke.com/_functions/aiReview";
+  var $ = function(id){ return document.getElementById(id); };
+  var out = $("out");
+  function esc(s){ return String(s==null?"":s).replace(/[&<>]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]; }); }
+
+  function renderError(msg){ out.innerHTML = '<div class="err">'+esc(msg)+'</div>'; }
+
+  function renderReview(r, meta){
+    if(!r){ renderError("No review returned."); return; }
+    if(r.raw){ out.innerHTML = '<div class="card"><div class="meta">Model returned non-JSON; showing raw output.</div><pre>'+esc(r.raw)+'</pre></div>'; return; }
+    var html = '<div class="card">';
+    (r.dimensions||[]).forEach(function(d){
+      html += '<div class="dim"><h3>'+esc(d.name)+'<span class="score">'+esc(d.score)+' / 5</span></h3><p>'+esc(d.evidence)+'</p></div>';
+    });
+    html += '</div><div class="card"><div class="overall">Overall: '+esc(r.overall)+' / 5</div>';
+    if(r.recommendation) html += '<p class="rec">'+esc(r.recommendation)+'</p>';
+    if(r.concerns && r.concerns.length){ html += '<div class="concerns"><strong>Concerns:</strong><ul>'; r.concerns.forEach(function(c){ html += '<li>'+esc(c)+'</li>'; }); html += '</ul></div>'; }
+    html += '</div>';
+    if(meta) html += '<div class="meta">'+esc(meta)+'</div>';
+    out.innerHTML = html;
+  }
+
+  $("run").addEventListener("click", async function(){
+    var key = $("adminKey").value.trim();
+    var material = $("material").value.trim();
+    if(!key){ renderError("Enter your admin key."); return; }
+    if(!material){ renderError("Paste some submission material to review."); return; }
+    var btn = $("run"); btn.disabled = true; btn.textContent = "Reviewing…"; out.innerHTML = '<div class="meta">Scoring against the rubric…</div>';
+    try{
+      var resp = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminKey: key, kind: $("kind").value, stage: $("stage").value.trim(), material: material })
+      });
+      var data = await resp.json();
+      if(!resp.ok || data.error){ renderError("Error: " + (data.error || resp.status) + (data.detail ? ("\n" + JSON.stringify(data.detail)) : "")); return; }
+      var meta = (data.model ? ("Model: " + data.model) : "") + (data.usage ? ("  ·  tokens: " + (data.usage.total_tokens||"?")) : "");
+      renderReview(data.review, meta);
+    }catch(e){ renderError("Request failed: " + e); }
+    finally{ btn.disabled = false; btn.textContent = "Run AI review"; }
+  });
+})();
+</script>
+</body>
+</html>
