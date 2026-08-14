@@ -326,14 +326,32 @@
     return '<span class="back" data-back="1">&#8249; Back to applications</span><h1>'+esc(it.name)+'</h1><div class="sub2">'+appQueue+' application</div>'+lock+body+status;
   }
 
+  function assignCell(f){
+    var opts = '<option value="">unassigned</option>' + coaches.map(function(c){
+      var selAttr = (f.coach && c.name === f.coach) ? ' selected' : '';
+      return '<option value="'+esc(c.id)+'"'+selAttr+'>'+esc(c.name)+'</option>';
+    }).join("");
+    return '<select class="assignSel" style="font-size:12px;padding:4px 6px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:6px">'+opts+'</select> '+
+      '<button class="btn ghost assignBtn" data-fid="'+esc(f.id)+'" style="padding:5px 10px;font-size:12px">Assign</button>';
+  }
+  function assignCoach(fid, coachId, btn){
+    if(!ADMIN_KEY){ toast("Enter the admin key first."); return; }
+    var orig = btn.textContent; btn.disabled = true; btn.textContent = "Saving...";
+    fetch(EP+"assignFounder",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminKey:ADMIN_KEY, founderId:fid, coachId:coachId})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ btn.disabled=false; btn.textContent=orig; if(j && !j.error){ toast("Coach assigned."); refreshData(); } else { toast("Assign failed."); } })
+      .catch(function(){ btn.disabled=false; btn.textContent=orig; toast("Could not reach the server."); });
+  }
+  if(!window.__assignWired){ window.__assignWired = true; document.addEventListener("click", function(ev){ var b = ev.target; if(b && b.classList && b.classList.contains("assignBtn")){ var row = b.closest("tr"); var sel = row ? row.querySelector("select.assignSel") : null; assignCoach(b.getAttribute("data-fid"), sel ? sel.value : "", b); } }); }
+
   function vFounders(){
     var html='<h1>Founders</h1><div class="sub2">The active cohort, their stage, coach, plan, and next gate.</div>';
-    html+='<table class="t"><thead><tr><th>Name</th><th>Stage</th><th>Week</th><th>Coach</th><th>Plan</th><th>Portal</th></tr></thead><tbody>';
+    html+='<table class="t"><thead><tr><th>Name</th><th>Stage</th><th>Week</th><th>Coach</th><th>Plan</th><th>Assign</th><th>Portal</th></tr></thead><tbody>';
     html+=founders.map(function(f){
       var pl=f.plan==="active"?'<span class="pill active">active</span>':f.plan==="paused"?'<span class="pill paused">paused</span>':'<span class="pill unpaid">unpaid</span>';
       var st='<span class="pill '+f.stage.toLowerCase()+'">'+f.stage+'</span>';
-      var lk=f.portal?'<button class="btn ghost" data-portal="'+esc(f.portal)+'" style="padding:5px 10px;font-size:12px">Copy link</button>':'<span style="color:var(--faint)">—</span>';
-      return '<tr><td class="nm">'+esc(f.name)+'</td><td>'+st+'</td><td>'+f.week+'</td><td>'+esc(f.coach)+'</td><td>'+pl+'</td><td>'+lk+'</td></tr>';
+      var lk=f.portal?'<button class="btn ghost" data-portal="'+esc(f.portal)+'" style="padding:5px 10px;font-size:12px">Copy link</button>':'<span style="color:var(--faint)">â</span>';
+      return '<tr><td class="nm">'+esc(f.name)+'</td><td>'+st+'</td><td>'+f.week+'</td><td>'+esc(f.coach)+'</td><td>'+pl+'</td><td>'+assignCell(f)+'</td><td>'+lk+'</td></tr>';
     }).join('')+'</tbody></table>';
     return html;
   }
@@ -344,7 +362,7 @@
     html+=coaches.map(function(c){
       var loadPct=Math.round(c.load/c.cap*100);
       var band=loadPct>85?"risk":loadPct>0?"ok":"none";
-      var lk=c.portal?'<button class="btn ghost" data-portal="'+esc(c.portal)+'" style="padding:5px 10px;font-size:12px">Copy link</button>':'<span style="color:var(--faint)">—</span>';
+      var lk=c.portal?'<button class="btn ghost" data-portal="'+esc(c.portal)+'" style="padding:5px 10px;font-size:12px">Copy link</button>':'<span style="color:var(--faint)">â</span>';
       return '<tr><td class="nm">'+esc(c.name)+'</td><td>'+esc(c.lane)+'</td><td>'+esc(c.tier)+'</td><td><span class="cell '+band+'">'+c.load+' / '+c.cap+'</span></td><td>'+(c.gate?'<span class="pill active">yes</span>':'<span class="tag">no</span>')+'</td><td>'+lk+'</td></tr>';
     }).join('')+'</tbody></table>';
     html+='<h2>Coverage</h2><div class="box">'+covGrid()+'</div>';
