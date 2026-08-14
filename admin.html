@@ -234,8 +234,9 @@
     return arr;
   }
   function fmtWhen(d){ if(!d) return ""; try{ var x=new Date(d); return x.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" "+x.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}); }catch(e){ return ""; } }
-  function portalLink(x){ return (x && x.memberId && x.accessToken) ? ("https://foundry.ethanstarke.com/portal.html?id="+encodeURIComponent(x.memberId)+"&t="+encodeURIComponent(x.accessToken)) : ""; }
-  function copyLink(url){ try{ navigator.clipboard.writeText(url); toast("Portal link copied."); }catch(e){ toast("Copy failed; select and copy manually."); } }
+  var MEMBER_PORTAL="https://www.ethanstarke.com/my-foundry";
+  function portalLink(x){ return (x && x.memberId) ? MEMBER_PORTAL : ""; }
+  function copyLink(url){ try{ navigator.clipboard.writeText(url); toast("Portal address copied."); }catch(e){ toast("Copy failed; select and copy manually."); } }
   function renderNav(){
     document.getElementById("navitems").innerHTML = NAV.map(function(n){
       var b = n.badge ? '<span class="badge">'+n.badge()+'</span>' : '';
