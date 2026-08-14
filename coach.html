@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Coach at Starke Foundry</title>
+<meta name="description" content="Starke Foundry is delivered by a hand-picked bench of operators and specialists who build founders against a bar they have cleared themselves. Express your interest in joining the bench." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/png" href="/shield_mark.png" />
+<style>
+  :root{
+    --ink:#0a0908;--panel:#15120e;--panel2:#1b1712;--line:rgba(255,255,255,0.09);
+    --paper:#f4efe7;--dim:#b7ad9e;--faint:#8a8072;--ember:#ff6a1a;--ember2:#ff9d2e;--gold:#e9c98a;--ok:#5fce8f;
+    --serif:'Fraunces',Georgia,serif;--sans:'Inter',system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(10,9,8,0.72);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:62px;max-width:1080px;margin:0 auto;padding:0 22px}
+  .brandlock{display:flex;align-items:center;gap:10px}
+  .brandmark{height:34px}
+  .bw-s{font-size:9px;letter-spacing:0.36em;color:var(--ember2);font-weight:600;display:block}
+  .bw-f{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:0.16em}
+  .bw-f b{color:var(--ember)}
+  .nav-back{font-size:13.5px;color:var(--dim)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  header.hero{padding:66px 0 24px;position:relative;overflow:hidden}
+  .glow{position:absolute;left:-6%;top:-70%;width:55%;height:360px;background:radial-gradient(ellipse at 50% 50%,rgba(255,106,26,0.2),transparent 70%);filter:blur(22px);pointer-events:none}
+  .eyebrow{font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:var(--ember2);font-weight:600}
+  header.hero h1{font-family:var(--serif);font-weight:500;font-size:clamp(32px,5.5vw,52px);margin:12px 0 14px;letter-spacing:-0.01em;max-width:18ch}
+  header.hero p.lede{color:var(--dim);max-width:66ch;font-size:17px}
+  .sec{padding:34px 0;border-top:1px solid var(--line)}
+  .sec:first-of-type{border-top:none}
+  h2{font-family:var(--serif);font-weight:500;font-size:clamp(22px,3vw,29px);margin-bottom:10px;letter-spacing:-0.01em}
+  .sec p{color:var(--dim);max-width:70ch;margin-bottom:12px}
+  .sec p b{color:var(--paper);font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:18px}
+  .cardx{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .cardx h3{font-family:var(--serif);font-size:17px;font-weight:500;margin-bottom:6px}
+  .cardx p{font-size:14px;color:var(--dim);margin-bottom:0}
+  .cardx .k{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ember2);font-weight:600;margin-bottom:8px}
+  ul.clean{list-style:none;margin:6px 0 0}
+  ul.clean li{position:relative;padding:8px 0 8px 22px;color:var(--dim);font-size:15px;border-bottom:1px solid var(--line)}
+  ul.clean li:last-child{border-bottom:none}
+  ul.clean li:before{content:"";position:absolute;left:2px;top:15px;width:6px;height:6px;border-radius:50%;background:var(--ember)}
+  ul.clean li b{color:var(--paper);font-weight:600}
+  /* form */
+  .formwrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px 26px;margin:8px 0 60px;max-width:760px}
+  .formwrap .note{color:var(--faint);font-size:13.5px;margin-bottom:20px}
+  .row{margin-bottom:16px}
+  .row.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:600px){.row.two{grid-template-columns:1fr}}
+  label{display:block;font-size:13px;color:var(--dim);font-weight:600;margin-bottom:6px;letter-spacing:0.02em}
+  label .opt{color:var(--faint);font-weight:400;letter-spacing:0}
+  input[type=text],input[type=email],input[type=url],textarea,select{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:8px;color:var(--paper);font-family:var(--sans);font-size:15px;padding:11px 13px}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--ember)}
+  textarea{min-height:96px;resize:vertical;line-height:1.5}
+  select{appearance:none}
+  .btn{display:inline-block;font-family:var(--sans);font-weight:600;font-size:15px;padding:13px 26px;border-radius:4px;cursor:pointer;border:none;color:#160b04;background:linear-gradient(180deg,var(--ember2),var(--ember))}
+  .btn:hover{transform:translateY(-1px)}
+  .fine{color:var(--faint);font-size:12.5px;margin-top:14px}
+  .done{display:none;background:linear-gradient(180deg,rgba(95,206,143,0.08),transparent);border:1px solid rgba(95,206,143,0.3);border-radius:14px;padding:26px;max-width:760px;margin:8px 0 60px}
+  .done h2{color:var(--ok)}
+  .done p{color:var(--dim)}
+  footer{border-top:1px solid var(--line);padding:28px 0;color:var(--faint);font-size:13px;text-align:center}
+  footer a{color:var(--ember2)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-in">
+    <a class="brandlock" href="/">
+      <img class="brandmark" src="/shield_mark.png" alt="Starke Foundry" onerror="this.style.display='none'" />
+      <span><span class="bw-s">STARKE</span><span class="bw-f">FO<b>U</b>NDRY</span></span>
+    </a>
+    <a class="nav-back" href="/">&#8249; Back to site</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="glow"></div>
+  <div class="wrap">
+    <div class="eyebrow">Join the bench</div>
+    <h1>Coach founders against a bar you have already cleared.</h1>
+    <p class="lede">Starke Foundry builds the founder before the company. It is delivered by a hand-picked bench of operators and specialists, each oriented to one method and one standard. We are looking for a few more of the right people. If that is you, this is where you raise your hand.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="sec">
+    <h2>What Foundry is</h2>
+    <p>Foundry is an identity-first incubator. It does not make a company presentable; it builds the person the company depends on, over three stages and forty-five weeks, coached every week against an investor-grade standard. Founders are not coached by a personality. They are coached against a bar, by people who have cleared it themselves.</p>
+  </div>
+
+  <div class="sec">
+    <h2>What a coach does</h2>
+    <div class="grid">
+      <div class="cardx"><div class="k">The unit</div><h3>One hour a week</h3><p>A single one-hour session per founder each week, on Zoom. A working session, not a lecture. Every week ends in a real move the founder owes by the next.</p></div>
+      <div class="cardx"><div class="k">The method</div><h3>Teach to the week</h3><p>You carry the founder through the method: the week's marker, the teaching that translates it to their real venture, and the one defined move you assign and hold them to.</p></div>
+      <div class="cardx"><div class="k">The bench</div><h3>Continuous, not solo</h3><p>Foundry is a bench, not a single voice. After each session you leave a short handoff, so any coach can pick up a founder and give the same read.</p></div>
+      <div class="cardx"><div class="k">The contract</div><h3>Candor with care</h3><p>Tell the hard truth without cruelty and without flattery. Pushback is delivered as an optimization puzzle. Agency stays with the founder; you advise and challenge, you do not run their company.</p></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>Who we are looking for</h2>
+    <p>Operators who have built real things and can develop founders against a standard they have met themselves. Ethan carries identity, narrative, leadership judgment, and the gates; the bench carries specialist depth. If your edge is one of these, we want to hear from you.</p>
+    <ul class="clean">
+      <li><b>Finance and capital.</b> Instruments and terms, cap tables, the raise, growth capital.</li>
+      <li><b>Legal and structure.</b> Entity, governance, the terrain a founder must own.</li>
+      <li><b>Product and zero to one.</b> Discovery, taste, velocity, the build standard.</li>
+      <li><b>Go to market and revenue.</b> Channels, pricing, speed to revenue, enterprise deals.</li>
+      <li><b>Media, narrative, and presence.</b> The founder's voice, the room, the story that raises.</li>
+    </ul>
+  </div>
+
+  <div class="sec">
+    <h2>How it works from here</h2>
+    <p>This is an expression of interest, not a formal application. If there is a fit, Ethan follows up personally, and a formal application and a conversation come next. We keep the bench small and deliberate, so we move carefully rather than quickly.</p>
+  </div>
+
+  <div class="sec" id="formsec">
+    <h2>Raise your hand</h2>
+    <div class="formwrap" id="wrapForm">
+      <div class="note">A few minutes. Nothing here commits you to anything; it opens a conversation.</div>
+      <form id="interest" action="https://formsubmit.co/e8850b7408d0d73a5c64368b3c29b7fe" method="POST" autocomplete="off">
+        <input type="hidden" name="_subject" value="New Foundry coach interest" />
+        <input type="hidden" name="_template" value="table" />
+        <input type="hidden" name="_captcha" value="false" />
+        <input type="hidden" name="_next" value="https://foundry.ethanstarke.com/coach.html?done=1" />
+
+        <div class="row two">
+          <div><label for="f_name">Your name</label><input type="text" id="f_name" name="name" required /></div>
+          <div><label for="f_email">Email</label><input type="email" id="f_email" name="email" required /></div>
+        </div>
+        <div class="row">
+          <label for="f_expertise">Your area of expertise</label>
+          <input type="text" id="f_expertise" name="expertise" placeholder="e.g. Enterprise sales, or Product and zero to one" required />
+        </div>
+        <div class="row">
+          <label for="f_built">What have you built, and which founders have you developed?</label>
+          <textarea id="f_built" name="builtWhat" placeholder="Plain and specific. What you have built or run, and any founders or teams you have coached or led." required></textarea>
+        </div>
+        <div class="row two">
+          <div>
+            <label for="f_stages">Where would you want to carry founders? <span class="opt">optional</span></label>
+            <select id="f_stages" name="stages">
+              <option value="">No preference yet</option>
+              <option>Seeker, the foundation</option>
+              <option>Builder, commercial execution</option>
+              <option>Sovereign, the summit</option>
+              <option>Across all three, as a specialist</option>
+            </select>
+          </div>
+          <div><label for="f_link">A link <span class="opt">optional</span></label><input type="url" id="f_link" name="link" placeholder="LinkedIn, your site, or a portfolio" /></div>
+        </div>
+        <div class="row">
+          <label for="f_note">Anything else you want Ethan to know <span class="opt">optional</span></label>
+          <textarea id="f_note" name="note" placeholder="Why this work, or what you would bring to a founder."></textarea>
+        </div>
+        <div class="row">
+          <label for="f_source">How did you hear about Foundry? <span class="opt">optional</span></label>
+          <input type="text" id="f_source" name="source" placeholder="A person, a book, the Starke Perspective, or somewhere else" />
+        </div>
+        <button type="submit" class="btn" id="submitBtn">Send my interest</button>
+        <div class="fine">Ethan reads every one himself. This is a private note to him, not a public post.</div>
+      </form>
+    </div>
+
+    <div class="done" id="doneBox">
+      <h2>Thank you. It is in.</h2>
+      <p>Ethan reads every expression of interest himself. If there is a fit, he will reach out to you directly, and a formal application and a conversation come next. No form letter, no queue you cannot see.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Starke Foundry &middot; Builds the founder before the company. &middot; <a href="/">foundry.ethanstarke.com</a>
+</footer>
+
+<script>
+(function(){
+  // Show the thank-you state after redirect.
+  if (/[?&]done=1/.test(location.search)) {
+    var f = document.getElementById("wrapForm"); if (f) f.style.display = "none";
+    var d = document.getElementById("doneBox"); if (d) d.style.display = "block";
+    var h = document.getElementById("formsec"); if (h) h.scrollIntoView();
+  }
+
+  // Mirror the founder application: also store the interest in the platform, non-blocking.
+  // The email submission (form action) is the primary path and always runs. If the Wix
+  // endpoint is not yet deployed or is unreachable, the form still submits normally.
+  var WIX_COACH_ENDPOINT = "https://www.ethanstarke.com/_functions/saveCoachInterest";
+  var form = document.getElementById("interest");
+  form.addEventListener("submit", function(){
+    try {
+      var payload = {
+        name: form.name.value, email: form.email.value,
+        expertise: form.expertise.value, builtWhat: form.builtWhat.value,
+        stages: form.stages.value, link: form.link.value,
+        note: form.note.value, source: form.source.value
+      };
+      fetch(WIX_COACH_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).catch(function(){});
+    } catch (e) {}
+    // Let the normal form submission to formsubmit proceed.
+  });
+})();
+</script>
+</body>
+</html>
