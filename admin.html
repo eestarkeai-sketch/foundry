@@ -313,8 +313,8 @@
     var lock = it.address ? '<div class="locked"><div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ember2);margin-bottom:8px">Identity, locked from the application</div><div class="lg"><div><div class="k">Name</div>'+esc(it.name)+'</div><div><div class="k">Email</div>'+esc(it.email)+'</div>'+(it.phone?'<div><div class="k">Phone</div>'+esc(it.phone)+'</div>':'')+(it.address?'<div><div class="k">Address</div>'+esc(it.address)+'</div>':'')+'</div></div>' : '';
     var body="", btns="";
     if(appQueue==="founder"){
-      body='<div class="block2"><h4>Essays</h4><p>'+esc(it.essays)+'</p></div><div class="block2"><h4>Proof</h4><p>'+esc(it.proof)+'</p></div>';
-      btns='<button class="btn welcome" data-act="welcome">Welcome, place in '+esc(it.placed)+'</button><button class="btn reject" data-act="reject">Reject</button>';
+      var _pb=(apps.founder||[]).some(function(a){return a.id!==it.id&&(a.email||"").toLowerCase()===(it.email||"").toLowerCase()&&a.status==="blocked";}); body=(_pb?'<div class="block2" style="border:1px solid var(--ember)"><b>&#9888; Previously blocked</b> &mdash; this email was blocked before as bad-faith. Review carefully.</div>':'')+'<div class="block2"><h4>Essays</h4><p>'+esc(it.essays)+'</p></div><div class="block2"><h4>Proof</h4><p>'+esc(it.proof)+'</p></div>';
+      btns='<button class="btn welcome" data-act="welcome">Welcome, place in '+esc(it.placed)+'</button><button class="btn reject" data-act="reject">Reject</button><button class="btn reject" data-act="block" style="opacity:.85">Block (bad faith)</button>';
     } else if(appQueue==="coachInterest"){
       body='<div class="block2"><h4>Expertise</h4><p>'+esc(it.expertise)+'</p></div><div class="block2"><h4>What they built</h4><p>'+esc(it.built)+'</p></div>';
       btns='<button class="btn invite" data-act="invite">Invite to deep application</button><button class="btn reject" data-act="reject">Decline</button>';
@@ -350,7 +350,7 @@
     html+=founders.map(function(f){
       var pl=f.plan==="active"?'<span class="pill active">active</span>':f.plan==="paused"?'<span class="pill paused">paused</span>':'<span class="pill unpaid">unpaid</span>';
       var st='<span class="pill '+f.stage.toLowerCase()+'">'+f.stage+'</span>';
-      var lk=f.portal?'<button class="btn ghost" data-portal="'+esc(f.portal)+'" style="padding:5px 10px;font-size:12px">Copy link</button>':'<span style="color:var(--faint)">â</span>';
+      var lk=f.portal?'<button class="btn ghost" data-portal="'+esc(f.portal)+'" style="padding:5px 10px;font-size:12px">Copy link</button>':'<span style="color:var(--faint)">Ã¢ÂÂ</span>';
       return '<tr><td class="nm">'+esc(f.name)+'</td><td>'+st+'</td><td>'+f.week+'</td><td>'+esc(f.coach)+'</td><td>'+pl+'</td><td>'+assignCell(f)+'</td><td>'+lk+'</td></tr>';
     }).join('')+'</tbody></table>';
     return html;
@@ -362,7 +362,7 @@
     html+=coaches.map(function(c){
       var loadPct=Math.round(c.load/c.cap*100);
       var band=loadPct>85?"risk":loadPct>0?"ok":"none";
-      var lk=c.portal?'<button class="btn ghost" data-portal="'+esc(c.portal)+'" style="padding:5px 10px;font-size:12px">Copy link</button>':'<span style="color:var(--faint)">â</span>';
+      var lk=c.portal?'<button class="btn ghost" data-portal="'+esc(c.portal)+'" style="padding:5px 10px;font-size:12px">Copy link</button>':'<span style="color:var(--faint)">Ã¢ÂÂ</span>';
       return '<tr><td class="nm">'+esc(c.name)+'</td><td>'+esc(c.lane)+'</td><td>'+esc(c.tier)+'</td><td><span class="cell '+band+'">'+c.load+' / '+c.cap+'</span></td><td>'+(c.gate?'<span class="pill active">yes</span>':'<span class="tag">no</span>')+'</td><td>'+lk+'</td></tr>';
     }).join('')+'</tbody></table>';
     html+='<h2>Coverage</h2><div class="box">'+covGrid()+'</div>';
@@ -473,7 +473,7 @@
     if(act==="welcome" && q==="founder"){ url="welcomeFounder"; payload={adminKey:ADMIN_KEY, applicationId:it.id}; }
     else if(act==="welcome" && q==="coachApps"){ url="welcomeCoach"; payload={adminKey:ADMIN_KEY, applicationId:it.id, placement:{tier:it.tier||"", primaryLane:it.lane||"", secondaryLanes:""}}; }
     else if(act==="invite"){ url="inviteCoach"; payload={adminKey:ADMIN_KEY, interestId:it.id}; }
-    else if(act==="reject"){ var coll=q==="founder"?"FounderApplications":q==="coachApps"?"CoachApplications":"CoachInterest"; url="decideReject"; payload={adminKey:ADMIN_KEY, collection:coll, applicationId:it.id}; }
+    else if(act==="reject"){ var coll=q==="founder"?"FounderApplications":q==="coachApps"?"CoachApplications":"CoachInterest"; url="decideReject"; payload={adminKey:ADMIN_KEY, collection:coll, applicationId:it.id}; } else if(act==="block"){ url="blockApplicant"; payload={adminKey:ADMIN_KEY, applicationId:it.id}; }
     else { return; }
     btn.textContent="Working..."; btn.disabled=true;
     fetch(EP+url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
