@@ -115,13 +115,137 @@
       '<div style="margin-top:14px"><button class="btn primary" id="sendBtn">Send to Ethan</button></div></div>';
   }
 
+  function coachExtra(){ return (ME && ME.role === "coach") ? coachDeskCard() : ""; }
+
+  function coachDeskCard(){
+    return '<div class="card"><h2>Your founders</h2>'+
+      '<div class="note">Every founder assigned to you. Log each weekly session, set homework, and hand a founder to another coach when the stage calls for it.</div>'+
+      '<div id="coachDesk"><div class="empty">Loading your roster...</div></div></div>';
+  }
+
+  var COACH_ROSTER = null;
+
+  function ensureCoachCSS(){
+    if(document.getElementById("coachCSS")) return;
+    var s = document.createElement("style"); s.id = "coachCSS";
+    s.textContent = [
+      ".fblock{border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0;background:var(--panel2)}",
+      ".fhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}",
+      ".fname{font-weight:600;font-size:16px}",
+      ".fmeta{color:var(--faint);font-size:13px}",
+      ".fhist{margin:10px 0}",
+      ".flog{border-top:1px solid var(--line);margin-top:10px;padding-top:10px}",
+      ".frow{display:flex;gap:8px;align-items:center;margin:6px 0}",
+      ".frow .wk{width:84px}",
+      ".frow2{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}",
+      ".handoff{margin-top:10px;border-top:1px dashed var(--line);padding-top:10px}",
+      "#coachDesk select{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px}",
+      ".btn.ghost{background:transparent;border:1px solid var(--line);color:var(--dim)}"
+    ].join(String.fromCharCode(10));
+    document.head.appendChild(s);
+  }
+
+  function loadCoachDesk(){
+    ensureCoachCSS();
+    api("coachData").then(function(res){
+      var host = document.getElementById("coachDesk");
+      if(!host) return;
+      if(res.s !== 200 || !res.j || res.j.error){ host.innerHTML = '<div class="empty">Could not load your roster. Refresh to try again.</div>'; return; }
+      COACH_ROSTER = res.j;
+      var fs = res.j.founders || [];
+      if(!fs.length){ host.innerHTML = '<div class="empty">No founders are assigned to you yet. Ethan assigns founders from the admin desk; they appear here when he does.</div>'; return; }
+      host.innerHTML = fs.map(founderBlock).join("");
+      wireCoachDesk();
+    }).catch(function(){
+      var host = document.getElementById("coachDesk");
+      if(host) host.innerHTML = '<div class="empty">Could not reach the server. Refresh to try again.</div>';
+    });
+  }
+
+  function founderBlock(f){
+    var sess = f.sessions || [];
+    var hist = sess.length ? sess.map(function(s){
+      var wk = s.week ? ("Wk " + esc(s.week)) : "";
+      var st = s.status ? ('<span class="pill">' + esc(s.status) + '</span>') : "";
+      return '<div class="msg"><div class="top"><span class="who">' + wk + ' ' + st + '</span><span class="when">' + esc(fmtDate(s._createdDate)) + '</span></div>' +
+        (s.notes ? ('<div class="bd">' + esc(s.notes) + '</div>') : "") +
+        (s.homeworkPicked ? ('<div class="subj">Homework: ' + esc(s.homeworkPicked) + '</div>') : "") +
+        (s.handoffNote ? ('<div class="bd"><em>Handoff note: ' + esc(s.handoffNote) + '</em></div>') : "") + '</div>';
+    }).join("") : '<div class="empty">No sessions logged yet.</div>';
+
+    var fid = esc(f.id);
+    return '<div class="fblock" data-fid="' + fid + '">' +
+      '<div class="fhead"><div><span class="fname">' + esc(f.name || "Founder") + '</span> ' +
+        '<span class="pill ' + esc((f.stage || "").toLowerCase()) + '">' + esc(f.stage || "Seeker") + '</span> ' +
+        '<span class="fmeta">week ' + esc(f.week || 1) + '</span></div>' +
+        '<div class="fmeta">' + esc(f.email || "") + '</div></div>' +
+      (f.buildLine ? ('<div class="note">Building: ' + esc(f.buildLine) + (f.metric ? (' / Metric: ' + esc(f.metric)) : "") + '</div>') : "") +
+      '<div class="fhist">' + hist + '</div>' +
+      '<div class="flog"><label>Log a session</label>' +
+        '<div class="frow"><input type="number" min="1" max="45" class="wk" value="' + esc(f.week || 1) + '" title="Week">' +
+          '<select class="st"><option value="logged">logged</option><option value="held">held</option><option value="missed">missed</option><option value="advanced">advanced</option></select></div>' +
+        '<textarea class="nt" maxlength="8000" placeholder="Session notes..."></textarea>' +
+        '<input class="hw" maxlength="3000" placeholder="Homework for this week">' +
+        '<div class="frow2"><button class="btn primary logBtn" data-fid="' + fid + '">Save session</button>' +
+          '<button class="btn ghost hoBtn" data-fid="' + fid + '">Hand off...</button></div>' +
+        '<div class="handoff" style="display:none">' +
+          '<label>Hand off to another coach</label>' +
+          '<input class="toc" maxlength="80" placeholder="Destination coach ID">' +
+          '<textarea class="hn" maxlength="4000" placeholder="Why you are handing this founder off..."></textarea>' +
+          '<div class="frow2"><button class="btn primary doHoBtn" data-fid="' + fid + '">Confirm handoff</button></div>' +
+        '</div>' +
+      '</div></div>';
+  }
+
+  function findBlock(el){ while(el && el !== document){ if(el.classList && el.classList.contains("fblock")) return el; el = el.parentNode; } return null; }
+
+  function wireCoachDesk(){
+    var host = document.getElementById("coachDesk");
+    if(!host || host._wired) return; host._wired = true;
+    host.addEventListener("click", function(ev){
+      var t = ev.target; if(!t || !t.classList) return;
+      if(t.classList.contains("logBtn")){ logCoachSession(t); }
+      else if(t.classList.contains("hoBtn")){ var b = findBlock(t); if(b){ var h = b.querySelector(".handoff"); if(h){ h.style.display = (h.style.display === "none" ? "block" : "none"); } } }
+      else if(t.classList.contains("doHoBtn")){ doHandoff(t); }
+    });
+  }
+
+  function logCoachSession(btn){
+    var b = findBlock(btn); if(!b) return;
+    var fid = b.getAttribute("data-fid");
+    var wk = b.querySelector(".wk"), st = b.querySelector(".st"), nt = b.querySelector(".nt"), hw = b.querySelector(".hw");
+    var notes = nt ? nt.value : "", homework = hw ? hw.value : "";
+    if(!notes.trim() && !homework.trim()){ toast("Add notes or homework first."); return; }
+    btn.disabled = true; btn.textContent = "Saving...";
+    api("logSession", { founderId: fid, week: wk ? wk.value : "", status: st ? st.value : "logged", notes: notes, homework: homework }).then(function(res){
+      btn.disabled = false; btn.textContent = "Save session";
+      if(res.s !== 200 || !res.j || res.j.error){ toast("Could not save the session."); return; }
+      toast("Session logged."); loadCoachDesk();
+    }).catch(function(){ btn.disabled = false; btn.textContent = "Save session"; toast("Could not reach the server."); });
+  }
+
+  function doHandoff(btn){
+    var b = findBlock(btn); if(!b) return;
+    var fid = b.getAttribute("data-fid");
+    var toc = b.querySelector(".toc"), hn = b.querySelector(".hn");
+    var to = toc ? toc.value.trim() : "";
+    if(!to){ toast("Enter the destination coach ID first."); return; }
+    btn.disabled = true; btn.textContent = "Handing off...";
+    api("handoffFounder", { founderId: fid, toCoachId: to, note: hn ? hn.value : "" }).then(function(res){
+      btn.disabled = false; btn.textContent = "Confirm handoff";
+      if(res.s !== 200 || !res.j || res.j.error){ toast("Handoff failed. Check the coach ID."); return; }
+      toast("Founder handed off."); loadCoachDesk();
+    }).catch(function(){ btn.disabled = false; btn.textContent = "Confirm handoff"; toast("Could not reach the server."); });
+  }
+
   function render(){
     root().innerHTML =
       '<div class="wrap"><div class="brand"><div class="k">STARKE</div><h1>FO<span>U</span>NDRY</h1></div>'+
       '<div class="sub">Welcome, '+esc((ME.name||"").split(" ")[0])+'. This is your private Foundry.</div>'+
-      profileCard()+inboxCard()+'</div>';
+      profileCard()+coachExtra()+inboxCard()+'</div>';
     var sv=document.getElementById("saveBtn"); if(sv) sv.addEventListener("click",function(){ saveProfile(sv); });
     var sn=document.getElementById("sendBtn"); if(sn) sn.addEventListener("click",function(){ sendMsg(sn); });
+    if(ME && ME.role === "coach"){ loadCoachDesk(); }
   }
 
   function saveProfile(btn){
