@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Foundry Coach Application</title>
+<meta name="description" content="The deep application to join the Starke Foundry coach bench. By invitation. Graded like a hire onto staff." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/png" href="/shield_mark.png" />
+<style>
+  :root{--ink:#0a0908;--ink2:#141110;--panel:#15120e;--panel2:#1b1712;--line:rgba(255,255,255,0.10);--paper:#f4efe7;--dim:#b7ad9e;--faint:#8a8072;--ember:#ff6a1a;--ember2:#ff9d2e;--gold:#e9c98a;--ok:#5fce8f;--serif:'Fraunces',Georgia,serif;--sans:'Inter',system-ui,-apple-system,Segoe UI,Arial,sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(10,9,8,0.72);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:62px;max-width:920px;margin:0 auto;padding:0 22px}
+  .brandlock{display:flex;align-items:center;gap:10px}
+  .brandmark{height:34px}
+  .bw-s{font-size:9px;letter-spacing:0.36em;color:var(--ember2);font-weight:600;display:block}
+  .bw-f{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:0.16em}
+  .bw-f b{color:var(--ember)}
+  .badge{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(233,201,138,0.3);border-radius:999px;padding:4px 12px}
+  .wrap{max-width:920px;margin:0 auto;padding:0 22px}
+  header.hero{padding:56px 0 22px;position:relative;overflow:hidden}
+  .glow{position:absolute;left:-6%;top:-70%;width:55%;height:340px;background:radial-gradient(ellipse at 50% 50%,rgba(255,106,26,0.18),transparent 70%);filter:blur(22px);pointer-events:none}
+  .eyebrow{font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:var(--ember2);font-weight:600}
+  header.hero h1{font-family:var(--serif);font-weight:500;font-size:clamp(30px,5vw,46px);margin:12px 0 14px;letter-spacing:-0.01em}
+  header.hero p{color:var(--dim);max-width:70ch;font-size:16px;margin-bottom:10px}
+  header.hero p b{color:var(--paper);font-weight:600}
+  .sec{border-top:1px solid var(--line);padding:30px 0}
+  .sec h2{font-family:var(--serif);font-weight:500;font-size:22px;margin-bottom:4px}
+  .sec .sh{color:var(--faint);font-size:13.5px;margin-bottom:18px;max-width:74ch}
+  .sec h2 .sn{color:var(--ember2);font-size:14px;font-family:var(--serif);margin-right:10px}
+  .row{margin-bottom:16px}
+  .row.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:600px){.row.two{grid-template-columns:1fr}}
+  label{display:block;font-size:13px;color:var(--dim);font-weight:600;margin-bottom:6px;letter-spacing:0.02em}
+  label .opt{color:var(--faint);font-weight:400}
+  label .req{color:var(--ember);font-weight:600}
+  input[type=text],input[type=email],input[type=url],textarea,select{width:100%;background:var(--ink2);border:1px solid var(--line);border-radius:8px;color:var(--paper);font-family:var(--sans);font-size:15px;padding:11px 13px}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--ember)}
+  textarea{min-height:96px;resize:vertical;line-height:1.5}
+  textarea.big{min-height:150px}
+  select{appearance:none}
+  .hint{color:var(--faint);font-size:12.5px;margin-top:5px}
+  .lanes{display:flex;flex-wrap:wrap;gap:8px}
+  .chk{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 13px;font-size:13.5px;color:var(--dim);cursor:pointer}
+  .chk input{accent-color:var(--ember);width:16px;height:16px}
+  .chk.on{border-color:var(--ember);color:var(--paper)}
+  .refcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+  .refcard .rh{font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ember2);font-weight:600;margin-bottom:10px}
+  .prompt{background:linear-gradient(180deg,rgba(255,106,26,0.07),transparent);border:1px solid rgba(255,106,26,0.24);border-left:3px solid var(--ember);border-radius:10px;padding:14px 18px;margin-bottom:14px;color:var(--paper);font-size:14.5px}
+  .prompt b{color:var(--ember2)}
+  .consent label{display:flex;gap:11px;align-items:flex-start;font-weight:400;color:var(--dim);font-size:14px;margin-bottom:12px;cursor:pointer}
+  .consent input{accent-color:var(--ember);width:17px;height:17px;margin-top:2px;flex-shrink:0}
+  .subwrap{padding:26px 0 70px}
+  .btn{display:inline-block;font-family:var(--sans);font-weight:600;font-size:15px;padding:14px 30px;border-radius:4px;cursor:pointer;border:none;color:#160b04;background:linear-gradient(180deg,var(--ember2),var(--ember))}
+  .btn:disabled{opacity:0.4;cursor:not-allowed}
+  .warn{color:var(--gold);font-size:13px;margin-top:12px;min-height:18px}
+  .fine{color:var(--faint);font-size:12.5px;margin-top:12px}
+  .done{display:none;background:linear-gradient(180deg,rgba(95,206,143,0.08),transparent);border:1px solid rgba(95,206,143,0.3);border-radius:14px;padding:28px;margin:30px 0 70px}
+  .done h2{color:var(--ok);font-family:var(--serif);font-weight:500;font-size:24px;margin-bottom:8px}
+  .done p{color:var(--dim)}
+  footer{border-top:1px solid var(--line);padding:26px 0;color:var(--faint);font-size:13px;text-align:center}
+  footer a{color:var(--ember2)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-in">
+    <a class="brandlock" href="/"><img class="brandmark" src="/shield_mark.png" alt="Starke Foundry" onerror="this.style.display='none'" /><span><span class="bw-s">STARKE</span><span class="bw-f">FO<b>U</b>NDRY</span></span></a>
+    <span class="badge">By invitation</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="glow"></div>
+  <div class="wrap">
+    <div class="eyebrow">The coach application</div>
+    <h1>The application to join the bench.</h1>
+    <p>You are here because your interest earned a closer look. This is the deep application, and it is graded the way we would grade a hire onto staff, on evidence, against a bar you have cleared yourself. It asks for your real track record with proof, seven references, and a work sample. <b>A live coaching session follows for every finalist.</b> Give it a clear hour; it takes the work seriously, on purpose.</p>
+    <p>Foundry builds the founder before the company. A coach here is not measured by a certificate. They are measured by what they have built and whether they can develop a founder against an investor-grade standard.</p>
+  </div>
+</header>
+
+<div class="wrap">
+<form id="app" action="https://formsubmit.co/e8850b7408d0d73a5c64368b3c29b7fe" method="POST" autocomplete="off">
+  <input type="hidden" name="_subject" value="New Foundry coach application" />
+  <input type="hidden" name="_template" value="table" />
+  <input type="hidden" name="_captcha" value="false" />
+  <input type="hidden" name="_next" value="https://foundry.ethanstarke.com/coach-apply.html?done=1" />
+  <input type="hidden" name="references_json" id="references_json" />
+
+  <div class="sec">
+    <h2><span class="sn">1</span>You</h2>
+    <div class="row two">
+      <div><label>Your name <span class="req">required</span></label><input type="text" name="name" id="f_name" required /></div>
+      <div><label>Email <span class="req">required</span></label><input type="email" name="email" id="f_email" required /></div>
+    </div>
+    <div class="row two">
+      <div><label>Current role and where <span class="req">required</span></label><input type="text" name="currentRole" id="f_role" placeholder="e.g. Founder and CEO, Acme; or Operating Partner, X" required /></div>
+      <div><label>A link <span class="opt">optional</span></label><input type="url" name="link" placeholder="LinkedIn, your site, or a portfolio" /></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sn">2</span>Track record, with proof</h2>
+    <div class="sh">Role by role, what you personally owned, not what the team did. Specifics are the point: numbers, timelines, your exact part. Vague claims score low, on purpose.</div>
+    <div class="row"><label>Work history <span class="req">required</span></label><textarea class="big" name="workHistory" id="f_history" placeholder="Each role: what you owned, the scope, the outcome. Be specific and honest." required></textarea></div>
+    <div class="row"><label>Your single strongest owned outcome, with the numbers <span class="req">required</span></label><textarea name="headlineOutcome" id="f_outcome" placeholder="e.g. Grew ARR from 2M to 9M in 18 months as the owner of X. Not 'led growth.'" required></textarea></div>
+    <div class="row"><label>Proof and artifacts <span class="opt">recommended</span></label><textarea name="proofLinks" placeholder="Links or a description of evidence: a deck you built, a model, a changelog, a cap table, a press mention. Real accomplishments leave residue."></textarea></div>
+    <div class="row"><label>The bar you have cleared <span class="req">required</span></label><textarea name="barCleared" id="f_bar" placeholder="The clearest proof you have operated at the altitude you want to coach toward: an exit, an owned P and L, a shipped and scaled product, closed deals, a company built." required></textarea></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sn">3</span>Coaching and why</h2>
+    <div class="row"><label>Founders or teams you have developed <span class="req">required</span></label><textarea name="foundersDeveloped" id="f_founders" placeholder="Who you have coached, mentored, or led, and what changed for them. Name someone who would vouch for it." required></textarea></div>
+    <div class="row"><label>Why this work <span class="opt">optional</span></label><textarea name="whyThisWork" placeholder="Why coaching founders, and what you would bring to one that few others could."></textarea></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sn">4</span>Your place on the bench</h2>
+    <div class="sh">Where your edge is, and where you could carry founders. This is your view; placement is decided on the evidence.</div>
+    <div class="row two">
+      <div><label>Your primary lane <span class="req">required</span></label>
+        <select name="primaryLane" id="f_primary" required>
+          <option value="">Choose one</option>
+          <option>Finance</option><option>Legal</option><option>Product</option><option>Go to Market</option><option>Media</option><option>Enterprise</option><option>Growth Capital</option>
+        </select>
+      </div>
+      <div><label>How senior a founder can you hold? <span class="opt">your view</span></label>
+        <select name="tierClaim">
+          <option value="">Choose one</option>
+          <option>Practitioner: defined, well-scoped domain work</option>
+          <option>Principal: complex, ambiguous problems, senior founders</option>
+          <option>Master: the highest-stakes, highest-ambiguity situations</option>
+        </select>
+      </div>
+    </div>
+    <div class="row"><label>Secondary lanes <span class="opt">optional, pick any</span></label>
+      <div class="lanes" id="secLanes"></div>
+    </div>
+    <div class="row"><label>Which stages could you carry? <span class="opt">pick any</span></label>
+      <div class="lanes" id="stageLanes"></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sn">5</span>The work sample</h2>
+    <div class="sh">This is weighted heaviest, because the best predictor of whether someone can coach is watching them coach. This is the written part; a live session follows.</div>
+    <div class="prompt"><b>The situation.</b> A Builder-stage founder opens your session upbeat: lots of inbound interest, a busy pipeline, and they want to start raising a round now. There is no revenue yet, and when you ask, they cannot name their one governing metric. In your own approach, how do you run this hour? What do you diagnose, what do you ask before you advise, and what single move do you leave them with by next week?</div>
+    <div class="row"><label>Your teardown <span class="req">required, aim for 250 words or more</span></label><textarea class="big" name="workSample" id="f_sample" placeholder="Show your actual coaching. Diagnosis before prescription. What you ask, what you resist doing, and the one move you assign." required></textarea></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sn">6</span>Seven references</h2>
+    <div class="sh">Spread across former bosses, peers, and people who reported to you. We ask each the same questions, including whether they would enthusiastically rehire you. Give people who have seen you operate up close.</div>
+    <div id="refs"></div>
+  </div>
+
+  <div class="sec consent">
+    <h2><span class="sn">7</span>Consent and the standard</h2>
+    <label><input type="checkbox" name="consentReferences" id="c1" value="yes" /> <span>I consent to Foundry contacting the references I have listed.</span></label>
+    <label><input type="checkbox" name="consentBackchannel" id="c2" value="yes" /> <span>I understand that senior-level vetting may include speaking with people who know my work who are not on my list, and I consent to that. My current employer will not be contacted without my explicit permission.</span></label>
+    <label><input type="checkbox" name="consentLiveSession" id="c3" value="yes" /> <span>I understand a live coaching session is required of every finalist, and I am ready to do one.</span></label>
+  </div>
+
+  <div class="subwrap">
+    <button type="submit" class="btn" id="submitBtn">Submit my application</button>
+    <div class="warn" id="warn"></div>
+    <div class="fine">Ethan reviews every application himself, on the evidence. Submitting is a serious step, not an enquiry.</div>
+  </div>
+</form>
+
+<div class="done" id="doneBox">
+  <h2>Received. Thank you for the care you put into it.</h2>
+  <p>Ethan reviews every application himself, against the evidence you gave. If it moves forward, the next step is your references and a live coaching session, and he will be in touch directly. No form letter, no queue you cannot see.</p>
+</div>
+</div>
+
+<footer>Starke Foundry &middot; Builds the founder before the company. &middot; <a href="/">foundry.ethanstarke.com</a></footer>
+
+<script>
+(function(){
+  // done state
+  if (/[?&]done=1/.test(location.search)) {
+    document.getElementById("app").style.display = "none";
+    document.getElementById("doneBox").style.display = "block";
+  }
+
+  var LANES = ["Finance","Legal","Product","Go to Market","Media","Enterprise","Growth Capital"];
+  var STAGES = ["Seeker","Builder","Sovereign"];
+  function chips(container, items, nameAttr){
+    var host = document.getElementById(container);
+    items.forEach(function(v,i){
+      var id = nameAttr + "_" + i;
+      var l = document.createElement("label"); l.className="chk";
+      l.innerHTML = '<input type="checkbox" name="'+nameAttr+'" value="'+v+'" id="'+id+'"> <span>'+v+'</span>';
+      l.querySelector("input").addEventListener("change",function(e){ l.classList.toggle("on", e.target.checked); });
+      host.appendChild(l);
+    });
+  }
+  chips("secLanes", LANES, "secondaryLane");
+  chips("stageLanes", STAGES, "stage");
+
+  // seven reference blocks
+  var refsHost = document.getElementById("refs");
+  for (var i=1;i<=7;i++){
+    var card = document.createElement("div"); card.className="refcard";
+    card.innerHTML =
+      '<div class="rh">Reference '+i+'</div>'+
+      '<div class="row two">'+
+        '<div><label>Name <span class="req">required</span></label><input type="text" name="ref'+i+'_name" class="ref-name" required></div>'+
+        '<div><label>How they know you <span class="req">required</span></label><select name="ref'+i+'_rel" required><option value="">Choose</option><option>Former manager</option><option>Peer or co-founder</option><option>Reported to me</option><option>Client or customer</option><option>Board or investor</option></select></div>'+
+      '</div>'+
+      '<div class="row two">'+
+        '<div><label>Where you worked together <span class="opt">optional</span></label><input type="text" name="ref'+i+'_org"></div>'+
+        '<div><label>Their email <span class="req">required</span></label><input type="email" name="ref'+i+'_email" class="ref-email" required></div>'+
+      '</div>';
+    refsHost.appendChild(card);
+  }
+
+  var form = document.getElementById("app");
+  var warn = document.getElementById("warn");
+
+  form.addEventListener("submit", function(e){
+    // consent gate
+    var c1=document.getElementById("c1").checked, c2=document.getElementById("c2").checked, c3=document.getElementById("c3").checked;
+    if (!(c1 && c2 && c3)) {
+      e.preventDefault();
+      warn.textContent = "Please confirm all three items in section 7 before submitting.";
+      document.getElementById("c1").scrollIntoView({behavior:"smooth",block:"center"});
+      return;
+    }
+    // build references JSON for the platform record
+    try {
+      var refs = [];
+      for (var i=1;i<=7;i++){
+        refs.push({
+          name: (form["ref"+i+"_name"].value||"").trim(),
+          relationship: (form["ref"+i+"_rel"].value||"").trim(),
+          org: (form["ref"+i+"_org"].value||"").trim(),
+          email: (form["ref"+i+"_email"].value||"").trim()
+        });
+      }
+      document.getElementById("references_json").value = JSON.stringify(refs);
+
+      var sec = Array.prototype.map.call(document.querySelectorAll('input[name="secondaryLane"]:checked'), function(x){return x.value;});
+      var stg = Array.prototype.map.call(document.querySelectorAll('input[name="stage"]:checked'), function(x){return x.value;});
+
+      var payload = {
+        name: form.name.value, email: form.email.value, currentRole: form.currentRole.value,
+        workHistory: form.workHistory.value, headlineOutcome: form.headlineOutcome.value,
+        proofLinks: form.proofLinks.value, barCleared: form.barCleared.value,
+        foundersDeveloped: form.foundersDeveloped.value, whyThisWork: form.whyThisWork.value,
+        primaryLane: form.primaryLane.value, secondaryLanes: sec.join(", "), stages: stg.join(", "),
+        tierClaim: form.tierClaim.value, references: JSON.stringify(refs),
+        workSample: form.workSample.value,
+        consentReferences: c1, consentBackchannel: c2, consentLiveSession: c3
+      };
+      fetch("https://www.ethanstarke.com/_functions/saveCoachApplication", {
+        method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload), keepalive:true
+      }).catch(function(){});
+    } catch(err){}
+    // let formsubmit proceed
+  });
+})();
+</script>
+</body>
+</html>
