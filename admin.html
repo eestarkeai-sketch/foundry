@@ -214,6 +214,28 @@
   function pending(x){var s=x.status||"pending";return s!=="welcomed"&&s!=="rejected"&&s!=="invited"&&s!=="declined";}
   var cur="overview";
   var ADMIN_KEY="";
+  var messagesRaw=[];
+  var msgThread=null;
+  function buildThreads(){
+    var map={};
+    (messagesRaw||[]).forEach(function(m){
+      var admin = m.fromRole==="admin";
+      var pid = admin ? m.toId : m.fromId;
+      var pname = admin ? (m.toName||"") : (m.fromName||"");
+      var prole = admin ? (m.toRole||"") : (m.fromRole||"");
+      if(!pid || pid==="admin") return;
+      if(!map[pid]) map[pid]={id:pid,name:pname,role:prole,msgs:[]};
+      if(pname && !map[pid].name) map[pid].name=pname;
+      map[pid].msgs.push(m);
+    });
+    var arr=Object.keys(map).map(function(k){return map[k];});
+    arr.forEach(function(t){ t.msgs.sort(function(a,b){return new Date(a._createdDate)-new Date(b._createdDate);}); t.last=t.msgs[t.msgs.length-1]; });
+    arr.sort(function(a,b){return new Date(b.last._createdDate)-new Date(a.last._createdDate);});
+    return arr;
+  }
+  function fmtWhen(d){ if(!d) return ""; try{ var x=new Date(d); return x.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" "+x.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}); }catch(e){ return ""; } }
+  function portalLink(x){ return (x && x.memberId && x.accessToken) ? ("https://foundry.ethanstarke.com/portal.html?id="+encodeURIComponent(x.memberId)+"&t="+encodeURIComponent(x.accessToken)) : ""; }
+  function copyLink(url){ try{ navigator.clipboard.writeText(url); toast("Portal link copied."); }catch(e){ toast("Copy failed; select and copy manually."); } }
   function renderNav(){
     document.getElementById("navitems").innerHTML = NAV.map(function(n){
       var b = n.badge ? '<span class="badge">'+n.badge()+'</span>' : '';
@@ -305,22 +327,24 @@
 
   function vFounders(){
     var html='<h1>Founders</h1><div class="sub2">The active cohort, their stage, coach, plan, and next gate.</div>';
-    html+='<table class="t"><thead><tr><th>Name</th><th>Stage</th><th>Week</th><th>Coach</th><th>Plan</th><th>Next gate</th></tr></thead><tbody>';
+    html+='<table class="t"><thead><tr><th>Name</th><th>Stage</th><th>Week</th><th>Coach</th><th>Plan</th><th>Portal</th></tr></thead><tbody>';
     html+=founders.map(function(f){
       var pl=f.plan==="active"?'<span class="pill active">active</span>':f.plan==="paused"?'<span class="pill paused">paused</span>':'<span class="pill unpaid">unpaid</span>';
       var st='<span class="pill '+f.stage.toLowerCase()+'">'+f.stage+'</span>';
-      return '<tr><td class="nm">'+esc(f.name)+'</td><td>'+st+'</td><td>'+f.week+'</td><td>'+esc(f.coach)+'</td><td>'+pl+'</td><td style="color:var(--faint)">'+esc(f.nextGate)+'</td></tr>';
+      var lk=f.portal?'<button class="btn ghost" data-portal="'+esc(f.portal)+'" style="padding:5px 10px;font-size:12px">Copy link</button>':'<span style="color:var(--faint)">—</span>';
+      return '<tr><td class="nm">'+esc(f.name)+'</td><td>'+st+'</td><td>'+f.week+'</td><td>'+esc(f.coach)+'</td><td>'+pl+'</td><td>'+lk+'</td></tr>';
     }).join('')+'</tbody></table>';
     return html;
   }
 
   function vBench(){
     var html='<h1>The bench</h1><div class="sub2">Coaches by lane and tier, their load against capacity, and gate authority.</div>';
-    html+='<table class="t"><thead><tr><th>Coach</th><th>Lane</th><th>Tier</th><th>Load</th><th>Gate authority</th></tr></thead><tbody>';
+    html+='<table class="t"><thead><tr><th>Coach</th><th>Lane</th><th>Tier</th><th>Load</th><th>Gate authority</th><th>Portal</th></tr></thead><tbody>';
     html+=coaches.map(function(c){
       var loadPct=Math.round(c.load/c.cap*100);
       var band=loadPct>85?"risk":loadPct>0?"ok":"none";
-      return '<tr><td class="nm">'+esc(c.name)+'</td><td>'+esc(c.lane)+'</td><td>'+esc(c.tier)+'</td><td><span class="cell '+band+'">'+c.load+' / '+c.cap+'</span></td><td>'+(c.gate?'<span class="pill active">yes</span>':'<span class="tag">no</span>')+'</td></tr>';
+      var lk=c.portal?'<button class="btn ghost" data-portal="'+esc(c.portal)+'" style="padding:5px 10px;font-size:12px">Copy link</button>':'<span style="color:var(--faint)">—</span>';
+      return '<tr><td class="nm">'+esc(c.name)+'</td><td>'+esc(c.lane)+'</td><td>'+esc(c.tier)+'</td><td><span class="cell '+band+'">'+c.load+' / '+c.cap+'</span></td><td>'+(c.gate?'<span class="pill active">yes</span>':'<span class="tag">no</span>')+'</td><td>'+lk+'</td></tr>';
     }).join('')+'</tbody></table>';
     html+='<h2>Coverage</h2><div class="box">'+covGrid()+'</div>';
     return html;
@@ -348,8 +372,23 @@
   }
 
   function vMessages(){
-    var html='<h1>Messages</h1><div class="sub2">Your inbox with founders, coaches, and the system. Person-to-person runs on Wix Inbox; system notices are stored.</div>';
-    html+='<div class="box">'+threads.map(function(t){return '<div class="msgthread"><div class="who">'+esc(t.who)+'</div><div class="prev">'+esc(t.prev)+'</div></div>';}).join('')+'</div>';
+    if(msgThread) return vThread();
+    var html='<h1>Messages</h1><div class="sub2">Your inbox with founders and coaches. They write from their private portal; you read and reply here.</div>';
+    if(!threads.length) return html+'<div class="box"><div style="color:var(--faint);font-size:13.5px">No messages yet. When a founder or coach writes from their portal, the thread appears here.</div></div>';
+    html+='<div class="box">'+threads.map(function(t){
+      var unread=t.msgs.filter(function(m){return m.fromRole!=="admin" && !m.read;}).length;
+      return '<div class="msgthread" data-thread="'+esc(t.id)+'"><div class="who">'+esc(t.name||"Member")+' &middot; <span style="color:var(--faint);font-weight:400">'+esc(t.role)+'</span>'+(unread?' <span class="badge">'+unread+'</span>':'')+'</div><div class="prev">'+esc((t.last.fromRole==="admin"?"You: ":"")+ (t.last.subject?("["+t.last.subject+"] "):"") + t.last.body)+'</div><div style="color:var(--faint);font-size:11px;margin-top:2px">'+esc(fmtWhen(t.last._createdDate))+'</div></div>';
+    }).join('')+'</div>';
+    return html;
+  }
+  function vThread(){
+    var t=msgThread;
+    var html='<span class="back" data-mback="1">&#8249; Back to messages</span><h1>'+esc(t.name||"Member")+'</h1><div class="sub2">'+esc(t.role)+' conversation</div>';
+    html+='<div class="box">'+t.msgs.map(function(m){
+      var mine=m.fromRole==="admin";
+      return '<div class="msgthread" style="border-left:3px solid '+(mine?"var(--ember)":"var(--line)")+'"><div class="who">'+esc(mine?"You":(m.fromName||t.name))+' <span style="color:var(--faint);font-weight:400;font-size:11px">'+esc(fmtWhen(m._createdDate))+'</span></div>'+(m.subject?'<div style="font-weight:600;font-size:13px;margin:2px 0">'+esc(m.subject)+'</div>':'')+'<div class="prev" style="white-space:pre-wrap">'+esc(m.body)+'</div></div>';
+    }).join('')+'</div>';
+    html+='<div class="box"><h3>Reply</h3><input id="rsubj" class="composer-in" placeholder="Subject (optional)" style="width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:9px 11px;font-family:inherit;font-size:13.5px;margin-bottom:8px"><textarea id="rbody" placeholder="Write your reply..." style="width:100%;min-height:90px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:9px 11px;font-family:inherit;font-size:13.5px;resize:vertical"></textarea><div class="actions" style="margin-top:10px"><button class="btn review" id="replyBtn">Send reply</button></div></div>';
     return html;
   }
 
@@ -377,6 +416,30 @@
       if(!appItem) return;
       doAction(act, b);
     }); });
+    v.querySelectorAll("[data-portal]").forEach(function(b){ b.addEventListener("click",function(e){ e.stopPropagation(); copyLink(b.dataset.portal); }); });
+    v.querySelectorAll("[data-thread]").forEach(function(el){ el.addEventListener("click",function(){ msgThread=threads.find(function(t){return t.id===el.dataset.thread;})||null; render(); }); });
+    var mback=v.querySelector("[data-mback]"); if(mback) mback.addEventListener("click",function(){ msgThread=null; render(); });
+    var rb=v.querySelector("#replyBtn"); if(rb) rb.addEventListener("click",function(){ sendReply(rb); });
+  }
+
+  function sendReply(btn){
+    if(!msgThread) return;
+    var subj=(document.getElementById("rsubj")||{}).value||"";
+    var body=(document.getElementById("rbody")||{}).value||"";
+    if(!body.trim()){ toast("Write a reply first."); return; }
+    var t=msgThread;
+    btn.disabled=true; btn.textContent="Sending...";
+    fetch(EP+"adminReply",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminKey:ADMIN_KEY, toId:t.id, toName:t.name, toRole:t.role, subject:subj, body:body})})
+      .then(function(r){ return r.json().then(function(j){ return {status:r.status,j:j}; }); })
+      .then(function(res){
+        if(res.status!==200||!res.j||res.j.error){ toast("Reply did not send. Try again."); btn.disabled=false; btn.textContent="Send reply"; return; }
+        toast("Reply sent.");
+        var openId=t.id;
+        fetch(EP+"adminData",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminKey:ADMIN_KEY})})
+          .then(function(r){ return r.json(); })
+          .then(function(j){ if(j&&!j.error){ mapLive(j); msgThread=threads.find(function(x){return x.id===openId;})||null; render(); } });
+      })
+      .catch(function(){ toast("Could not reach the server."); btn.disabled=false; btn.textContent="Send reply"; });
   }
 
   var EP="https://www.ethanstarke.com/_functions/";
@@ -411,9 +474,9 @@
     apps.founder = (d.founderApps||[]).map(function(x){ return { id:x._id, name:x.name, email:x.email, phone:x.phone, address:x.address, placed:x.stagePlaced||"Seeker", status:x.status||"pending", essays:x.essays||"", proof:x.proofLinks||x.proof||"" }; });
     apps.coachInterest = (d.coachInterest||[]).map(function(x){ return { id:x._id, name:x.name, email:x.email, expertise:x.expertise||"", built:x.builtWhat||"", status:x.status||"pending" }; });
     apps.coachApps = (d.coachApps||[]).map(function(x){ var refs=[]; try{refs=JSON.parse(x.references||"[]");}catch(e){} return { id:x._id, name:x.name, email:x.email, phone:x.phone, address:x.address, lane:x.primaryLane||"", tier:x.tierClaim||"", outcome:x.headlineOutcome||"", bar:x.barCleared||"", founders:x.foundersDeveloped||"", sample:x.workSample||"", refs:refs, status:x.status||"pending" }; });
-    founders = (d.founders||[]).map(function(x){ return { id:x._id, name:x.name, stage:x.stage||"Seeker", week:x.week||1, coach:x.coachId?(byId[x.coachId]||"assigned"):"unassigned", plan:x.status==="paused"?"paused":(x.status==="unpaid"?"unpaid":"active"), nextGate:"", status:x.status||"active" }; });
-    coaches = (d.coaches||[]).map(function(x){ return { id:x._id, name:x.name, lane:x.primaryLane||x.role||"", tier:x.tier||"", gate:!!x.gateAuthority, cap:x.capacity||6, load:0 }; });
-    upcoming=[]; velocity=[]; bookOrders=[]; threads=[];
+    founders = (d.founders||[]).map(function(x){ return { id:x._id, memberId:x.memberId||"", portal:portalLink(x), name:x.name, stage:x.stage||"Seeker", week:x.week||1, coach:x.coachId?(byId[x.coachId]||"assigned"):"unassigned", plan:x.status==="paused"?"paused":(x.status==="unpaid"?"unpaid":"active"), nextGate:"", status:x.status||"active" }; });
+    coaches = (d.coaches||[]).map(function(x){ return { id:x._id, memberId:x.memberId||"", portal:portalLink(x), name:x.name, lane:x.primaryLane||x.role||"", tier:x.tier||"", gate:!!x.gateAuthority, cap:x.capacity||6, load:0 }; });
+    messagesRaw=d.messages||[]; upcoming=[]; velocity=[]; bookOrders=[]; threads=buildThreads();
   }
   function boot(key){
     var err=document.getElementById("keyErr"), btn=document.getElementById("keyBtn");
