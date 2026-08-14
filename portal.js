@@ -85,7 +85,7 @@
   function profileCard(){
     var m=ME, html='<div class="card"><h2>Your profile</h2>';
     if(m.role==="coach"){
-      html+='<div class="note">Your bench tier is <span class="pill">'+esc(m.tier||"—")+'</span>. Keep your public profile current.</div>';
+      html+='<div class="note">Your bench tier is <span class="pill">'+esc(m.tier||"â")+'</span>. Keep your public profile current.</div>';
       html+=idBlock();
       html+='<label>Primary lane</label><input id="c_lane" maxlength="120" value="'+esc(m.primaryLane)+'">';
       html+='<label>Secondary lanes</label><input id="c_lanes2" maxlength="240" value="'+esc(m.secondaryLanes)+'" placeholder="Comma separated">';
@@ -97,7 +97,7 @@
       html+='<label>Your governing metric</label><input id="f_metric" maxlength="300" value="'+esc(m.metric)+'" placeholder="The one number that tells you it is working">';
       html+='<label>About you</label><textarea id="f_bio" maxlength="2000" placeholder="A few lines on who you are and what you are here to build.">'+esc(m.bio)+'</textarea>';
     }
-    html+='<div style="margin-top:16px"><button class="btn primary" id="saveBtn">Save profile</button></div></div>';
+    html+='<div style="margin-top:16px"><button class="btn primary" id="saveBtn">Request profile change</button><div class="note" style="margin-top:8px">Your profile is locked once set. Submitting sends a change request to Ethan; approved changes are applied within about a week.</div></div></div>';
     return html;
   }
 
@@ -249,19 +249,17 @@
   }
 
   function saveProfile(btn){
-    var payload={};
-    if(ME.role==="coach"){ payload.bio=val("c_bio"); payload.primaryLane=val("c_lane"); payload.secondaryLanes=val("c_lanes2"); }
-    else { payload.bio=val("f_bio"); payload.buildLine=val("f_build"); payload.metric=val("f_metric"); }
-    btn.disabled=true; btn.textContent="Saving...";
-    api("memberUpdate", payload).then(function(res){
-      btn.disabled=false; btn.textContent="Save profile";
-      if(res.s!==200||!res.j||res.j.error){ toast("Could not save. Try again."); return; }
-      if(ME.role==="coach"){ ME.bio=payload.bio; ME.primaryLane=payload.primaryLane; ME.secondaryLanes=payload.secondaryLanes; }
-      else { ME.bio=payload.bio; ME.buildLine=payload.buildLine; ME.metric=payload.metric; }
-      toast("Profile saved.");
-    }).catch(function(){ btn.disabled=false; btn.textContent="Save profile"; toast("Could not reach the server."); });
+    var lines=[];
+    if(ME.role==="coach"){ lines.push("Primary lane: "+val("c_lane")); lines.push("Secondary lanes: "+val("c_lanes2")); lines.push("Bio: "+val("c_bio")); }
+    else { lines.push("Build line: "+val("f_build")); lines.push("Metric: "+val("f_metric")); lines.push("Bio: "+val("f_bio")); }
+    var body="Profile change request from "+(ME.name||"")+" ("+(ME.email||"")+"): "+lines.join(" / ");
+    btn.disabled=true; btn.textContent="Sending...";
+    api("memberSend", {subject:"Profile change request", body:body}).then(function(res){
+      btn.disabled=false; btn.textContent="Request profile change";
+      if(res.s!==200||!res.j||res.j.error){ toast("Could not send your request. Try again."); return; }
+      toast("Request sent to Ethan. Profile changes are reviewed and applied within about a week.");
+    }).catch(function(){ btn.disabled=false; btn.textContent="Request profile change"; toast("Could not reach the server."); });
   }
-
   function sendMsg(btn){
     var subj=val("m_subj"), bd=val("m_body");
     if(!bd.trim()){ toast("Write a message first."); return; }
