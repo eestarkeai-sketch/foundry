@@ -118,12 +118,8 @@
   </div>
 </header>
 
-<form id="app" class="wrap" action="https://formsubmit.co/e8850b7408d0d73a5c64368b3c29b7fe" method="POST" enctype="multipart/form-data" autocomplete="off">
-  <input type="hidden" name="_subject" value="New Starke Foundry application" />
-  <input type="hidden" name="_template" value="table" />
-  <input type="hidden" name="_captcha" value="false" />
+<form id="app" class="wrap" autocomplete="off">
   <input type="text" name="_honey" style="display:none" />
-  <input type="hidden" name="_next" value="https://foundry.ethanstarke.com/apply.html?done=1" />
   <input type="hidden" name="Computed placement" id="f_tier" value="" />
   <input type="hidden" name="Category 1 score" id="f_c1" value="" />
   <input type="hidden" name="Category 2 score" id="f_c2" value="" />
@@ -546,39 +542,68 @@
 </script>
 
 <script>
-// Send the shipping address into Wix so it lives in the ShippingAddresses collection,
-// not only in the notification email. Non-blocking: if the endpoint is unavailable the
-// application still submits normally through the form action above.
+// The full application is written into Wix (FounderApplications + ShippingAddresses),
+// which is the system of record shown on the admin dashboard. The email is a
+// notification only: it announces that an application arrived and to review it there.
 (function(){
-  var WIX_ADDRESS_ENDPOINT = "https://www.ethanstarke.com/_functions/saveApplicantAddress";
+  var WIX_ENDPOINT = "https://www.ethanstarke.com/_functions/saveApplicantAddress";
   var form = document.getElementById("app");
+  var notify = document.getElementById("notify");
   if(!form) return;
   function val(n){ var el = form.querySelector('[name="'+n+'"]'); return el ? (el.value||"").trim() : ""; }
-  form.addEventListener("submit", function(){
+  function setNotify(n, v){ var el = notify && notify.querySelector('[name="'+n+'"]'); if(el) el.value = v || ""; }
+  form.addEventListener("submit", function(e){
+    if(e && e.preventDefault) e.preventDefault();
+    if(val("_honey")) return;
+    var stage = val("Current stage") || val("Computed placement");
+    var payload = {
+      applicantEmail: val("Email"),
+      fullName: val("Full name"),
+      location: val("Location"),
+      shipToName: val("Ship to name"),
+      street: val("Street address"),
+      unit: val("Apartment or unit"),
+      city: val("Ship city"),
+      state: val("State"),
+      zip: val("ZIP code"),
+      country: val("Country") || "United States",
+      stageApplied: stage,
+      computedPlacement: val("Computed placement"),
+      whatBuilding: val("What you are building"),
+      whyNow: val("Why now"),
+      essay1: val("Essay 1 the specific scene"),
+      essay2: val("Essay 2 the honest failure"),
+      essay3: val("Essay 3 the non-obvious truth"),
+      slopeWhen: val("Slope who and when"),
+      slopeSaid: val("Slope what they said"),
+      slopeDid: val("Slope what you did"),
+      videoLink: val("Verification video link")
+    };
     try{
-      var payload = {
-        applicantEmail: val("Email"),
-        shipToName: val("Ship to name"),
-        street: val("Street address"),
-        unit: val("Apartment or unit"),
-        city: val("Ship city"),
-        state: val("State"),
-        zip: val("ZIP code"),
-        country: val("Country") || "United States",
-        stageApplied: val("Current stage"),
-        fullName: val("Full name")
-      };
-      if(!payload.applicantEmail || !payload.zip) return;
-      fetch(WIX_ADDRESS_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        keepalive: true,
-        mode: "cors"
-      }).catch(function(){});
-    }catch(e){}
+      fetch(WIX_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), keepalive: true, mode: "cors" }).catch(function(){});
+    }catch(e2){}
+    if(notify){
+      setNotify("Applicant", payload.fullName || payload.applicantEmail);
+      setNotify("Email", payload.applicantEmail);
+      setNotify("Stage applied", payload.stageApplied);
+      notify.submit();
+    } else {
+      window.location.href = "https://foundry.ethanstarke.com/apply.html?done=1";
+    }
   });
 })();
 </script>
+<!-- Notification-only email: carries no application content, just a ping to review
+     the full application on the admin dashboard. Native POST keeps delivery reliable. -->
+<form id="notify" action="https://formsubmit.co/e8850b7408d0d73a5c64368b3c29b7fe" method="POST" style="display:none">
+  <input type="hidden" name="_subject" value="New Starke Foundry application: review on the admin dashboard" />
+  <input type="hidden" name="_template" value="table" />
+  <input type="hidden" name="_captcha" value="false" />
+  <input type="hidden" name="_next" value="https://foundry.ethanstarke.com/apply.html?done=1" />
+  <input type="hidden" name="Notice" value="A new Foundry application arrived. The full application is on your admin dashboard. Open the Foundry admin desk to review, welcome, or decline it." />
+  <input type="hidden" name="Applicant" value="" />
+  <input type="hidden" name="Email" value="" />
+  <input type="hidden" name="Stage applied" value="" />
+</form>
 </body>
 </html>
