@@ -337,7 +337,7 @@
   function assignCoach(fid, coachId, btn){
     if(!ADMIN_KEY){ toast("Enter the admin key first."); return; }
     var orig = btn.textContent; btn.disabled = true; btn.textContent = "Saving...";
-    fetch(EP+"assignFounder",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminKey:ADMIN_KEY, founderId:fid, coachId:coachId})})
+    fetch(EP+"assignFounder",{method:"POST",body:JSON.stringify({adminKey:ADMIN_KEY, founderId:fid, coachId:coachId})})
       .then(function(r){ return r.json(); })
       .then(function(j){ btn.disabled=false; btn.textContent=orig; if(j && !j.error){ toast("Coach assigned."); refreshData(); } else { toast("Assign failed."); } })
       .catch(function(){ btn.disabled=false; btn.textContent=orig; toast("Could not reach the server."); });
@@ -354,7 +354,7 @@
   function setSession(fid, mn, pw, btn){
     if(!ADMIN_KEY){ toast("Enter the admin key first."); return; }
     var orig=btn.textContent; btn.disabled=true; btn.textContent="Saving...";
-    fetch(EP+"setFounderSession?cb="+Date.now(),{method:"POST",cache:"no-store",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminKey:ADMIN_KEY, founderId:fid, mn:mn, pwd:pw})})
+    fetch(EP+"setFounderSession?cb="+Date.now(),{method:"POST",cache:"no-store",body:JSON.stringify({adminKey:ADMIN_KEY, founderId:fid, mn:mn, pwd:pw})})
       .then(function(r){ return r.json(); })
       .then(function(j){ btn.disabled=false; btn.textContent=orig; if(j && !j.error){ toast(mn?"Session set. Founder can join.":"Session cleared."); } else { toast("Set failed: "+((j&&j.error)||"error")); } })
       .catch(function(){ btn.disabled=false; btn.textContent=orig; toast("Could not reach the server."); });
@@ -465,13 +465,13 @@
     if(!body.trim()){ toast("Write a reply first."); return; }
     var t=msgThread;
     btn.disabled=true; btn.textContent="Sending...";
-    fetch(EP+"adminReply",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminKey:ADMIN_KEY, toId:t.id, toName:t.name, toRole:t.role, subject:subj, body:body})})
+    fetch(EP+"adminReply",{method:"POST",body:JSON.stringify({adminKey:ADMIN_KEY, toId:t.id, toName:t.name, toRole:t.role, subject:subj, body:body})})
       .then(function(r){ return r.json().then(function(j){ return {status:r.status,j:j}; }); })
       .then(function(res){
         if(res.status!==200||!res.j||res.j.error){ toast("Reply did not send. Try again."); btn.disabled=false; btn.textContent="Send reply"; return; }
         toast("Reply sent.");
         var openId=t.id;
-        fetch(EP+"adminData",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminKey:ADMIN_KEY})})
+        fetch(EP+"adminData?cb="+Date.now(),{method:"POST",body:JSON.stringify({adminKey:ADMIN_KEY})})
           .then(function(r){ return r.json(); })
           .then(function(j){ if(j&&!j.error){ mapLive(j); msgThread=threads.find(function(x){return x.id===openId;})||null; render(); } });
       })
@@ -480,7 +480,7 @@
 
   var EP="https://www.ethanstarke.com/_functions/";
   function refreshData(){
-    fetch(EP+"adminData",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminKey:ADMIN_KEY})})
+    fetch(EP+"adminData?cb="+Date.now(),{method:"POST",body:JSON.stringify({adminKey:ADMIN_KEY})})
       .then(function(r){ return r.json(); })
       .then(function(j){ if(j && !j.error){ mapLive(j); render(); } })
       .catch(function(){});
@@ -493,7 +493,7 @@
     else if(act==="reject"){ var coll=q==="founder"?"FounderApplications":q==="coachApps"?"CoachApplications":"CoachInterest"; url="decideReject"; payload={adminKey:ADMIN_KEY, collection:coll, applicationId:it.id}; } else if(act==="block"){ url="blockApplicant"; payload={adminKey:ADMIN_KEY, applicationId:it.id}; }
     else { return; }
     btn.textContent="Working..."; btn.disabled=true;
-    fetch(EP+url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+    fetch(EP+url,{method:"POST",body:JSON.stringify(payload)})
       .then(function(r){ return r.json().then(function(j){ return {status:r.status,j:j}; }); })
       .then(function(res){
         if(res.status!==200 || !res.j || res.j.error){ toast("That did not go through: "+((res.j&&res.j.error)||("HTTP "+res.status))); btn.textContent=orig; btn.disabled=false; return; }
@@ -517,7 +517,7 @@
   function boot(key){
     var err=document.getElementById("keyErr"), btn=document.getElementById("keyBtn");
     err.textContent=""; btn.textContent="Opening...";
-    fetch("https://www.ethanstarke.com/_functions/adminData",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminKey:key})})
+    fetch("https://www.ethanstarke.com/_functions/adminData?cb="+Date.now(),{method:"POST",body:JSON.stringify({adminKey:key})})
       .then(function(r){ return r.json().then(function(j){ return {status:r.status,j:j}; }); })
       .then(function(res){
         if(res.status!==200 || (res.j&&res.j.error)){ err.textContent="That key was not accepted."; btn.textContent="Open dashboard"; return; }
