@@ -322,7 +322,7 @@
       body='<div class="block2"><h4>Strongest outcome</h4><p>'+esc(it.outcome)+'</p></div><div class="block2"><h4>Bar cleared</h4><p>'+esc(it.bar)+'</p></div><div class="block2"><h4>Founders developed</h4><p>'+esc(it.founders)+'</p></div><div class="block2"><h4>Work sample</h4><p>'+esc(it.sample)+'</p></div>';
       btns='<button class="btn review" data-act="review">Open review console</button><button class="btn welcome" data-act="welcome">Welcome to the bench</button><button class="btn reject" data-act="reject">Reject</button>';
     }
-    var status = it.status!=="pending" ? '<div class="tag" style="color:var(--ok)">This application is '+it.status+'</div>' : '<div class="actions">'+btns+'</div>';
+    var status = !pending(it) ? '<div class="tag" style="color:var(--ok)">This application is '+it.status+'</div>' : '<div class="actions">'+btns+'</div>';
     return '<span class="back" data-back="1">&#8249; Back to applications</span><h1>'+esc(it.name)+'</h1><div class="sub2">'+appQueue+' application</div>'+lock+body+status;
   }
 
