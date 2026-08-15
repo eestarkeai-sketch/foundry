@@ -133,7 +133,7 @@
     <div id="navitems"></div>
   </div>
   <div class="main">
-    <div class="demo">Live, reading your Foundry collections. The Welcome, Reject, and Invite actions connect in the next deploy; everything you see here is your real data.</div>
+    <div class="demo">Live &mdash; reading and writing your Foundry collections in real time. Everything here is your real data.</div>
     <div id="view"></div>
   </div>
 </div>
@@ -147,55 +147,13 @@
 
   // ------- sample data -------
   var RATES = { Seeker:250, Builder:500, Sovereign:750 };
-  var founders = [
-    { id:"f1", name:"Marcus Reed", stage:"Seeker", week:4, coach:"Ethan", plan:"active", nextGate:"Foundation, wk15", status:"active" },
-    { id:"f2", name:"Priya Anand", stage:"Builder", week:19, coach:"Sam Okafor", plan:"active", nextGate:"Momentum, wk30", status:"active" },
-    { id:"f3", name:"Sam Nakamura", stage:"Sovereign", week:33, coach:"Ethan", plan:"active", nextGate:"Certificate, wk45", status:"active" },
-    { id:"f4", name:"Leah Gold", stage:"Seeker", week:8, coach:"Dana Cole", plan:"active", nextGate:"Foundation, wk15", status:"active" },
-    { id:"f5", name:"Tom Ferris", stage:"Builder", week:22, coach:"Sam Okafor", plan:"paused", nextGate:"Momentum, wk30", status:"paused" },
-    { id:"f6", name:"Ana Ruiz", stage:"Seeker", week:1, coach:"unassigned", plan:"unpaid", nextGate:"Foundation, wk15", status:"welcomed, unpaid" }
-  ];
-  var coaches = [
-    { id:"c1", name:"Ethan Starke", lane:"Identity, narrative, gates", tier:"Owner", gate:true, cap:12, load:2 },
-    { id:"c2", name:"Sam Okafor", lane:"Product", tier:"Principal", gate:false, cap:6, load:2 },
-    { id:"c3", name:"Dana Cole", lane:"Go to Market", tier:"Principal", gate:false, cap:6, load:1 },
-    { id:"c4", name:"Ravi Menon", lane:"Finance", tier:"Master", gate:false, cap:5, load:0 },
-    { id:"c5", name:"Nadia Fen", lane:"Legal", tier:"Practitioner", gate:false, cap:6, load:0 }
-  ];
-  var apps = {
-    founder: [
-      { id:"fa1", name:"Marcus Reed", email:"marcus@reed.io", phone:"+1 415 555 0110", address:"820 Valencia St, San Francisco, CA", placed:"Seeker", status:"pending",
-        essays:"The scene: the night I shut down my first product...\nThe failure: I hired for comfort...\nThe truth: our moat is the onboarding data.", proof:"Stripe receipts; changelog; data room." },
-      { id:"fa2", name:"Dana Whitfield", email:"dana@whitfield.co", phone:"+1 512 555 0148", address:"1904 E 6th St, Austin, TX", placed:"Builder", status:"pending",
-        essays:"The scene: our first enterprise pilot...\nThe failure: I raised before I had a metric...\nThe truth: distribution is the product.", proof:"ARR chart 0 to 40k; two design-partner contracts." }
-    ],
-    coachInterest: [
-      { id:"ci1", name:"Priya Kapoor", email:"priya@kapoor.vc", expertise:"Growth capital and the raise", built:"Seed-fund partner; 14 rounds; one exit as founder.", status:"pending" }
-    ],
-    coachApps: [
-      { id:"ca1", name:"Sam Okafor Jr", email:"sam2@okafor.dev", phone:"+44 20 7946 0102", address:"14 Rivington St, London", lane:"Product", tier:"Principal", status:"pending",
-        outcome:"0 to 1.2M MAU in 2 years as owner of activation; team of 18.", bar:"Built and sold a product company.", founders:"Coached 6 founders; two raised seed.",
-        sample:"I would not touch the raise. I would ask what one number makes an investor believe...", refs:[{name:"J. Cole",rel:"Former manager"},{name:"A. Reyes",rel:"Peer"}] }
-    ]
-  };
-  var upcoming = [
-    { who:"Marcus Reed", when:"Tue 10:00", what:"Seeker wk4, Environment and Place", coach:"Ethan" },
-    { who:"Priya Anand", when:"Tue 14:00", what:"Builder wk19, Iteration Discipline", coach:"Sam Okafor" },
-    { who:"Leah Gold", when:"Wed 09:00", what:"Seeker wk8, Legal Structure", coach:"Dana Cole" }
-  ];
-  var velocity = [
-    { who:"Sam Nakamura", stage:"Sovereign", state:"Charge set day 6 of 30", due:"Return in 24 days" },
-    { who:"Priya Anand", stage:"Builder", state:"Window, day 18 of 30", due:"Return in 12 days" }
-  ];
-  var bookOrders = [
-    { who:"Marcus Reed", movement:"Seeker, Movement I", status:"shipped", tracking:"1Z..." },
-    { who:"Leah Gold", movement:"Seeker, Movement II", status:"ordered", tracking:"pending" }
-  ];
-  var threads = [
-    { who:"Priya Anand, founder", prev:"Quick question on the demand test before Tuesday..." },
-    { who:"Sam Okafor, coach", prev:"Handoff on Priya is in. She is ahead on the loop." },
-    { who:"Foundry System", prev:"Ana Ruiz was welcomed but has not paid in 3 days." }
-  ];
+  var founders = [];
+  var coaches = [];
+  var apps = { founder: [], coachInterest: [], coachApps: [] };
+  var upcoming = [];
+  var velocity = [];
+  var bookOrders = [];
+  var threads = [];
 
   var LANES = ["Finance","Legal","Product","Go to Market","Media","Enterprise","Growth Capital"];
   var TIERS = ["Practitioner","Principal","Master"];
@@ -242,7 +200,7 @@
       var b = n.badge ? '<span class="badge">'+n.badge()+'</span>' : '';
       return '<div class="navitem'+(n.k===cur?' on':'')+'" data-k="'+n.k+'"><span>'+n.label+'</span>'+b+'</div>';
     }).join('');
-    document.querySelectorAll(".navitem").forEach(function(el){ el.addEventListener("click",function(){ cur=el.dataset.k; renderNav(); render(); }); });
+    document.querySelectorAll(".navitem").forEach(function(el){ el.addEventListener("click",function(){ cur=el.dataset.k; appItem=null; msgThread=null; renderNav(); render(); }); });
   }
 
   // ------- helpers -------
@@ -482,7 +440,7 @@
   function refreshData(){
     fetch(EP+"adminData?cb="+Date.now(),{method:"POST",body:JSON.stringify({adminKey:ADMIN_KEY})})
       .then(function(r){ return r.json(); })
-      .then(function(j){ if(j && !j.error){ mapLive(j); render(); } })
+      .then(function(j){ if(j && !j.error){ mapLive(j); renderNav(); render(); } })
       .catch(function(){});
   }
   function doAction(act, btn){
