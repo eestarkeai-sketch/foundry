@@ -115,6 +115,19 @@
       '<div style="margin-top:14px"><button class="btn primary" id="sendBtn">Send to Ethan</button></div></div>';
   }
 
+  function sessionCard(){
+    var m=ME; if(!m || m.role==="coach") return "";
+    var mn=(m.sessionMeetingNumber==null?"":String(m.sessionMeetingNumber)).replace(/[^0-9]/g,"");
+    if(!mn) return "";
+    var url="https://foundry.ethanstarke.com/session.html?mn="+encodeURIComponent(mn)
+      +(m.sessionPasscode?("&pwd="+encodeURIComponent(m.sessionPasscode)):"")
+      +"&name="+encodeURIComponent(m.name||"Foundry Member");
+    var note=m.sessionNote?('<div class="note">'+esc(m.sessionNote)+'</div>')
+      :'<div class="note">Your coaching room is ready. Join at your scheduled time.</div>';
+    return '<div class="card"><h2>Your coaching session</h2>'+note+
+      '<div style="margin-top:14px"><a class="btn primary" href="'+url+'" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none">Join your session</a></div></div>';
+  }
+
   function coachExtra(){ return (ME && ME.role === "coach") ? coachDeskCard() : ""; }
 
   function coachDeskCard(){
@@ -242,7 +255,7 @@
     root().innerHTML =
       '<div class="wrap"><div class="brand"><div class="k">STARKE</div><h1>FO<span>U</span>NDRY</h1></div>'+
       '<div class="sub">Welcome, '+esc((ME.name||"").split(" ")[0])+'. This is your private Foundry.</div>'+
-      profileCard()+coachExtra()+inboxCard()+'</div>';
+      sessionCard()+profileCard()+coachExtra()+inboxCard()+'</div>';
     var sv=document.getElementById("saveBtn"); if(sv) sv.addEventListener("click",function(){ saveProfile(sv); });
     var sn=document.getElementById("sendBtn"); if(sn) sn.addEventListener("click",function(){ sendMsg(sn); });
     if(ME && ME.role === "coach"){ loadCoachDesk(); }

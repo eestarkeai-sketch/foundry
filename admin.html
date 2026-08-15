@@ -344,14 +344,31 @@
   }
   if(!window.__assignWired){ window.__assignWired = true; document.addEventListener("click", function(ev){ var b = ev.target; if(b && b.classList && b.classList.contains("assignBtn")){ var row = b.closest("tr"); var sel = row ? row.querySelector("select.assignSel") : null; assignCoach(b.getAttribute("data-fid"), sel ? sel.value : "", b); } }); }
 
+  function sessionCell(f){
+    var mn = f.sessionMeetingNumber==null?"":String(f.sessionMeetingNumber);
+    var pw = f.sessionPasscode==null?"":String(f.sessionPasscode);
+    return '<input class="sessMn" value="'+esc(mn)+'" placeholder="Zoom #" style="width:92px;font-size:12px;padding:4px 6px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:6px"> '+
+      '<input class="sessPw" value="'+esc(pw)+'" placeholder="passcode" style="width:74px;font-size:12px;padding:4px 6px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:6px"> '+
+      '<button class="btn ghost sessBtn" data-fid="'+esc(f.id)+'" style="padding:5px 10px;font-size:12px">Set</button>';
+  }
+  function setSession(fid, mn, pw, btn){
+    if(!ADMIN_KEY){ toast("Enter the admin key first."); return; }
+    var orig=btn.textContent; btn.disabled=true; btn.textContent="Saving...";
+    fetch(EP+"setFounderSession?cb="+Date.now(),{method:"POST",cache:"no-store",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminKey:ADMIN_KEY, founderId:fid, mn:mn, pwd:pw})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ btn.disabled=false; btn.textContent=orig; if(j && !j.error){ toast(mn?"Session set. Founder can join.":"Session cleared."); } else { toast("Set failed: "+((j&&j.error)||"error")); } })
+      .catch(function(){ btn.disabled=false; btn.textContent=orig; toast("Could not reach the server."); });
+  }
+  if(!window.__sessWired){ window.__sessWired = true; document.addEventListener("click", function(ev){ var b = ev.target; if(b && b.classList && b.classList.contains("sessBtn")){ var row = b.closest("tr"); var mnEl = row ? row.querySelector("input.sessMn") : null; var pwEl = row ? row.querySelector("input.sessPw") : null; setSession(b.getAttribute("data-fid"), mnEl?mnEl.value:"", pwEl?pwEl.value:"", b); } }); }
+
   function vFounders(){
     var html='<h1>Founders</h1><div class="sub2">The active cohort, their stage, coach, plan, and next gate.</div>';
-    html+='<table class="t"><thead><tr><th>Name</th><th>Stage</th><th>Week</th><th>Coach</th><th>Plan</th><th>Assign</th><th>Portal</th></tr></thead><tbody>';
+    html+='<table class="t"><thead><tr><th>Name</th><th>Stage</th><th>Week</th><th>Coach</th><th>Plan</th><th>Assign</th><th>Session</th><th>Portal</th></tr></thead><tbody>';
     html+=founders.map(function(f){
       var pl=f.plan==="active"?'<span class="pill active">active</span>':f.plan==="paused"?'<span class="pill paused">paused</span>':'<span class="pill unpaid">unpaid</span>';
       var st='<span class="pill '+f.stage.toLowerCase()+'">'+f.stage+'</span>';
       var lk=f.portal?'<button class="btn ghost" data-portal="'+esc(f.portal)+'" style="padding:5px 10px;font-size:12px">Copy link</button>':'<span style="color:var(--faint)">Ã¢ÂÂ</span>';
-      return '<tr><td class="nm">'+esc(f.name)+'</td><td>'+st+'</td><td>'+f.week+'</td><td>'+esc(f.coach)+'</td><td>'+pl+'</td><td>'+assignCell(f)+'</td><td>'+lk+'</td></tr>';
+      return '<tr><td class="nm">'+esc(f.name)+'</td><td>'+st+'</td><td>'+f.week+'</td><td>'+esc(f.coach)+'</td><td>'+pl+'</td><td>'+assignCell(f)+'</td><td>'+sessionCell(f)+'</td><td>'+lk+'</td></tr>';
     }).join('')+'</tbody></table>';
     return html;
   }
