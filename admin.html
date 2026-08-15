@@ -313,7 +313,7 @@
     var lock = it.address ? '<div class="locked"><div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ember2);margin-bottom:8px">Identity, locked from the application</div><div class="lg"><div><div class="k">Name</div>'+esc(it.name)+'</div><div><div class="k">Email</div>'+esc(it.email)+'</div>'+(it.phone?'<div><div class="k">Phone</div>'+esc(it.phone)+'</div>':'')+(it.address?'<div><div class="k">Address</div>'+esc(it.address)+'</div>':'')+'</div></div>' : '';
     var body="", btns="";
     if(appQueue==="founder"){
-      var _pb=(apps.founder||[]).some(function(a){return a.id!==it.id&&(a.email||"").toLowerCase()===(it.email||"").toLowerCase()&&a.status==="blocked";}); body=(_pb?'<div class="block2" style="border:1px solid var(--ember)"><b>&#9888; Previously blocked</b> &mdash; this email was blocked before as bad-faith. Review carefully.</div>':'')+'<div class="block2"><h4>Essays</h4><p>'+esc(it.essays)+'</p></div><div class="block2"><h4>Proof</h4><p>'+esc(it.proof)+'</p></div>';
+      var _pb=(apps.founder||[]).some(function(a){return a.id!==it.id&&(a.email||"").toLowerCase()===(it.email||"").toLowerCase()&&a.status==="blocked";}); body=(_pb?'<div class="block2" style="border:1px solid var(--ember)"><b>&#9888; Previously blocked</b> &mdash; this email was blocked before as bad-faith. Review carefully.</div>':'')+'<div class="block2"><h4>Essays</h4><p>'+esc(it.essays)+'</p></div><div class="block2"><h4>Proof</h4><p>'+esc(it.proof)+'</p></div>'+aiBox(it);
       btns='<button class="btn welcome" data-act="welcome">Welcome, place in '+esc(it.placed)+'</button><button class="btn reject" data-act="reject">Reject</button><button class="btn reject" data-act="block" style="opacity:.85">Block (bad faith)</button>';
     } else if(appQueue==="coachInterest"){
       body='<div class="block2"><h4>Expertise</h4><p>'+esc(it.expertise)+'</p></div><div class="block2"><h4>What they built</h4><p>'+esc(it.built)+'</p></div>';
@@ -515,6 +515,33 @@
   document.getElementById("keyInput").addEventListener("keydown",function(e){ if(e.key==="Enter"){ var k=this.value.trim(); if(k) boot(k); } });
   document.getElementById("keyInput").focus();
 })();
+
+  function aiMaterial(it){ return "ESSAYS:\n"+(it.essays||"")+"\n\nPROOF:\n"+(it.proof||""); }
+  function renderAi(r){
+    if(!r) return "";
+    if(r.raw) return '<pre style="white-space:pre-wrap;font-size:12px;color:var(--dim)">'+esc(r.raw)+'</pre>';
+    var h="";
+    (r.dimensions||[]).forEach(function(d){
+      h+='<div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line)"><div><b style="color:var(--gold)">'+esc(d.name)+'</b><div style="color:var(--dim);font-size:13px;margin-top:2px">'+esc(d.evidence)+'</div></div><div style="white-space:nowrap;font-family:var(--serif)">'+esc(d.score)+' / 5</div></div>';
+    });
+    h+='<div style="margin-top:10px"><b style="font-family:var(--serif)">Overall '+esc(r.overall)+' / 5.</b> '+esc(r.recommendation)+'</div>';
+    if(r.concerns && r.concerns.length){ h+='<div style="margin-top:6px;color:var(--gold);font-size:13px">Concerns: '+esc(r.concerns.join("; "))+'</div>'; }
+    return h;
+  }
+  function runAi(it){
+    if(!ADMIN_KEY){ it.aiReview=null; return; }
+    it.aiReview="loading";
+    fetch(EP+"aiReview?cb="+Date.now(),{method:"POST",cache:"no-store",body:JSON.stringify({adminKey:ADMIN_KEY,kind:"application",stage:it.placed||"",material:aiMaterial(it)})})
+      .then(function(r){return r.json();})
+      .then(function(d){ it.aiReview=(d&&d.ok)?d.review:null; if(cur==="applications"&&appItem&&appItem.id===it.id) render(); })
+      .catch(function(){ it.aiReview=null; if(cur==="applications"&&appItem&&appItem.id===it.id) render(); });
+  }
+  function aiBox(it){
+    if(it.aiReview===undefined){ runAi(it); }
+    if(it.aiReview===undefined || it.aiReview==="loading"){ return '<div class="block2"><h4>AI review <span style="color:var(--ember2);font-weight:400;font-size:12px">&middot; advisory, you decide</span></h4><p style="color:var(--dim)">Scoring against the rubric&hellip;</p></div>'; }
+    if(!it.aiReview){ return '<div class="block2"><h4>AI review</h4><p style="color:var(--dim)">Could not score right now.</p></div>'; }
+    return '<div class="block2"><h4>AI review <span style="color:var(--ember2);font-weight:400;font-size:12px">&middot; advisory, you decide</span></h4>'+renderAi(it.aiReview)+'</div>';
+  }
 </script>
 </body>
 </html>
