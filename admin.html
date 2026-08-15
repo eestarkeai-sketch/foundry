@@ -255,21 +255,21 @@
   // ------- views -------
   function vOverview(){
     var wk = committedWeekly();
+    var lanesRisk = LANES.filter(function(l){return laneCoachCount(l)===1;}).length;
     var cards = [
-      {lbl:"Active founders", val:founders.filter(function(f){return f.plan==="active";}).length, delta:"+2 this month"},
-      {lbl:"On the bench", val:coaches.length+"", delta:"1 lane at risk", cls:"flat"},
+      {lbl:"Active founders", val:founders.filter(function(f){return f.plan==="active";}).length, delta:founders.length+" enrolled", cls:"flat"},
+      {lbl:"On the bench", val:coaches.length+"", delta:(lanesRisk?lanesRisk+" lane"+(lanesRisk>1?"s":"")+" at risk":"coverage nominal"), cls:"flat"},
       {lbl:"Pending decisions", val:pendingTotal()+"", delta:"awaiting you", cls:"flat"},
       {lbl:"Committed weekly", val:money(wk), delta:money(wk*5)+" per block", cls:"flat"},
       {lbl:"Sessions this week", val:upcoming.length+"", delta:"across "+new Set(upcoming.map(function(u){return u.coach;})).size+" coaches", cls:"flat"},
       {lbl:"Velocity Tests live", val:velocity.length+"", delta:"in flight", cls:"flat"}
     ];
-    var attention = [
-      {sev:"hi",t:pendingTotal()+" applications await your decision",m:"2 founders, 1 coach interest, 1 coach application",go:"applications"},
-      {sev:"hi",t:"Ana Ruiz welcomed but unpaid, day 3",m:"The 5-day welcome clock is running",go:"founders"},
-      {sev:"md",t:"Legal lane is single-covered",m:"Nadia Fen only. Key-person risk against the standard of two per lane",go:"bench"},
-      {sev:"md",t:"Tom Ferris is paused",m:"Builder wk22. A pause near a gate, watch the slope",go:"founders"},
-      {sev:"lo",t:"Sam Nakamura Certificate Gate approaches",m:"Sovereign wk33, gate at wk45, Velocity Charge set",go:"sessions"}
-    ];
+    var attention = [];
+    if(pendingTotal()>0){ attention.push({sev:"hi",t:pendingTotal()+" application"+(pendingTotal()>1?"s":"")+" await your decision",m:apps.founder.filter(pending).length+" founder, "+apps.coachInterest.filter(pending).length+" coach interest, "+apps.coachApps.filter(pending).length+" coach application",go:"applications"}); }
+    founders.filter(function(f){return f.plan==="unpaid";}).forEach(function(f){ attention.push({sev:"hi",t:f.name+" welcomed but unpaid",m:"The welcome clock is running",go:"founders"}); });
+    LANES.forEach(function(l){ if(laneCoachCount(l)===1){ attention.push({sev:"md",t:l+" lane is single-covered",m:"Key-person risk against the standard of two per lane",go:"bench"}); } });
+    founders.filter(function(f){return f.plan==="paused";}).forEach(function(f){ attention.push({sev:"md",t:f.name+" is paused",m:"A pause near a gate, watch the slope",go:"founders"}); });
+    if(!attention.length){ attention.push({sev:"lo",t:"Nothing needs you right now",m:"No pending applications and no risks flagged",go:"overview"}); }
     var html='<h1>Overview</h1><div class="sub2">What Foundry looks like right now, and what needs you.</div>';
     html+='<div class="cards">'+cards.map(function(c){return '<div class="card"><div class="lbl">'+c.lbl+'</div><div class="val">'+c.val+'</div><div class="delta '+(c.cls||'')+'">'+c.delta+'</div></div>';}).join('')+'</div>';
     html+='<div class="cols"><div class="box"><h3>Needs your attention</h3>'+attention.map(function(a){
@@ -531,7 +531,6 @@
   document.getElementById("keyBtn").addEventListener("click",function(){ var k=document.getElementById("keyInput").value.trim(); if(k) boot(k); });
   document.getElementById("keyInput").addEventListener("keydown",function(e){ if(e.key==="Enter"){ var k=this.value.trim(); if(k) boot(k); } });
   document.getElementById("keyInput").focus();
-})();
 
   function aiMaterial(it){ return "ESSAYS:\n"+(it.essays||"")+"\n\nPROOF:\n"+(it.proof||""); }
   function renderAi(r){
@@ -559,6 +558,7 @@
     if(!it.aiReview){ return '<div class="block2"><h4>AI review</h4><p style="color:var(--dim)">Could not score right now.</p></div>'; }
     return '<div class="block2"><h4>AI review <span style="color:var(--ember2);font-weight:400;font-size:12px">&middot; advisory, you decide</span></h4>'+renderAi(it.aiReview)+'</div>';
   }
+})();
 </script>
 </body>
 </html>
