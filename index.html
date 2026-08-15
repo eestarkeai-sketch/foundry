@@ -38,6 +38,9 @@
     background:radial-gradient(ellipse 58% 46% at 50% 54%,rgba(255,106,26,0.20),rgba(143,44,23,0.08) 44%,transparent 72%);
     transition:opacity .25s ease}
 
+  /* Rising ember flares (restored) */
+  #embers{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.42}
+
   /* Ember descent line */
   #descent{position:fixed;left:38px;top:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent,var(--line) 12%,var(--line) 88%,transparent);z-index:40;pointer-events:none}
   #descent .fill{position:absolute;left:0;top:0;width:1px;height:0;background:linear-gradient(180deg,transparent,rgba(255,106,26,0.55));transition:height .1s linear}
@@ -161,7 +164,7 @@
 
   .pvbadge{position:fixed;right:16px;bottom:16px;z-index:60;background:rgba(255,106,26,0.12);border:1px solid rgba(255,106,26,0.4);color:var(--ember-2);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;padding:8px 14px;border-radius:2px;font-weight:600;backdrop-filter:blur(6px)}
 
-  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.crest,.crest-halo,.hero-glow,.scrollcue{animation:none}}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.crest,.crest-halo,.hero-glow,.scrollcue{animation:none}#embers{display:none}}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 <style id="sfx-chrome">
@@ -207,6 +210,7 @@
 </head>
 <body>
 <div id="heat"></div>
+<canvas id="embers"></canvas>
 <div id="descent"><div class="fill" id="descentFill"></div><div class="mark" id="descentMark"></div></div>
 
 <nav id="nav">
@@ -372,6 +376,39 @@
   if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return;}
   var io=new IntersectionObserver(function(entries){entries.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}});},{threshold:0.16});
   els.forEach(function(e){io.observe(e);});
+})();
+// Rising ember flares (restored)
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce) return;
+  var c=document.getElementById('embers'); if(!c) return;
+  var x=c.getContext('2d'), W,H,parts=[];
+  function size(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  size();
+  var N=Math.min(64, Math.floor(window.innerWidth/24));
+  for(var i=0;i<N;i++){parts.push(spawn(Math.random()*H));}
+  function spawn(y){
+    return {x:Math.random()*W, y:y==null?H+10:y, r:0.6+Math.random()*2.0,
+      vy:0.22+Math.random()*0.7, drift:(Math.random()-0.5)*0.5, life:Math.random(), tw:0.004+Math.random()*0.01};
+  }
+  function tick(){
+    x.clearRect(0,0,W,H);
+    for(var i=0;i<parts.length;i++){
+      var p=parts[i];
+      p.y-=p.vy; p.x+=p.drift; p.life+=p.tw;
+      var a=0.5+0.5*Math.sin(p.life*6.28);
+      var grd=x.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*3);
+      grd.addColorStop(0,'rgba(255,175,80,'+(0.72*a)+')');
+      grd.addColorStop(0.4,'rgba(255,106,26,'+(0.48*a)+')');
+      grd.addColorStop(1,'rgba(181,52,26,0)');
+      x.fillStyle=grd;
+      x.beginPath();x.arc(p.x,p.y,p.r*3,0,6.2832);x.fill();
+      if(p.y< -20 || p.x< -30 || p.x>W+30){parts[i]=spawn();}
+    }
+    requestAnimationFrame(tick);
+  }
+  window.addEventListener('resize',size);
+  tick();
 })();
 </script>
 <script>(function(){var t=document.getElementById('sfxToggle'),l=document.getElementById('sfxLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.classList.toggle('open',o);t.setAttribute('aria-expanded',o?'true':'false');});Array.prototype.forEach.call(l.querySelectorAll('a'),function(a){a.addEventListener('click',function(){l.classList.remove('open');t.classList.remove('open');t.setAttribute('aria-expanded','false');});});})();</script>
