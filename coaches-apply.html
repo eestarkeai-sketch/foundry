@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Join the Bench &middot; Starke Foundry</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0d0b0a; --panel:#161311; --panel2:#1d1917; --line:#2a2523;
+    --ink:#f3ede6; --dim:#b8afa5; --faint:#8a807a;
+    --ember:#e8763a; --ember2:#f0a35e; --ok:#7bbf6a; --bad:#d9705f;
+    --serif:'Fraunces',Georgia,serif; --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(1100px 560px at 50% -12%, rgba(232,118,58,0.09), transparent 60%); min-height:100vh;}
+  a{color:var(--ember2); text-decoration:none}
+  .wrap{max-width:680px; margin:0 auto; padding:52px 22px 96px}
+  .brand{text-align:center; margin-bottom:30px}
+  .brand .k{font-size:11px; letter-spacing:0.36em; color:var(--ember); font-weight:700}
+  .brand h1{font-family:var(--serif); font-weight:600; font-size:28px; letter-spacing:0.18em; margin:4px 0 0}
+  .brand h1 span{color:var(--ember)}
+  .lede{text-align:center; margin-bottom:30px}
+  .lede h2{font-family:var(--serif); font-weight:400; font-size:32px; line-height:1.14; margin:0 0 12px}
+  .lede p{color:var(--dim); font-size:15px; max-width:520px; margin:0 auto}
+  .card{background:linear-gradient(180deg,var(--panel),#131010); border:1px solid var(--line); border-radius:18px; padding:28px}
+  label{display:block; font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--faint); margin:18px 0 7px}
+  label:first-child{margin-top:0}
+  .hint{color:var(--faint); font-size:12.5px; margin:-3px 0 7px; text-transform:none; letter-spacing:0}
+  input,select,textarea{width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--ink);
+    border-radius:11px; padding:12px 14px; font-family:var(--sans); font-size:15px}
+  textarea{min-height:88px; resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:none; border-color:var(--ember)}
+  .two{display:flex; gap:14px} .two>div{flex:1}
+  button{width:100%; margin-top:24px; background:linear-gradient(180deg,var(--ember2),var(--ember)); color:#1a120c;
+    font-weight:600; border:none; border-radius:11px; padding:15px 18px; font-size:15.5px; cursor:pointer; font-family:var(--sans)}
+  button:disabled{opacity:.6; cursor:default}
+  .msg{margin-top:16px; font-size:14px; min-height:20px} .msg.bad{color:var(--bad)}
+  #thanks{display:none; text-align:center}
+  #thanks h2{font-family:var(--serif); font-weight:500; font-size:28px; margin:6px 0 10px}
+  #thanks p{color:var(--dim)}
+  .foot{margin-top:30px; text-align:center; color:var(--faint); font-size:12px; letter-spacing:0.05em}
+  .foot .m{font-family:var(--serif); letter-spacing:0.2em; color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><div class="k">STARKE</div><h1>FO<span>U</span>NDRY</h1></div>
+
+  <div id="intro">
+    <div class="lede">
+      <h2>Join the Bench.</h2>
+      <p>The Foundry's coaches carry founders through the climb. We take few, and we take the proven. Tell us the bar you clear &mdash; concretely, with evidence.</p>
+    </div>
+    <form id="form" class="card" autocomplete="off">
+      <div class="two">
+        <div><label>Full name</label><input name="name" required /></div>
+        <div><label>Email</label><input name="email" type="email" required /></div>
+      </div>
+      <div class="two">
+        <div><label>Phone</label><input name="phone" /></div>
+        <div><label>Location</label><input name="location" /></div>
+      </div>
+
+      <label>Primary lane</label>
+      <div class="hint">Where you carry the most weight.</div>
+      <select name="primaryLane" required>
+        <option value="">Choose a lane&hellip;</option>
+        <option>Capital &amp; Fundraising</option>
+        <option>Narrative &amp; Positioning</option>
+        <option>Product &amp; Engineering</option>
+        <option>Behavioral &amp; Identity</option>
+        <option>Go-to-Market &amp; Sales</option>
+        <option>Operations &amp; Finance</option>
+        <option>Legal &amp; Structure</option>
+      </select>
+
+      <label>Tier you claim</label>
+      <div class="hint">Be honest. The bar rises with the tier, and we verify.</div>
+      <select name="tierClaim" required>
+        <option value="">Choose&hellip;</option>
+        <option>Associate &mdash; developing operators</option>
+        <option>Senior &mdash; shipped and scaled</option>
+        <option>Principal &mdash; outcomes at the top of the field</option>
+      </select>
+
+      <label>Your headline outcome</label>
+      <div class="hint">The single most impressive thing you've driven. One paragraph.</div>
+      <textarea name="headlineOutcome" required></textarea>
+
+      <label>The bar you clear &mdash; the evidence</label>
+      <div class="hint">Numbers, names, outcomes. What proves you belong on the Bench?</div>
+      <textarea name="barCleared" required></textarea>
+
+      <label>Founders / operators you've developed</label>
+      <div class="hint">Who did you build, and what happened to them?</div>
+      <textarea name="foundersDeveloped"></textarea>
+
+      <label>Work sample or profile</label>
+      <div class="hint">A link &mdash; portfolio, LinkedIn, a piece of work.</div>
+      <input name="workSample" type="url" placeholder="https://" />
+
+      <label>References</label>
+      <div class="hint">Names and how to reach them.</div>
+      <textarea name="references"></textarea>
+
+      <button id="submit" type="submit">Submit for the Bench</button>
+      <div id="msg" class="msg"></div>
+    </form>
+  </div>
+
+  <div id="thanks" class="card">
+    <h2>Received.</h2>
+    <p>Your application is on the desk. If the bar is met, Ethan reaches out. The Foundry chooses its Bench.</p>
+  </div>
+
+  <div class="foot"><div class="m">STARKE FOUNDRY</div>Build the founder before the company.</div>
+</div>
+
+<script>
+(function(){
+  var EP = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/coach-intake";
+  var form = document.getElementById("form");
+  form.addEventListener("submit", async function(e){
+    e.preventDefault();
+    var btn = document.getElementById("submit"), msg = document.getElementById("msg");
+    var data = {};
+    Array.prototype.forEach.call(form.elements, function(el){ if(el.name) data[el.name] = (el.value||"").trim(); });
+    if(!data.email || !data.name){ msg.className="msg bad"; msg.textContent="Name and email are required."; return; }
+    btn.disabled = true; btn.textContent = "Submitting…"; msg.textContent = "";
+    try{
+      var r = await fetch(EP, { method:"POST", cache:"no-store", body: JSON.stringify(data) });
+      var j = await r.json();
+      if(!r.ok || j.error){ throw new Error(j.error || ("Server error "+r.status)); }
+      document.getElementById("intro").style.display = "none";
+      document.getElementById("thanks").style.display = "block";
+      window.scrollTo(0,0);
+    }catch(err){
+      btn.disabled = false; btn.textContent = "Submit for the Bench";
+      msg.className = "msg bad"; msg.textContent = err.message || "Could not submit — try again.";
+    }
+  });
+})();
+</script>
+</body>
+</html>
