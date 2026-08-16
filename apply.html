@@ -498,7 +498,7 @@
   // ---- Corrected submit: save the FULL application to the live admin desk, then send a short notice ----
   // Fail-safe: if the backend save fails for any reason, we fall back to emailing Ethan the full
   // application (native FormSubmit) so an application can never be silently lost.
-  var EP = "https://www.ethanstarke.com/_functions/";
+  var EP = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/";
   var appForm = document.getElementById("app");
   var notifyForm = document.getElementById("notify");
   var submitting = false;
@@ -553,7 +553,7 @@
            document.getElementById("n_stage").value=data.stagePlaced; }catch(_){}
       notifyForm.submit(); }
     function fullFallback(){ if(done)return; done=true; appForm.submit(); }
-    fetch(EP+"applyIntake?cb="+Date.now(), {method:"POST", cache:"no-store", body: JSON.stringify(data)})
+    fetch(EP+"apply-intake?cb="+Date.now(), {method:"POST", cache:"no-store", body: JSON.stringify(data)})
       .then(function(r){ return r.ok; })
       .then(function(ok){ ok ? notifyAndFinish() : fullFallback(); })
       .catch(function(){ fullFallback(); });
@@ -567,7 +567,7 @@
 (function(){
   if(location.search.indexOf("done=1")>-1) return; // just submitted -> keep thank-you
   function show(id,disp){ var e=document.getElementById(id); if(e) e.style.display=disp; }
-  fetch("https://www.ethanstarke.com/_functions/getPublicSettings",{cache:"no-store"})
+  fetch("https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/public-settings",{cache:"no-store"})
     .then(function(r){ return r.json(); })
     .then(function(s){
       if(s && s.intakeOpen===false){
