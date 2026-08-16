@@ -3,280 +3,140 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Coach at Starke Foundry</title>
-<meta name="description" content="Starke Foundry is delivered by a hand-picked bench of operators and specialists who build founders against a bar they have cleared themselves. Express your interest in joining the bench." />
+<title>Coach &middot; Starke Foundry</title>
+<meta name="robots" content="noindex" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-<link rel="icon" type="image/png" href="/shield_mark.png" />
 <style>
   :root{
-    --ink:#0a0908;--panel:#15120e;--panel2:#1b1712;--line:rgba(255,255,255,0.09);
-    --paper:#f4efe7;--dim:#b7ad9e;--faint:#8a8072;--ember:#ff6a1a;--ember2:#ff9d2e;--gold:#e9c98a;--ok:#5fce8f;
-    --serif:'Fraunces',Georgia,serif;--sans:'Inter',system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+    --bg:#0d0b0a; --panel:#161311; --panel2:#1d1917; --line:#2a2523;
+    --ink:#f3ede6; --dim:#b8afa5; --faint:#8a807a;
+    --ember:#e8763a; --ember2:#f0a35e; --ok:#7bbf6a; --gold:#c9a24a; --bad:#d9705f;
+    --serif:'Fraunces',Georgia,serif; --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
-  a{color:inherit;text-decoration:none}
-  nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(10,9,8,0.72);border-bottom:1px solid var(--line)}
-  .nav-in{display:flex;align-items:center;justify-content:space-between;height:62px;max-width:1080px;margin:0 auto;padding:0 22px}
-  .brandlock{display:flex;align-items:center;gap:10px}
-  .brandmark{height:34px}
-  .bw-s{font-size:9px;letter-spacing:0.36em;color:var(--ember2);font-weight:600;display:block}
-  .bw-f{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:0.16em}
-  .bw-f b{color:var(--ember)}
-  .nav-back{font-size:13.5px;color:var(--dim)}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
-  header.hero{padding:66px 0 24px;position:relative;overflow:hidden}
-  .glow{position:absolute;left:-6%;top:-70%;width:55%;height:360px;background:radial-gradient(ellipse at 50% 50%,rgba(255,106,26,0.2),transparent 70%);filter:blur(22px);pointer-events:none}
-  .eyebrow{font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:var(--ember2);font-weight:600}
-  header.hero h1{font-family:var(--serif);font-weight:500;font-size:clamp(32px,5.5vw,52px);margin:12px 0 14px;letter-spacing:-0.01em;max-width:18ch}
-  header.hero p.lede{color:var(--dim);max-width:66ch;font-size:17px}
-  .sec{padding:34px 0;border-top:1px solid var(--line)}
-  .sec:first-of-type{border-top:none}
-  h2{font-family:var(--serif);font-weight:500;font-size:clamp(22px,3vw,29px);margin-bottom:10px;letter-spacing:-0.01em}
-  .sec p{color:var(--dim);max-width:70ch;margin-bottom:12px}
-  .sec p b{color:var(--paper);font-weight:600}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:18px}
-  .cardx{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
-  .cardx h3{font-family:var(--serif);font-size:17px;font-weight:500;margin-bottom:6px}
-  .cardx p{font-size:14px;color:var(--dim);margin-bottom:0}
-  .cardx .k{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ember2);font-weight:600;margin-bottom:8px}
-  ul.clean{list-style:none;margin:6px 0 0}
-  ul.clean li{position:relative;padding:8px 0 8px 22px;color:var(--dim);font-size:15px;border-bottom:1px solid var(--line)}
-  ul.clean li:last-child{border-bottom:none}
-  ul.clean li:before{content:"";position:absolute;left:2px;top:15px;width:6px;height:6px;border-radius:50%;background:var(--ember)}
-  ul.clean li b{color:var(--paper);font-weight:600}
-  /* form */
-  .formwrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px 26px;margin:8px 0 60px;max-width:760px}
-  .formwrap .note{color:var(--faint);font-size:13.5px;margin-bottom:20px}
-  .row{margin-bottom:16px}
-  .row.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media(max-width:600px){.row.two{grid-template-columns:1fr}}
-  label{display:block;font-size:13px;color:var(--dim);font-weight:600;margin-bottom:6px;letter-spacing:0.02em}
-  label .opt{color:var(--faint);font-weight:400;letter-spacing:0}
-  input[type=text],input[type=email],input[type=url],textarea,select{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:8px;color:var(--paper);font-family:var(--sans);font-size:15px;padding:11px 13px}
-  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--ember)}
-  textarea{min-height:96px;resize:vertical;line-height:1.5}
-  select{appearance:none}
-  .btn{display:inline-block;font-family:var(--sans);font-weight:600;font-size:15px;padding:13px 26px;border-radius:4px;cursor:pointer;border:none;color:#160b04;background:linear-gradient(180deg,var(--ember2),var(--ember))}
-  .btn:hover{transform:translateY(-1px)}
-  .fine{color:var(--faint);font-size:12.5px;margin-top:14px}
-  .done{display:none;background:linear-gradient(180deg,rgba(95,206,143,0.08),transparent);border:1px solid rgba(95,206,143,0.3);border-radius:14px;padding:26px;max-width:760px;margin:8px 0 60px}
-  .done h2{color:var(--ok)}
-  .done p{color:var(--dim)}
-  footer{border-top:1px solid var(--line);padding:28px 0;color:var(--faint);font-size:13px;text-align:center}
-  footer a{color:var(--ember2)}
-</style>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-<style id="sfx-chrome">
-.sfx-nav{position:sticky;top:0;z-index:9000;background:rgba(5,4,3,0.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06);font-family:'Inter',system-ui,-apple-system,sans-serif}
-.sfx-nav *{box-sizing:border-box}
-.sfx-nav-in{display:flex;align-items:center;justify-content:space-between;height:78px;max-width:1180px;margin:0 auto;padding:0 40px}
-.sfx-brand{display:flex;align-items:center;gap:13px;text-decoration:none}
-.sfx-brand img{height:32px;width:auto;display:block;opacity:.9}
-.sfx-brand .wm{font-size:13px;letter-spacing:0.34em;color:#f2ece3;font-weight:600}
-.sfx-links{display:flex;gap:34px;align-items:center}
-.sfx-links a{font-size:12.5px;letter-spacing:0.14em;text-transform:uppercase;color:#a49b8e;text-decoration:none;transition:color .3s}
-.sfx-links a:hover{color:#f2ece3}
-.sfx-links a.enter{border:1px solid rgba(255,255,255,0.2);padding:9px 18px;color:#f2ece3;border-radius:1px}
-.sfx-links a.enter:hover{border-color:#ff6a1a;color:#ffa23c}
-.sfx-toggle{display:none;background:none;border:0;cursor:pointer;width:30px;height:22px;position:relative;padding:0}
-.sfx-toggle span{display:block;height:2px;width:100%;background:#f2ece3;border-radius:2px;position:absolute;left:0;transition:.25s}
-.sfx-toggle span:nth-child(1){top:0}.sfx-toggle span:nth-child(2){top:10px}.sfx-toggle span:nth-child(3){top:20px}
-.sfx-toggle.open span:nth-child(1){top:10px;transform:rotate(45deg)}
-.sfx-toggle.open span:nth-child(2){opacity:0}
-.sfx-toggle.open span:nth-child(3){top:10px;transform:rotate(-45deg)}
-@media(max-width:860px){
-  .sfx-toggle{display:block}
-  .sfx-links{position:absolute;top:78px;left:0;right:0;background:rgba(5,4,3,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06);flex-direction:column;gap:0;align-items:stretch;padding:8px 0;display:none}
-  .sfx-links.open{display:flex}
-  .sfx-links a:not(.enter){padding:14px 40px;font-size:14px}
-  .sfx-links a.enter{margin:12px 40px;text-align:center}
-}
-.sfx-foot{border-top:1px solid rgba(255,255,255,0.06);background:#050403;padding:64px 0 40px;font-family:'Inter',system-ui,-apple-system,sans-serif}
-.sfx-foot *{box-sizing:border-box}
-.sfx-foot-in{max-width:1180px;margin:0 auto;padding:0 40px}
-.sfx-foot-cols{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px}
-.sfx-foot-brand{display:flex;align-items:center;gap:12px}
-.sfx-foot-brand img{height:30px;width:auto}
-.sfx-foot-brand span{font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:#f2ece3;font-weight:600}
-.sfx-foot-tag{margin-top:16px;max-width:38ch;line-height:1.6;font-size:14px;color:#6b6358}
-.sfx-foot h5{font-size:11px;letter-spacing:0.26em;text-transform:uppercase;color:#ffa23c;font-weight:600;margin-bottom:16px}
-.sfx-foot-col a{display:block;color:#a49b8e;font-size:14px;margin-bottom:11px;text-decoration:none;letter-spacing:0.01em}
-.sfx-foot-col a:hover{color:#ffa23c}
-.sfx-foot-base{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:44px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06);color:#6b6358;font-size:12.5px;letter-spacing:0.04em}
-@media(max-width:760px){.sfx-foot-cols{grid-template-columns:1fr 1fr}.sfx-foot-brand-col{grid-column:1/-1}}
-@media(max-width:460px){.sfx-foot-cols{grid-template-columns:1fr}}
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(1100px 560px at 50% -12%, rgba(232,118,58,0.09), transparent 60%); min-height:100vh;}
+  a{color:var(--ember2); text-decoration:none}
+  .wrap{max-width:760px; margin:0 auto; padding:52px 22px 90px}
+  .brand{text-align:center; margin-bottom:32px}
+  .brand .k{font-size:11px; letter-spacing:0.36em; color:var(--ember); font-weight:700}
+  .brand h1{font-family:var(--serif); font-weight:600; font-size:28px; letter-spacing:0.18em; margin:4px 0 0}
+  .brand h1 span{color:var(--ember)}
+  .card{background:linear-gradient(180deg,var(--panel),#131010); border:1px solid var(--line); border-radius:18px; padding:30px}
+  h2{font-family:var(--serif); font-weight:400; font-size:27px; margin:0 0 8px}
+  p.lede{color:var(--dim); font-size:15px; margin:0 0 22px}
+  label{display:block; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--faint); margin:0 0 7px}
+  input[type=email]{width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--ink); border-radius:11px; padding:13px 15px; font-family:var(--sans); font-size:15.5px}
+  input[type=email]:focus{outline:none; border-color:var(--ember)}
+  button{margin-top:14px; background:linear-gradient(180deg,var(--ember2),var(--ember)); color:#1a120c; font-weight:600; border:none; border-radius:11px; padding:14px 18px; font-size:15.5px; cursor:pointer; font-family:var(--sans); width:100%}
+  button.ghost{background:transparent; color:var(--dim); border:1px solid var(--line); width:auto; padding:9px 16px; font-size:13.5px; margin:0}
+  .msg{margin-top:16px; font-size:14px; min-height:20px} .msg.bad{color:var(--bad)}
+  .hide{display:none}
+  .top{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px}
+  .who{color:var(--faint); font-size:13px} .who b{color:var(--dim)}
+  .lanepill{display:inline-block; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; padding:3px 11px; border-radius:999px; border:1px solid #3a2f23; color:var(--ember2)}
+  table{width:100%; border-collapse:collapse; font-size:14px; margin-top:8px}
+  th,td{text-align:left; padding:10px 10px; border-bottom:1px solid var(--line)}
+  th{color:var(--faint); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; font-weight:600}
+  .pill{display:inline-block; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; padding:2px 9px; border-radius:999px; border:1px solid var(--line); color:var(--dim)}
+  .pill.ok{border-color:#2f4a2a; color:var(--ok)} .pill.warn{border-color:#4a3a1f; color:var(--gold)} .pill.stage{border-color:#3a2f23; color:var(--ember2)}
+  .empty{color:var(--faint); font-size:14px; padding:18px 0}
+  .foot{margin-top:30px; text-align:center; color:var(--faint); font-size:12px; letter-spacing:0.05em}
+  .foot .m{font-family:var(--serif); letter-spacing:0.2em; color:var(--dim)}
 </style>
 </head>
 <body>
-<nav class="sfx-nav"><div class="sfx-nav-in">
-  <a class="sfx-brand" href="/index.html"><img src="/shield_mark.png" alt="Starke Foundry" /><span class="wm">STARKE&nbsp;&nbsp;FOUNDRY</span></a>
-  <button class="sfx-toggle" id="sfxToggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-  <div class="sfx-links" id="sfxLinks">
-    <a href="/index.html#method">Method</a>
-    <a href="/index.html#programs">Programs</a>
-    <a href="/index.html#ethan">Ethan</a>
-    <a href="/coaches.html">The Bench</a>
-    <a href="/faq.html">FAQ</a>
-    <a href="https://www.ethanstarke.com/my-foundry">Sign In</a>
-    <a class="enter" href="/apply.html">Apply</a>
-  </div>
-</div></nav>
-
-
-
-<header class="hero">
-  <div class="glow"></div>
-  <div class="wrap">
-    <div class="eyebrow">Join the bench</div>
-    <h1>Coach founders against a bar you have already cleared.</h1>
-    <p class="lede">Starke Foundry builds the founder before the company. It is delivered by a hand-picked bench of operators and specialists, each oriented to one method and one standard. We are looking for a few more of the right people. If that is you, this is where you raise your hand.</p>
-  </div>
-</header>
-
 <div class="wrap">
+  <div class="brand"><div class="k">STARKE</div><h1>FO<span>U</span>NDRY</h1></div>
 
-  <div class="sec">
-    <h2>What Foundry is</h2>
-    <p>Foundry is an identity-first incubator. It does not make a company presentable; it builds the person the company depends on, over three stages and forty-five weeks, coached every week against an investor-grade standard. Founders are not coached by a personality. They are coached against a bar, by people who have cleared it themselves.</p>
+  <div id="loading" class="card"><p class="lede" style="margin:0">Opening the Bench&hellip;</p></div>
+
+  <div id="signin" class="card hide">
+    <h2>Coach sign-in.</h2>
+    <p class="lede">Sign in with the email on your Bench profile. We&rsquo;ll send a one-tap link.</p>
+    <label>Email</label>
+    <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+    <button id="send">Send my sign-in link</button>
+    <div id="signinMsg" class="msg"></div>
   </div>
 
-  <div class="sec">
-    <h2>What a coach does</h2>
-    <div class="grid">
-      <div class="cardx"><div class="k">The unit</div><h3>One hour a week</h3><p>A single one-hour session per founder each week, on Zoom. A working session, not a lecture. Every week ends in a real move the founder owes by the next.</p></div>
-      <div class="cardx"><div class="k">The method</div><h3>Teach to the week</h3><p>You carry the founder through the method: the week's marker, the teaching that translates it to their real venture, and the one defined move you assign and hold them to.</p></div>
-      <div class="cardx"><div class="k">The bench</div><h3>Continuous, not solo</h3><p>Foundry is a bench, not a single voice. After each session you leave a short handoff, so any coach can pick up a founder and give the same read.</p></div>
-      <div class="cardx"><div class="k">The contract</div><h3>Candor with care</h3><p>Tell the hard truth without cruelty and without flattery. Pushback is delivered as an optimization puzzle. Agency stays with the founder; you advise and challenge, you do not run their company.</p></div>
-    </div>
+  <div id="sent" class="card hide">
+    <h2>Check your email.</h2>
+    <p class="lede">We sent a sign-in link to <b id="sentTo"></b>. Open it on this device.</p>
+    <button class="ghost" id="backToSignin">Use a different email</button>
   </div>
 
-  <div class="sec">
-    <h2>Who we are looking for</h2>
-    <p>Operators who have built real things and can develop founders against a standard they have met themselves. Ethan carries identity, narrative, leadership judgment, and the gates; the bench carries specialist depth. If your edge is one of these, we want to hear from you.</p>
-    <ul class="clean">
-      <li><b>Finance and capital.</b> Instruments and terms, cap tables, the raise, growth capital.</li>
-      <li><b>Legal and structure.</b> Entity, governance, the terrain a founder must own.</li>
-      <li><b>Product and zero to one.</b> Discovery, taste, velocity, the build standard.</li>
-      <li><b>Go to market and revenue.</b> Channels, pricing, speed to revenue, enterprise deals.</li>
-      <li><b>Media, narrative, and presence.</b> The founder's voice, the room, the story that raises.</li>
-    </ul>
+  <div id="notcoach" class="card hide">
+    <div class="top"><div class="who">Signed in as <b id="ncEmail"></b></div><button class="ghost" id="signout1">Sign out</button></div>
+    <h2>Not on the Bench.</h2>
+    <p class="lede">You&rsquo;re signed in, but this email isn&rsquo;t on the Foundry Bench. If you applied, we&rsquo;ll reach out when you&rsquo;re admitted. <a href="mailto:ethan@ethanstarke.com">Reach Ethan.</a></p>
   </div>
 
-  <div class="sec">
-    <h2>How it works from here</h2>
-    <p>This is an expression of interest, not a formal application. If there is a fit, Ethan follows up personally, and a formal application and a conversation come next. We keep the bench small and deliberate, so we move carefully rather than quickly.</p>
+  <div id="dash" class="card hide">
+    <div class="top"><div class="who">Coach &middot; <b id="dashEmail"></b></div><button class="ghost" id="signout2">Sign out</button></div>
+    <h2 id="hello">Your Bench.</h2>
+    <p class="lede"><span class="lanepill" id="lane">&mdash;</span> &nbsp; <span id="tier" style="color:var(--faint);font-size:13px"></span></p>
+    <div style="font-family:var(--serif);font-size:18px;margin:24px 0 6px">Your founders</div>
+    <div id="founders"></div>
   </div>
 
-  <div class="sec" id="formsec">
-    <h2>Raise your hand</h2>
-    <div class="formwrap" id="wrapForm">
-      <div class="note">A few minutes. Nothing here commits you to anything; it opens a conversation.</div>
-      <form id="interest" action="https://formsubmit.co/e8850b7408d0d73a5c64368b3c29b7fe" method="POST" autocomplete="off">
-        <input type="hidden" name="_subject" value="New Foundry coach interest" />
-        <input type="hidden" name="_template" value="table" />
-        <input type="hidden" name="_captcha" value="false" />
-        <input type="hidden" name="_next" value="https://foundry.ethanstarke.com/coach.html?done=1" />
-
-        <div class="row two">
-          <div><label for="f_name">Your name</label><input type="text" id="f_name" name="name" required /></div>
-          <div><label for="f_email">Email</label><input type="email" id="f_email" name="email" required /></div>
-        </div>
-        <div class="row">
-          <label for="f_expertise">Your area of expertise</label>
-          <input type="text" id="f_expertise" name="expertise" placeholder="e.g. Enterprise sales, or Product and zero to one" required />
-        </div>
-        <div class="row">
-          <label for="f_built">What have you built, and which founders have you developed?</label>
-          <textarea id="f_built" name="builtWhat" placeholder="Plain and specific. What you have built or run, and any founders or teams you have coached or led." required></textarea>
-        </div>
-        <div class="row two">
-          <div>
-            <label for="f_stages">Where would you want to carry founders? <span class="opt">optional</span></label>
-            <select id="f_stages" name="stages">
-              <option value="">No preference yet</option>
-              <option>Seeker, the foundation</option>
-              <option>Builder, commercial execution</option>
-              <option>Sovereign, the summit</option>
-              <option>Across all three, as a specialist</option>
-            </select>
-          </div>
-          <div><label for="f_link">A link <span class="opt">optional</span></label><input type="url" id="f_link" name="link" placeholder="LinkedIn, your site, or a portfolio" /></div>
-        </div>
-        <div class="row">
-          <label for="f_note">Anything else you want Ethan to know <span class="opt">optional</span></label>
-          <textarea id="f_note" name="note" placeholder="Why this work, or what you would bring to a founder."></textarea>
-        </div>
-        <div class="row">
-          <label for="f_source">How did you hear about Foundry? <span class="opt">optional</span></label>
-          <input type="text" id="f_source" name="source" placeholder="A person, a book, the Starke Perspective, or somewhere else" />
-        </div>
-        <button type="submit" class="btn" id="submitBtn">Send my interest</button>
-        <div class="fine">Ethan reads every one himself. This is a private note to him, not a public post.</div>
-      </form>
-    </div>
-
-    <div class="done" id="doneBox">
-      <h2>Thank you. It is in.</h2>
-      <p>Ethan reads every expression of interest himself. If there is a fit, he will reach out to you directly, and a formal application and a conversation come next. No form letter, no queue you cannot see.</p>
-    </div>
-  </div>
-
+  <div class="foot"><div class="m">STARKE FOUNDRY</div>Carry the founder through the climb.</div>
 </div>
 
-
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 (function(){
-  // Show the thank-you state after redirect.
-  if (/[?&]done=1/.test(location.search)) {
-    var f = document.getElementById("wrapForm"); if (f) f.style.display = "none";
-    var d = document.getElementById("doneBox"); if (d) d.style.display = "block";
-    var h = document.getElementById("formsec"); if (h) h.scrollIntoView();
+  var URL_ = "https://dxkmdjdkwmarifzelakr.supabase.co";
+  var KEY  = "sb_publishable_cgxjr49Fp01dLdEvycazwQ_D1s6eqKH";
+  var COACH = URL_ + "/functions/v1/coach-data";
+  var REDIRECT = "https://foundry.ethanstarke.com/coach.html";
+
+  var sb = window.supabase.createClient(URL_, KEY, { auth: { flowType:"implicit", detectSessionInUrl:true, persistSession:true, autoRefreshToken:true } });
+
+  function show(id){ ["loading","signin","sent","notcoach","dash"].forEach(function(x){ document.getElementById(x).classList.toggle("hide", x!==id); }); }
+  function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  function stPill(s){ var c=(s==="active")?"ok":((s==="awaiting_payment"||s==="unpaid")?"warn":""); return '<span class="pill '+c+'">'+esc(s||"—")+'</span>'; }
+
+  async function loadDash(session){
+    show("loading");
+    try{
+      var j = await (await fetch(COACH, { headers:{ Authorization:"Bearer "+session.access_token } })).json();
+      if(!j || j.coach == null){ document.getElementById("ncEmail").textContent = (j&&j.email)||(session.user&&session.user.email)||""; show("notcoach"); return; }
+      var c = j.coach;
+      document.getElementById("dashEmail").textContent = j.email || c.email || "";
+      document.getElementById("hello").textContent = c.name ? (c.name.split(" ")[0]+"'s Bench.") : "Your Bench.";
+      document.getElementById("lane").textContent = c.primary_lane || "Coach";
+      document.getElementById("tier").textContent = c.tier || "";
+      var fs = j.founders || [], el = document.getElementById("founders");
+      if(!fs.length){ el.innerHTML = '<div class="empty">No founders assigned yet. Ethan places founders with you from the desk.</div>'; }
+      else { el.innerHTML = '<table><thead><tr><th>Founder</th><th>Email</th><th>Chamber</th><th>Week</th><th>Standing</th></tr></thead><tbody>'+
+        fs.map(function(f){ return '<tr><td>'+esc(f.name||"—")+'</td><td style="color:var(--dim)">'+esc(f.email||"")+'</td><td><span class="pill stage">'+esc(f.stage||"—")+'</span></td><td>'+(f.week||1)+'</td><td>'+stPill(f.status)+'</td></tr>'; }).join('')+'</tbody></table>'; }
+      show("dash");
+    }catch(e){ document.getElementById("ncEmail").textContent = (session.user&&session.user.email)||""; show("notcoach"); }
   }
 
-  // Mirror the founder application: also store the interest in the platform, non-blocking.
-  // The email submission (form action) is the primary path and always runs. If the Wix
-  // endpoint is not yet deployed or is unreachable, the form still submits normally.
-  var WIX_COACH_ENDPOINT = "https://www.ethanstarke.com/_functions/saveCoachInterest";
-  var form = document.getElementById("interest");
-  form.addEventListener("submit", function(){
-    try {
-      var payload = {
-        name: form.name.value, email: form.email.value,
-        expertise: form.expertise.value, builtWhat: form.builtWhat.value,
-        stages: form.stages.value, link: form.link.value,
-        note: form.note.value, source: form.source.value
-      };
-      fetch(WIX_COACH_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        keepalive: true
-      }).catch(function(){});
-    } catch (e) {}
-    // Let the normal form submission to formsubmit proceed.
+  async function route(){ var r = await sb.auth.getSession(); if(r.data.session) loadDash(r.data.session); else show("signin"); }
+  sb.auth.onAuthStateChange(function(ev, session){ if(session) loadDash(session); else if(ev==="SIGNED_OUT") show("signin"); });
+
+  document.getElementById("send").addEventListener("click", async function(){
+    var email=(document.getElementById("email").value||"").trim(), msg=document.getElementById("signinMsg");
+    if(!email){ msg.className="msg bad"; msg.textContent="Enter your email first."; return; }
+    this.disabled=true; msg.className="msg"; msg.textContent="Sending…";
+    var out = await sb.auth.signInWithOtp({ email:email, options:{ emailRedirectTo:REDIRECT, shouldCreateUser:true } });
+    this.disabled=false;
+    if(out.error){ msg.className="msg bad"; msg.textContent=out.error.message||"Could not send."; return; }
+    document.getElementById("sentTo").textContent=email; show("sent");
   });
+  document.getElementById("email").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("send").click(); });
+  document.getElementById("backToSignin").addEventListener("click", function(){ show("signin"); });
+  document.getElementById("signout1").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
+  document.getElementById("signout2").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
+
+  route();
 })();
 </script>
-
-
-<footer class="sfx-foot"><div class="sfx-foot-in">
-  <div class="sfx-foot-cols">
-    <div class="sfx-foot-brand-col">
-      <div class="sfx-foot-brand"><img src="/shield_mark.png" alt="Starke Foundry" /><span>Starke Foundry</span></div>
-      <div class="sfx-foot-tag">An identity-first founder incubator led by Ethan Starke. We build the founder before the company.</div>
-    </div>
-    <div class="sfx-foot-col"><h5>Program</h5><a href="/index.html#method">The Method</a><a href="/index.html#programs">Programs</a><a href="/coaches.html">The Bench</a><a href="/apply.html">Apply</a></div>
-    <div class="sfx-foot-col"><h5>Foundry</h5><a href="/faq.html">FAQ</a><a href="https://www.ethanstarke.com/my-foundry">Member Sign In</a><a href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call</a></div>
-    <div class="sfx-foot-col"><h5>Legal</h5><a href="/terms.html">Terms &amp; Conditions</a><a href="/privacy.html">Privacy Policy</a></div>
-  </div>
-  <div class="sfx-foot-base"><span>&copy; 2026 Starke Foundry. All rights reserved.</span><span>By application. Foundry chooses its founders.</span></div>
-</div></footer>
-<script>(function(){var t=document.getElementById('sfxToggle'),l=document.getElementById('sfxLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.classList.toggle('open',o);t.setAttribute('aria-expanded',o?'true':'false');});Array.prototype.forEach.call(l.querySelectorAll('a'),function(a){a.addEventListener('click',function(){l.classList.remove('open');t.classList.remove('open');t.setAttribute('aria-expanded','false');});});})();</script>
 </body>
 </html>

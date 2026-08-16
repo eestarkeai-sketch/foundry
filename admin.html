@@ -73,6 +73,7 @@
   .acts{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:14px; padding-top:12px; border-top:1px solid var(--line)}
   .acts .lbl{font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--faint)}
   .acts.done{color:var(--faint); font-size:12.5px; text-transform:uppercase; letter-spacing:0.08em}
+  .sec{font-family:var(--serif); font-size:16px; margin:14px 0 10px; color:var(--dim)}
   table{width:100%; border-collapse:collapse; font-size:13px}
   th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:middle}
   th{color:var(--faint); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; font-weight:600}
@@ -101,6 +102,7 @@
     <div class="tabs">
       <div class="tab on" data-t="apps">Applications</div>
       <div class="tab" data-t="founders">Founders</div>
+      <div class="tab" data-t="coaches">Coaches</div>
       <div class="tab" data-t="payments">Payments</div>
     </div>
     <div id="view"></div>
@@ -150,7 +152,8 @@
     document.getElementById("stats").innerHTML = stat(c.applications,"Applications")+stat(c.founders,"Founders")+stat(c.payments,"Payments");
     var v = document.getElementById("view");
     if(TAB==="apps") v.innerHTML = renderApps(DATA.applications||[]);
-    else if(TAB==="founders") v.innerHTML = renderFounders(DATA.founders||[]);
+    else if(TAB==="founders") v.innerHTML = renderFounders(DATA.founders||[], DATA.coaches||[]);
+    else if(TAB==="coaches") v.innerHTML = renderCoaches(DATA.coach_applications||[], DATA.coaches||[]);
     else v.innerHTML = renderPayments(DATA.payments||[]);
   }
   function stat(n,l){ return '<div class="stat"><b>'+(n||0)+'</b><span>'+l+'</span></div>'; }
@@ -177,15 +180,44 @@
         appActions(x)+'</div>';
     }).join("");
   }
-  function renderFounders(f){
+  function renderFounders(f, coaches){
     if(!f.length) return '<div class="empty">No founders yet. Admitting an application opens a seat here; payment turns it active.</div>';
-    return '<table><thead><tr><th>Name</th><th>Email</th><th>Chamber</th><th>Week</th><th>Standing</th><th>Placement</th></tr></thead><tbody>'+
+    return '<table><thead><tr><th>Name</th><th>Email</th><th>Chamber</th><th>Week</th><th>Standing</th><th>Coach</th><th>Placement</th></tr></thead><tbody>'+
       f.map(function(x){ return '<tr><td>'+esc(x.name||"—")+'</td><td class="em">'+esc(x.email||"")+'</td>'+
         '<td>'+stPill_stage(x.stage)+'</td><td>'+(x.week||1)+'</td><td>'+stPill(x.status)+'</td>'+
+        '<td>'+coachSelect(x, coaches||[])+'</td>'+
         '<td><div class="cellacts">'+stageSel("fstage", x.id, x.stage||"Seeker")+
         '<input class="fweek" data-id="'+x.id+'" type="number" min="1" value="'+(x.week||1)+'" style="width:56px" />'+
         '<button class="mini save" data-fact="place" data-id="'+x.id+'">Save</button></div></td></tr>'; }).join("")+
       '</tbody></table>';
+  }
+  function coachSelect(f, coaches){
+    var opts = '<option value="">— unassigned —</option>' + coaches.map(function(c){ return '<option value="'+c.id+'"'+((f.coach_id===c.id)?' selected':'')+'>'+esc(c.name||c.email||"coach")+'</option>'; }).join('');
+    return '<select class="fcoach" data-id="'+f.id+'">'+opts+'</select>';
+  }
+  function coachAppActions(x){
+    if(x.status==="submitted") return '<div class="acts"><button class="mini" data-cact="admit_coach" data-id="'+x.id+'">Admit to Bench</button><button class="mini reject" data-cact="reject_coach" data-id="'+x.id+'">Reject</button></div>';
+    return '<div class="acts done">'+esc(x.status)+'</div>';
+  }
+  function renderCoaches(apps, roster){
+    var out = '<div class="sec">On the Bench ('+roster.length+')</div>';
+    if(!roster.length) out += '<div class="empty">No coaches on the Bench yet.</div>';
+    else out += '<table><thead><tr><th>Name</th><th>Email</th><th>Lane</th><th>Tier</th><th>Capacity</th></tr></thead><tbody>'+
+      roster.map(function(c){ return '<tr><td>'+esc(c.name||"—")+'</td><td class="em">'+esc(c.email||"")+'</td><td>'+esc(c.primary_lane||"—")+'</td><td>'+esc(c.tier||"—")+'</td><td>'+(c.capacity||6)+'</td></tr>'; }).join('')+'</tbody></table>';
+    out += '<div class="sec" style="margin-top:22px">Applications ('+apps.length+')</div>';
+    if(!apps.length) return out + '<div class="empty">No coach applications yet.</div>';
+    return out + apps.map(function(x){
+      return '<div class="card"><div class="row1"><div>'+
+        '<div class="nm">'+esc(x.name||"(no name)")+'</div>'+
+        '<div class="em">'+esc(x.email||"")+(x.phone?" &middot; "+esc(x.phone):"")+'</div>'+
+        '<div class="meta">'+when(x.created_at)+(x.primary_lane?(" &middot; "+esc(x.primary_lane)):"")+(x.tier_claim?(" &middot; "+esc(x.tier_claim)):"")+'</div></div>'+
+        '<div style="text-align:right">'+stPill(x.status)+'</div></div>'+
+        (x.headline_outcome?('<details><summary>Headline outcome</summary><pre>'+esc(x.headline_outcome)+'</pre></details>'):'')+
+        (x.bar_cleared?('<details><summary>The bar cleared</summary><pre>'+esc(x.bar_cleared)+'</pre></details>'):'')+
+        (x.founders_developed?('<details><summary>Founders developed</summary><pre>'+esc(x.founders_developed)+'</pre></details>'):'')+
+        (x.work_sample?('<div class="meta" style="margin-top:8px">Work: <a href="'+esc(x.work_sample)+'" target="_blank" rel="noopener">'+esc(x.work_sample)+'</a></div>'):'')+
+        coachAppActions(x)+'</div>';
+    }).join('');
   }
   function stPill_stage(s){ return '<span class="pill stage">'+esc(s||"—")+'</span>'; }
   function renderPayments(p){
@@ -197,7 +229,7 @@
 
   // event delegation for action buttons
   document.getElementById("view").addEventListener("click", function(e){
-    var b = e.target && e.target.closest ? e.target.closest("button[data-act],button[data-fact]") : null;
+    var b = e.target && e.target.closest ? e.target.closest("button[data-act],button[data-fact],button[data-cact]") : null;
     if(!b) return;
     var id = b.getAttribute("data-id");
     if(b.hasAttribute("data-act")){
@@ -205,9 +237,17 @@
       var payload = { action: act, application_id: id };
       if(act==="admit"){ var s=document.querySelector('.chsel[data-id="'+id+'"]'); payload.stage = s?s.value:"Seeker"; }
       doWrite(payload, b);
+    } else if(b.hasAttribute("data-cact")){
+      doWrite({ action: b.getAttribute("data-cact"), coach_application_id: id }, b);
     } else if(b.getAttribute("data-fact")==="place"){
       var st=document.querySelector('.fstage[data-id="'+id+'"]'), wk=document.querySelector('.fweek[data-id="'+id+'"]');
       doWrite({ action:"place", founder_id:id, stage: st?st.value:undefined, week: wk?parseInt(wk.value,10):undefined }, b);
+    }
+  });
+  document.getElementById("view").addEventListener("change", function(e){
+    var s = e.target;
+    if(s && s.classList && s.classList.contains("fcoach")){
+      doWrite({ action:"assign_coach", founder_id: s.getAttribute("data-id"), coach_id: s.value || null });
     }
   });
 
