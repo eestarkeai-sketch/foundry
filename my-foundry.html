@@ -56,6 +56,14 @@
   .sess .m{color:var(--faint); font-size:12.5px; margin-top:3px}
   .empty{color:var(--faint); font-size:14px; padding:16px 0}
   .paybtn{display:block; text-align:center; text-decoration:none; margin-top:20px; background:linear-gradient(180deg,var(--ember2),var(--ember)); color:#1a120c; font-weight:600; padding:14px 18px; border-radius:11px}
+  .thread{max-height:240px; overflow:auto; margin-top:4px}
+  .bub{max-width:82%; padding:9px 13px; border-radius:12px; margin:7px 0; font-size:14.5px; line-height:1.45}
+  .bub.them{background:#211b18; border:1px solid var(--line)} .bub.me{background:#2a1f16; border:1px solid #3a2f23; margin-left:auto}
+  .bub .who2{font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--faint); margin-bottom:2px}
+  .mrow{display:flex; gap:8px; margin-top:10px}
+  .mrow input{flex:1; background:var(--panel2); border:1px solid var(--line); color:var(--ink); border-radius:10px; padding:11px 13px; font-family:var(--sans); font-size:15px}
+  .mrow input:focus{outline:none;border-color:var(--ember)}
+  .mrow button{width:auto; margin-top:0; padding:11px 18px}
   .foot{margin-top:30px; text-align:center; color:var(--faint); font-size:12px; letter-spacing:0.05em}
   .foot .m{font-family:var(--serif); letter-spacing:0.2em; color:var(--dim)}
 </style>
@@ -117,6 +125,10 @@
     </div>
     <div class="sec-h">Your sessions</div>
     <div id="sessions"></div>
+    <div class="sec-h">Messages with your coach</div>
+    <div id="thread" class="thread"></div>
+    <div class="mrow"><input id="minput" placeholder="Message your coach&hellip;" autocomplete="off" /><button id="msend">Send</button></div>
+    <div id="mMsg" class="msg"></div>
   </div>
 
   <div class="foot"><div class="m">STARKE FOUNDRY</div>Build the founder before the company.</div>
@@ -128,6 +140,7 @@
   var URL_ = "https://dxkmdjdkwmarifzelakr.supabase.co";
   var KEY  = "sb_publishable_cgxjr49Fp01dLdEvycazwQ_D1s6eqKH";
   var MEMBER = URL_ + "/functions/v1/member-data";
+  var SEND = URL_ + "/functions/v1/messages-send";
   var REDIRECT = "https://foundry.ethanstarke.com/my-foundry.html";
 
   var sb = window.supabase.createClient(URL_, KEY, {
@@ -171,6 +184,11 @@
           (s.zoom_number?('<div class="m">Zoom '+esc(s.zoom_number)+(s.passcode?(" &middot; passcode "+esc(s.passcode)):"")+'</div>'):'')+
           (s.note?('<div class="m">'+esc(s.note)+'</div>'):'')+'</div>';
       }).join(""); }
+      var msgs = j.messages || [];
+      document.getElementById("thread").innerHTML = msgs.length ? msgs.map(function(m){
+        var mine = m.role==="founder";
+        return '<div class="bub '+(mine?"me":"them")+'"><div class="who2">'+esc(m.from_name||m.role||"")+'</div>'+esc(m.body||"")+'</div>';
+      }).join("") : '<div style="color:var(--faint);font-size:14px;padding:8px 0">No messages yet. Say hello to your coach.</div>';
       show("dash");
     }catch(e){ document.getElementById("noseatEmail").textContent = (session.user&&session.user.email)||""; show("noseat"); }
   }
@@ -200,6 +218,22 @@
   document.getElementById("backToSignin").addEventListener("click", function(){ show("signin"); });
   document.getElementById("signout1").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
   document.getElementById("signout3").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
+  async function sendMsg(){
+    var inp=document.getElementById("minput"), mm=document.getElementById("mMsg"), btn=document.getElementById("msend");
+    var text=(inp.value||"").trim(); if(!text) return;
+    var r=await sb.auth.getSession(); var t=r.data.session&&r.data.session.access_token;
+    if(!t){ mm.className="msg bad"; mm.textContent="Session expired — refresh."; return; }
+    btn.disabled=true;
+    try{
+      var res=await fetch(SEND, { method:"POST", headers:{ Authorization:"Bearer "+t, "Content-Type":"application/json" }, body: JSON.stringify({ body:text }) });
+      var j=await res.json();
+      if(j.error){ mm.className="msg bad"; mm.textContent=j.error; btn.disabled=false; return; }
+      inp.value=""; mm.textContent=""; btn.disabled=false;
+      var s=(await sb.auth.getSession()).data.session; if(s) loadDash(s);
+    }catch(e){ mm.className="msg bad"; mm.textContent="Could not send."; btn.disabled=false; }
+  }
+  document.getElementById("msend").addEventListener("click", sendMsg);
+  document.getElementById("minput").addEventListener("keydown", function(e){ if(e.key==="Enter") sendMsg(); });
   document.getElementById("signout2").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
 
   route();

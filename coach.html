@@ -29,21 +29,35 @@
   h2{font-family:var(--serif); font-weight:400; font-size:27px; margin:0 0 8px}
   p.lede{color:var(--dim); font-size:15px; margin:0 0 22px}
   label{display:block; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--faint); margin:0 0 7px}
-  input[type=email]{width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--ink); border-radius:11px; padding:13px 15px; font-family:var(--sans); font-size:15.5px}
-  input[type=email]:focus{outline:none; border-color:var(--ember)}
-  button{margin-top:14px; background:linear-gradient(180deg,var(--ember2),var(--ember)); color:#1a120c; font-weight:600; border:none; border-radius:11px; padding:14px 18px; font-size:15.5px; cursor:pointer; font-family:var(--sans); width:100%}
-  button.ghost{background:transparent; color:var(--dim); border:1px solid var(--line); width:auto; padding:9px 16px; font-size:13.5px; margin:0}
-  .msg{margin-top:16px; font-size:14px; min-height:20px} .msg.bad{color:var(--bad)}
+  input,textarea{width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--ink); border-radius:10px; padding:11px 13px; font-family:var(--sans); font-size:14.5px}
+  input:focus,textarea:focus{outline:none; border-color:var(--ember)}
+  button{background:linear-gradient(180deg,var(--ember2),var(--ember)); color:#1a120c; font-weight:600; border:none; border-radius:10px; padding:11px 16px; font-size:14px; cursor:pointer; font-family:var(--sans)}
+  button.ghost{background:transparent; color:var(--dim); border:1px solid var(--line); padding:9px 16px; font-size:13.5px}
+  button:disabled{opacity:.55; cursor:default}
+  .msg{margin-top:14px; font-size:14px; min-height:18px} .msg.bad{color:var(--bad)}
   .hide{display:none}
+  #signin input[type=email], #signin button{width:100%; margin-top:0}
+  #signin button{margin-top:14px}
   .top{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px}
   .who{color:var(--faint); font-size:13px} .who b{color:var(--dim)}
   .lanepill{display:inline-block; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; padding:3px 11px; border-radius:999px; border:1px solid #3a2f23; color:var(--ember2)}
-  table{width:100%; border-collapse:collapse; font-size:14px; margin-top:8px}
-  th,td{text-align:left; padding:10px 10px; border-bottom:1px solid var(--line)}
-  th{color:var(--faint); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; font-weight:600}
   .pill{display:inline-block; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; padding:2px 9px; border-radius:999px; border:1px solid var(--line); color:var(--dim)}
   .pill.ok{border-color:#2f4a2a; color:var(--ok)} .pill.warn{border-color:#4a3a1f; color:var(--gold)} .pill.stage{border-color:#3a2f23; color:var(--ember2)}
-  .empty{color:var(--faint); font-size:14px; padding:18px 0}
+  .empty{color:var(--faint); font-size:14px; padding:14px 0}
+  .fcard{border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:14px; background:var(--panel2)}
+  .frow{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap}
+  .fnm{font-family:var(--serif); font-size:18px; font-weight:600} .fem{color:var(--dim); font-size:13px}
+  .sub{font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--faint); margin:16px 0 8px}
+  .sess{border-left:2px solid #3a2f23; padding:2px 0 2px 12px; margin-bottom:8px}
+  .sess .w{color:var(--ember2); font-size:12px; letter-spacing:0.08em; text-transform:uppercase}
+  .sess .t{font-size:14px} .sess .m{color:var(--faint); font-size:12.5px}
+  .sform{margin-top:8px} .sform .grid{display:flex; gap:8px; flex-wrap:wrap} .sform .grid>div{flex:1; min-width:120px}
+  .sform label{margin-top:0}
+  .thread{max-height:220px; overflow:auto; margin-bottom:10px}
+  .bub{max-width:80%; padding:8px 12px; border-radius:12px; margin:6px 0; font-size:14px; line-height:1.4}
+  .bub.them{background:#211b18; border:1px solid var(--line)} .bub.me{background:#2a1f16; border:1px solid #3a2f23; margin-left:auto}
+  .bub .who2{font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--faint); margin-bottom:2px}
+  .mrow{display:flex; gap:8px} .mrow input{flex:1}
   .foot{margin-top:30px; text-align:center; color:var(--faint); font-size:12px; letter-spacing:0.05em}
   .foot .m{font-family:var(--serif); letter-spacing:0.2em; color:var(--dim)}
 </style>
@@ -79,7 +93,7 @@
     <div class="top"><div class="who">Coach &middot; <b id="dashEmail"></b></div><button class="ghost" id="signout2">Sign out</button></div>
     <h2 id="hello">Your Bench.</h2>
     <p class="lede"><span class="lanepill" id="lane">&mdash;</span> &nbsp; <span id="tier" style="color:var(--faint);font-size:13px"></span></p>
-    <div style="font-family:var(--serif);font-size:18px;margin:24px 0 6px">Your founders</div>
+    <div id="deskMsg" class="msg"></div>
     <div id="founders"></div>
   </div>
 
@@ -92,42 +106,119 @@
   var URL_ = "https://dxkmdjdkwmarifzelakr.supabase.co";
   var KEY  = "sb_publishable_cgxjr49Fp01dLdEvycazwQ_D1s6eqKH";
   var COACH = URL_ + "/functions/v1/coach-data";
+  var WRITE = URL_ + "/functions/v1/coach-write";
+  var SEND  = URL_ + "/functions/v1/messages-send";
   var REDIRECT = "https://foundry.ethanstarke.com/coach.html";
 
   var sb = window.supabase.createClient(URL_, KEY, { auth: { flowType:"implicit", detectSessionInUrl:true, persistSession:true, autoRefreshToken:true } });
+  var DATA = null;
 
   function show(id){ ["loading","signin","sent","notcoach","dash"].forEach(function(x){ document.getElementById(x).classList.toggle("hide", x!==id); }); }
   function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
   function stPill(s){ var c=(s==="active")?"ok":((s==="awaiting_payment"||s==="unpaid")?"warn":""); return '<span class="pill '+c+'">'+esc(s||"—")+'</span>'; }
+  function when(s){ if(!s) return ""; try{ return new Date(s).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return s; } }
+  function deskMsg(t,bad){ var el=document.getElementById("deskMsg"); el.className="msg"+(bad?" bad":""); el.textContent=t||""; if(t&&!bad) setTimeout(function(){ if(el.textContent===t) el.textContent=""; },3000); }
+
+  async function token(){ var r = await sb.auth.getSession(); return r.data.session ? r.data.session.access_token : null; }
+
+  function sessionsFor(fid){ return (DATA.sessions||[]).filter(function(s){ return s.founder_id===fid; }); }
+  function messagesFor(fid){ return (DATA.messages||[]).filter(function(m){ return m.to_id===fid; }); }
+
+  function renderFounder(f){
+    var sess = sessionsFor(f.id), msgs = messagesFor(f.id);
+    var sessHtml = sess.length ? sess.map(function(s){
+      return '<div class="sess"><div class="w">Week '+(s.week||"—")+'</div>'+
+        '<div class="t">'+(s.scheduled_at?when(s.scheduled_at):"Time TBD")+'</div>'+
+        (s.zoom_number?('<div class="m">Zoom '+esc(s.zoom_number)+(s.passcode?(" &middot; "+esc(s.passcode)):"")+'</div>'):'')+
+        (s.note?('<div class="m">'+esc(s.note)+'</div>'):'')+'</div>';
+    }).join("") : '<div class="empty">No sessions yet.</div>';
+    var thread = msgs.length ? msgs.map(function(m){
+      var mine = m.role==="coach";
+      return '<div class="bub '+(mine?"me":"them")+'"><div class="who2">'+esc(m.from_name||m.role||"")+'</div>'+esc(m.body||"")+'</div>';
+    }).join("") : '<div class="empty">No messages yet.</div>';
+    return '<div class="fcard">'+
+      '<div class="frow"><div><div class="fnm">'+esc(f.name||"—")+'</div><div class="fem">'+esc(f.email||"")+'</div></div>'+
+      '<div><span class="pill stage">'+esc(f.stage||"—")+'</span> '+stPill(f.status)+' &middot; Week '+(f.week||1)+'</div></div>'+
+      '<div class="sub">Sessions</div>'+sessHtml+
+      '<details class="sform"><summary style="cursor:pointer;color:var(--faint);font-size:12.5px;margin-top:6px">Schedule a session</summary>'+
+        '<div class="grid" style="margin-top:10px">'+
+          '<div><label>Week</label><input class="s-week" data-id="'+f.id+'" type="number" min="1" value="'+(f.week||1)+'" /></div>'+
+          '<div><label>When</label><input class="s-when" data-id="'+f.id+'" type="datetime-local" /></div>'+
+        '</div>'+
+        '<div class="grid" style="margin-top:8px">'+
+          '<div><label>Zoom</label><input class="s-zoom" data-id="'+f.id+'" placeholder="Zoom link or number" /></div>'+
+          '<div><label>Passcode</label><input class="s-pass" data-id="'+f.id+'" /></div>'+
+        '</div>'+
+        '<label style="margin-top:8px">Note</label><input class="s-note" data-id="'+f.id+'" placeholder="What this session is for" />'+
+        '<button style="margin-top:10px" data-sched="'+f.id+'">Schedule session</button>'+
+      '</details>'+
+      '<div class="sub">Messages</div>'+
+      '<div class="thread">'+thread+'</div>'+
+      '<div class="mrow"><input class="minput" data-msg="'+f.id+'" placeholder="Message '+esc((f.name||"founder").split(" ")[0])+'…" /><button data-send="'+f.id+'">Send</button></div>'+
+    '</div>';
+  }
+
+  function render(){
+    var c = DATA.coach;
+    document.getElementById("dashEmail").textContent = DATA.email || c.email || "";
+    document.getElementById("hello").textContent = c.name ? (c.name.split(" ")[0]+"'s Bench.") : "Your Bench.";
+    document.getElementById("lane").textContent = c.primary_lane || "Coach";
+    document.getElementById("tier").textContent = c.tier || "";
+    var fs = DATA.founders || [], el = document.getElementById("founders");
+    el.innerHTML = fs.length ? fs.map(renderFounder).join("") : '<div class="empty">No founders assigned yet. Ethan places founders with you from the desk.</div>';
+  }
 
   async function loadDash(session){
     show("loading");
     try{
       var j = await (await fetch(COACH, { headers:{ Authorization:"Bearer "+session.access_token } })).json();
-      if(!j || j.coach == null){ document.getElementById("ncEmail").textContent = (j&&j.email)||(session.user&&session.user.email)||""; show("notcoach"); return; }
-      var c = j.coach;
-      document.getElementById("dashEmail").textContent = j.email || c.email || "";
-      document.getElementById("hello").textContent = c.name ? (c.name.split(" ")[0]+"'s Bench.") : "Your Bench.";
-      document.getElementById("lane").textContent = c.primary_lane || "Coach";
-      document.getElementById("tier").textContent = c.tier || "";
-      var fs = j.founders || [], el = document.getElementById("founders");
-      if(!fs.length){ el.innerHTML = '<div class="empty">No founders assigned yet. Ethan places founders with you from the desk.</div>'; }
-      else { el.innerHTML = '<table><thead><tr><th>Founder</th><th>Email</th><th>Chamber</th><th>Week</th><th>Standing</th></tr></thead><tbody>'+
-        fs.map(function(f){ return '<tr><td>'+esc(f.name||"—")+'</td><td style="color:var(--dim)">'+esc(f.email||"")+'</td><td><span class="pill stage">'+esc(f.stage||"—")+'</span></td><td>'+(f.week||1)+'</td><td>'+stPill(f.status)+'</td></tr>'; }).join('')+'</tbody></table>'; }
-      show("dash");
-    }catch(e){ document.getElementById("ncEmail").textContent = (session.user&&session.user.email)||""; show("notcoach"); }
+      if(!j || j.coach == null){ document.getElementById("ncEmail").textContent=(j&&j.email)||(session.user&&session.user.email)||""; show("notcoach"); return; }
+      DATA = j; show("dash"); render();
+    }catch(e){ document.getElementById("ncEmail").textContent=(session.user&&session.user.email)||""; show("notcoach"); }
+  }
+  async function reload(){ var r = await sb.auth.getSession(); if(r.data.session) await loadDash(r.data.session); }
+
+  async function post(url, payload){
+    var t = await token(); if(!t) return { error:"session expired" };
+    var r = await fetch(url, { method:"POST", headers:{ Authorization:"Bearer "+t, "Content-Type":"application/json" }, body: JSON.stringify(payload) });
+    return await r.json();
   }
 
-  async function route(){ var r = await sb.auth.getSession(); if(r.data.session) loadDash(r.data.session); else show("signin"); }
+  document.getElementById("founders").addEventListener("click", async function(e){
+    var b = e.target && e.target.closest ? e.target.closest("button[data-sched],button[data-send]") : null;
+    if(!b) return;
+    if(b.hasAttribute("data-sched")){
+      var id=b.getAttribute("data-sched");
+      var wk=document.querySelector('.s-week[data-id="'+id+'"]'), wh=document.querySelector('.s-when[data-id="'+id+'"]'),
+          zm=document.querySelector('.s-zoom[data-id="'+id+'"]'), ps=document.querySelector('.s-pass[data-id="'+id+'"]'), nt=document.querySelector('.s-note[data-id="'+id+'"]');
+      var payload={ action:"schedule_session", founder_id:id,
+        week: wk&&wk.value?parseInt(wk.value,10):null,
+        scheduled_at: wh&&wh.value? new Date(wh.value).toISOString() : null,
+        zoom_number: zm?zm.value:"", passcode: ps?ps.value:"", note: nt?nt.value:"" };
+      b.disabled=true;
+      var j=await post(WRITE, payload); b.disabled=false;
+      if(j.error){ deskMsg("Could not schedule: "+j.error, true); return; }
+      deskMsg("Session scheduled."); await reload();
+    } else if(b.hasAttribute("data-send")){
+      var fid=b.getAttribute("data-send"), inp=document.querySelector('.minput[data-msg="'+fid+'"]');
+      var text=inp?inp.value.trim():""; if(!text) return;
+      b.disabled=true;
+      var j2=await post(SEND, { founder_id:fid, body:text }); b.disabled=false;
+      if(j2.error){ deskMsg("Could not send: "+j2.error, true); return; }
+      if(inp) inp.value=""; await reload();
+    }
+  });
+
+  async function route(){ var r=await sb.auth.getSession(); if(r.data.session) loadDash(r.data.session); else show("signin"); }
   sb.auth.onAuthStateChange(function(ev, session){ if(session) loadDash(session); else if(ev==="SIGNED_OUT") show("signin"); });
 
   document.getElementById("send").addEventListener("click", async function(){
-    var email=(document.getElementById("email").value||"").trim(), msg=document.getElementById("signinMsg");
-    if(!email){ msg.className="msg bad"; msg.textContent="Enter your email first."; return; }
-    this.disabled=true; msg.className="msg"; msg.textContent="Sending…";
-    var out = await sb.auth.signInWithOtp({ email:email, options:{ emailRedirectTo:REDIRECT, shouldCreateUser:true } });
+    var email=(document.getElementById("email").value||"").trim(), m=document.getElementById("signinMsg");
+    if(!email){ m.className="msg bad"; m.textContent="Enter your email first."; return; }
+    this.disabled=true; m.className="msg"; m.textContent="Sending…";
+    var out=await sb.auth.signInWithOtp({ email:email, options:{ emailRedirectTo:REDIRECT, shouldCreateUser:true } });
     this.disabled=false;
-    if(out.error){ msg.className="msg bad"; msg.textContent=out.error.message||"Could not send."; return; }
+    if(out.error){ m.className="msg bad"; m.textContent=out.error.message||"Could not send."; return; }
     document.getElementById("sentTo").textContent=email; show("sent");
   });
   document.getElementById("email").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("send").click(); });
