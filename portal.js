@@ -119,7 +119,7 @@
     var m=ME; if(!m || m.role==="coach") return "";
     var mn=(m.sessionMeetingNumber==null?"":String(m.sessionMeetingNumber)).replace(/[^0-9]/g,"");
     if(!mn) return "";
-    var url="https://foundry.ethanstarke.com/session.html?mn="+encodeURIComponent(mn)
+    var url="https://starkefoundry.com/session.html?mn="+encodeURIComponent(mn)
       +(m.sessionPasscode?("&pwd="+encodeURIComponent(m.sessionPasscode)):"")
       +"&name="+encodeURIComponent(m.name||"Foundry Member");
     var note=m.sessionNote?('<div class="note">'+esc(m.sessionNote)+'</div>')

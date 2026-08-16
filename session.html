@@ -39,7 +39,7 @@
   var mn = qp("mn").replace(/\D/g,"");
   var pwd = qp("pwd");
   var name = qp("name") || "Foundry Member";
-  var leave = qp("leave") || "https://foundry.ethanstarke.com/";
+  var leave = qp("leave") || "https://starkefoundry.com/";
   if(!mn){ msg("This session link is missing its meeting number. Please use the link from your portal.", true); return; }
   if(typeof ZoomMtg === "undefined"){ msg("Could not load the meeting client. Check your connection and refresh.", true); return; }
 
