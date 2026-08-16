@@ -15,8 +15,7 @@
     --ember:#e8763a; --ember2:#f0a35e; --gold:#c9a24a; --ok:#7bbf6a; --bad:#d9705f;
     --serif:'Fraunces',Georgia,serif; --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   }
-  *{box-sizing:border-box}
-  html,body{margin:0}
+  *{box-sizing:border-box} html,body{margin:0}
   body{background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.5;
     -webkit-font-smoothing:antialiased;
     background-image:radial-gradient(1100px 560px at 50% -12%, rgba(232,118,58,0.08), transparent 60%); min-height:100vh;}
@@ -26,28 +25,33 @@
   .brand .k{font-size:11px; letter-spacing:0.34em; color:var(--ember); font-weight:700}
   .brand h1{font-family:var(--serif); font-weight:600; font-size:22px; letter-spacing:0.14em; margin:0}
   .brand h1 span{color:var(--ember)}
-  .sub{color:var(--faint); font-size:13px; margin-bottom:24px}
 
-  /* gate */
   #gate{max-width:420px; margin:8vh auto 0; text-align:center}
   #gate h2{font-family:var(--serif); font-weight:500; font-size:26px; margin:18px 0 6px}
   #gate p{color:var(--dim); font-size:14px; margin:0 0 22px}
   .field{display:flex; gap:10px}
-  input[type=password]{flex:1; background:var(--panel2); border:1px solid var(--line); color:var(--ink);
+  input[type=password],input[type=number]{background:var(--panel2); border:1px solid var(--line); color:var(--ink);
     border-radius:10px; padding:12px 14px; font-family:var(--sans); font-size:15px}
-  input[type=password]:focus{outline:none; border-color:var(--ember)}
+  input[type=password]{flex:1}
+  input:focus{outline:none; border-color:var(--ember)}
   button{background:linear-gradient(180deg,var(--ember2),var(--ember)); color:#1a120c; font-weight:600;
     border:none; border-radius:10px; padding:12px 18px; font-size:14.5px; cursor:pointer; font-family:var(--sans)}
   button.ghost{background:transparent; color:var(--dim); border:1px solid var(--line)}
+  button.mini{padding:7px 12px; font-size:12.5px; border-radius:8px}
+  button.mini.reject{background:transparent; color:var(--bad); border:1px solid #4a2a26}
+  button.mini.save{background:transparent; color:var(--ink); border:1px solid var(--line)}
+  button:disabled{opacity:.55; cursor:default}
+  select{background:var(--panel2); border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:7px 10px; font-family:var(--sans); font-size:13px}
   #gateErr{color:var(--bad); font-size:13px; margin-top:14px; min-height:18px}
 
-  /* desk */
   #desk{display:none}
-  .bar{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:22px}
+  .bar{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:8px}
   .stats{display:flex; gap:10px; flex-wrap:wrap}
   .stat{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:10px 16px; min-width:104px}
   .stat b{display:block; font-family:var(--serif); font-size:22px; color:var(--ember2)}
   .stat span{font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--faint)}
+  #deskMsg{min-height:18px; font-size:13px; margin:4px 0 6px}
+  #deskMsg.ok{color:var(--ok)} #deskMsg.bad{color:var(--bad)}
   .tabs{display:flex; gap:6px; margin:8px 0 18px; border-bottom:1px solid var(--line)}
   .tab{padding:9px 14px; font-size:13.5px; color:var(--dim); cursor:pointer; border-bottom:2px solid transparent}
   .tab.on{color:var(--ink); border-bottom-color:var(--ember)}
@@ -66,9 +70,13 @@
   details summary{cursor:pointer; color:var(--faint); font-size:12.5px}
   pre{white-space:pre-wrap; word-break:break-word; background:var(--panel2); border:1px solid var(--line);
     border-radius:10px; padding:12px; margin:10px 0 0; font-family:var(--sans); font-size:12.5px; color:var(--dim)}
+  .acts{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:14px; padding-top:12px; border-top:1px solid var(--line)}
+  .acts .lbl{font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--faint)}
+  .acts.done{color:var(--faint); font-size:12.5px; text-transform:uppercase; letter-spacing:0.08em}
   table{width:100%; border-collapse:collapse; font-size:13px}
-  th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--line)}
+  th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:middle}
   th{color:var(--faint); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; font-weight:600}
+  .cellacts{display:flex; align-items:center; gap:6px}
   .empty{color:var(--faint); font-size:13.5px; padding:24px 4px}
   .foot{margin-top:34px; color:var(--faint); font-size:12px; letter-spacing:0.04em}
 </style>
@@ -77,62 +85,69 @@
 <div class="wrap">
   <div class="brand"><div class="k">STARKE</div><h1>FO<span>U</span>NDRY &middot; The Desk</h1></div>
 
-  <!-- token gate -->
   <div id="gate">
     <h2>The Desk is sealed.</h2>
     <p>Enter the desk key to open the applications, founders, and payments.</p>
-    <div class="field">
-      <input id="tok" type="password" placeholder="Desk key" autocomplete="off" />
-      <button id="open">Open</button>
-    </div>
+    <div class="field"><input id="tok" type="password" placeholder="Desk key" autocomplete="off" /><button id="open">Open</button></div>
     <div id="gateErr"></div>
   </div>
 
-  <!-- desk -->
   <div id="desk">
     <div class="bar">
       <div class="stats" id="stats"></div>
       <button class="ghost" id="refresh">Refresh</button>
     </div>
+    <div id="deskMsg"></div>
     <div class="tabs">
       <div class="tab on" data-t="apps">Applications</div>
       <div class="tab" data-t="founders">Founders</div>
       <div class="tab" data-t="payments">Payments</div>
     </div>
     <div id="view"></div>
-    <div class="foot">Read-only desk on the Supabase backend. Decisions &amp; placement actions come next.</div>
+    <div class="foot">Operating desk on the Supabase backend. Admit &amp; place opens an awaiting-payment seat; payment turns it active.</div>
   </div>
 </div>
 
 <script>
 (function(){
-  var FN = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/admin-data";
-  var token = "";        // held in memory only, never stored
-  var DATA = null;
-  var TAB = "apps";
+  var BASE = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/";
+  var READ = BASE + "admin-data";
+  var WRITE = BASE + "admin-write";
+  var STAGES = ["Seeker","Builder","Sovereign"];
+  var token = "", DATA = null, TAB = "apps";
 
-  var gate = document.getElementById("gate");
-  var desk = document.getElementById("desk");
-  var err  = document.getElementById("gateErr");
+  var gate = document.getElementById("gate"), desk = document.getElementById("desk"),
+      err = document.getElementById("gateErr"), deskMsg = document.getElementById("deskMsg");
 
   function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
-  function money(cents){ if(cents==null) return "—"; return "$"+(cents/100).toLocaleString("en-US",{minimumFractionDigits:0}); }
+  function money(c){ if(c==null) return "—"; return "$"+(c/100).toLocaleString("en-US",{minimumFractionDigits:0}); }
   function when(s){ if(!s) return ""; try{ return new Date(s).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return s; } }
-  function stPill(s){ var c = s==="active"||s==="welcomed"||s==="paid" ? "ok" : (s==="rejected"||s==="blocked"||s==="unpaid" ? "warn" : ""); return '<span class="pill '+c+'">'+esc(s||"—")+'</span>'; }
+  function stPill(s){ var c=(s==="active"||s==="welcomed"||s==="paid")?"ok":((s==="rejected"||s==="blocked"||s==="unpaid"||s==="awaiting_payment")?"warn":""); return '<span class="pill '+c+'">'+esc(s||"—")+'</span>'; }
+  function stageSel(cls,id,cur){ return '<select class="'+cls+'" data-id="'+id+'">'+STAGES.map(function(s){return '<option'+((cur===s)?' selected':'')+'>'+s+'</option>';}).join('')+'</select>'; }
+  function msg(t,ok){ deskMsg.className = ok?"ok":"bad"; deskMsg.textContent = t||""; if(t) setTimeout(function(){ if(deskMsg.textContent===t) deskMsg.textContent=""; }, 4000); }
 
   function load(){
     err.textContent = "Opening…";
-    return fetch(FN, { headers: { "x-admin-token": token } })
-      .then(function(r){ if(r.status===401){ throw new Error("Wrong desk key."); } if(!r.ok){ throw new Error("Server error ("+r.status+")."); } return r.json(); })
-      .then(function(j){ DATA = j; gate.style.display="none"; desk.style.display="block"; render(); })
-      .catch(function(e){ err.textContent = e.message || "Could not open."; token=""; });
+    return fetch(READ, { headers: { "x-admin-token": token } })
+      .then(function(r){ if(r.status===401) throw new Error("Wrong desk key."); if(!r.ok) throw new Error("Server error ("+r.status+")."); return r.json(); })
+      .then(function(j){ DATA=j; gate.style.display="none"; desk.style.display="block"; render(); })
+      .catch(function(e){ err.textContent=e.message||"Could not open."; token=""; });
+  }
+
+  async function doWrite(payload, btn){
+    if(btn){ btn.disabled=true; }
+    try{
+      var r = await fetch(WRITE, { method:"POST", headers:{ "x-admin-token": token, "Content-Type":"application/json" }, body: JSON.stringify(payload) });
+      var j = await r.json();
+      if(!r.ok || j.error){ msg("Action failed: "+(j.error||r.status), false); if(btn) btn.disabled=false; return; }
+      msg("Done.", true); await load();
+    }catch(e){ msg("Action failed: "+e.message, false); if(btn) btn.disabled=false; }
   }
 
   function render(){
     if(!DATA) return;
     var c = DATA.counts || {applications:0,founders:0,payments:0};
-    document.getElementById("stats").innerHTML =
-      stat(c.applications,"Applications") + stat(c.founders,"Founders") + stat(c.payments,"Payments");
+    document.getElementById("stats").innerHTML = stat(c.applications,"Applications")+stat(c.founders,"Founders")+stat(c.payments,"Payments");
     var v = document.getElementById("view");
     if(TAB==="apps") v.innerHTML = renderApps(DATA.applications||[]);
     else if(TAB==="founders") v.innerHTML = renderFounders(DATA.founders||[]);
@@ -140,6 +155,15 @@
   }
   function stat(n,l){ return '<div class="stat"><b>'+(n||0)+'</b><span>'+l+'</span></div>'; }
 
+  function appActions(x){
+    if(x.status==="submitted"){
+      return '<div class="acts"><span class="lbl">Place in</span>'+stageSel("chsel", x.id, x.stage_placed||"Seeker")+
+        '<button class="mini" data-act="admit" data-id="'+x.id+'">Admit &amp; place</button>'+
+        '<button class="mini reject" data-act="reject" data-id="'+x.id+'">Reject</button></div>';
+    }
+    if(x.decision) return '<div class="acts done">'+esc(x.decision)+(x.stage_placed?(" &middot; "+esc(x.stage_placed)):"")+'</div>';
+    return '';
+  }
   function renderApps(a){
     if(!a.length) return '<div class="empty">No applications yet.</div>';
     return a.map(function(x){
@@ -147,35 +171,51 @@
         '<div class="nm">'+esc(x.name||"(no name)")+'</div>'+
         '<div class="em">'+esc(x.email||"")+(x.phone?" &middot; "+esc(x.phone):"")+(x.address?" &middot; "+esc(x.address):"")+'</div>'+
         '<div class="meta">'+when(x.created_at)+'</div></div>'+
-        '<div style="text-align:right"><span class="pill stage">'+esc(x.stage_placed||"—")+'</span> '+stPill(x.status)+'</div>'+
-        '</div>'+
+        '<div style="text-align:right"><span class="pill stage">'+esc(x.stage_placed||"—")+'</span> '+stPill(x.status)+'</div></div>'+
         (x.essays?('<details><summary>Read application</summary><pre>'+esc(x.essays)+'</pre></details>'):'')+
         (x.proof?('<details><summary>Evidence / links</summary><pre>'+esc(x.proof)+'</pre></details>'):'')+
-        '</div>';
+        appActions(x)+'</div>';
     }).join("");
   }
   function renderFounders(f){
-    if(!f.length) return '<div class="empty">No founders provisioned yet. They appear here the moment a block is paid.</div>';
-    return '<table><thead><tr><th>Name</th><th>Email</th><th>Stage</th><th>Week</th><th>Status</th><th>Joined</th></tr></thead><tbody>'+
-      f.map(function(x){ return '<tr><td>'+esc(x.name||"—")+'</td><td class="em">'+esc(x.email||"")+'</td><td><span class="pill stage">'+esc(x.stage||"—")+'</span></td><td>'+(x.week||1)+'</td><td>'+stPill(x.status)+'</td><td class="meta">'+when(x.created_at)+'</td></tr>'; }).join("")+
+    if(!f.length) return '<div class="empty">No founders yet. Admitting an application opens a seat here; payment turns it active.</div>';
+    return '<table><thead><tr><th>Name</th><th>Email</th><th>Chamber</th><th>Week</th><th>Standing</th><th>Placement</th></tr></thead><tbody>'+
+      f.map(function(x){ return '<tr><td>'+esc(x.name||"—")+'</td><td class="em">'+esc(x.email||"")+'</td>'+
+        '<td>'+stPill_stage(x.stage)+'</td><td>'+(x.week||1)+'</td><td>'+stPill(x.status)+'</td>'+
+        '<td><div class="cellacts">'+stageSel("fstage", x.id, x.stage||"Seeker")+
+        '<input class="fweek" data-id="'+x.id+'" type="number" min="1" value="'+(x.week||1)+'" style="width:56px" />'+
+        '<button class="mini save" data-fact="place" data-id="'+x.id+'">Save</button></div></td></tr>'; }).join("")+
       '</tbody></table>';
   }
+  function stPill_stage(s){ return '<span class="pill stage">'+esc(s||"—")+'</span>'; }
   function renderPayments(p){
     if(!p.length) return '<div class="empty">No payments recorded yet.</div>';
-    return '<table><thead><tr><th>Email</th><th>Stage</th><th>Amount</th><th>Status</th><th>When</th></tr></thead><tbody>'+
-      p.map(function(x){ return '<tr><td class="em">'+esc(x.email||"")+'</td><td><span class="pill stage">'+esc(x.stage||"—")+'</span></td><td>'+money(x.amount)+'</td><td>'+stPill(x.status)+'</td><td class="meta">'+when(x.created_at)+'</td></tr>'; }).join("")+
+    return '<table><thead><tr><th>Email</th><th>Chamber</th><th>Amount</th><th>Status</th><th>When</th></tr></thead><tbody>'+
+      p.map(function(x){ return '<tr><td class="em">'+esc(x.email||"")+'</td><td>'+stPill_stage(x.stage)+'</td><td>'+money(x.amount)+'</td><td>'+stPill(x.status)+'</td><td class="meta">'+when(x.created_at)+'</td></tr>'; }).join("")+
       '</tbody></table>';
   }
 
-  // wiring
-  document.getElementById("open").addEventListener("click", function(){ token = document.getElementById("tok").value.trim(); if(token) load(); });
+  // event delegation for action buttons
+  document.getElementById("view").addEventListener("click", function(e){
+    var b = e.target && e.target.closest ? e.target.closest("button[data-act],button[data-fact]") : null;
+    if(!b) return;
+    var id = b.getAttribute("data-id");
+    if(b.hasAttribute("data-act")){
+      var act = b.getAttribute("data-act");
+      var payload = { action: act, application_id: id };
+      if(act==="admit"){ var s=document.querySelector('.chsel[data-id="'+id+'"]'); payload.stage = s?s.value:"Seeker"; }
+      doWrite(payload, b);
+    } else if(b.getAttribute("data-fact")==="place"){
+      var st=document.querySelector('.fstage[data-id="'+id+'"]'), wk=document.querySelector('.fweek[data-id="'+id+'"]');
+      doWrite({ action:"place", founder_id:id, stage: st?st.value:undefined, week: wk?parseInt(wk.value,10):undefined }, b);
+    }
+  });
+
+  document.getElementById("open").addEventListener("click", function(){ token=document.getElementById("tok").value.trim(); if(token) load(); });
   document.getElementById("tok").addEventListener("keydown", function(e){ if(e.key==="Enter"){ token=this.value.trim(); if(token) load(); } });
   document.getElementById("refresh").addEventListener("click", function(){ if(token) load(); });
   Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(t){
-    t.addEventListener("click", function(){
-      Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(o){ o.classList.remove("on"); });
-      t.classList.add("on"); TAB = t.getAttribute("data-t"); render();
-    });
+    t.addEventListener("click", function(){ Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(o){o.classList.remove("on");}); t.classList.add("on"); TAB=t.getAttribute("data-t"); render(); });
   });
 })();
 </script>

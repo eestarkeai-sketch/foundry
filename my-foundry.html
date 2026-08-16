@@ -55,6 +55,7 @@
   .sess .t{font-size:15px; margin-top:3px}
   .sess .m{color:var(--faint); font-size:12.5px; margin-top:3px}
   .empty{color:var(--faint); font-size:14px; padding:16px 0}
+  .paybtn{display:block; text-align:center; text-decoration:none; margin-top:20px; background:linear-gradient(180deg,var(--ember2),var(--ember)); color:#1a120c; font-weight:600; padding:14px 18px; border-radius:11px}
   .foot{margin-top:30px; text-align:center; color:var(--faint); font-size:12px; letter-spacing:0.05em}
   .foot .m{font-family:var(--serif); letter-spacing:0.2em; color:var(--dim)}
 </style>
@@ -90,6 +91,17 @@
     <button class="ghost" id="signout1">Sign out</button>
   </div>
 
+  <!-- admitted, awaiting payment -->
+  <div id="awaiting" class="card hide">
+    <div class="top">
+      <div class="who">Signed in as <b id="awEmail"></b></div>
+      <button class="ghost" id="signout3">Sign out</button>
+    </div>
+    <h2 id="awHello">You&rsquo;re admitted.</h2>
+    <p class="lede">Your place is held in <b id="awStage">the Seeker</b> chamber. Access opens the moment your first five-week block is paid &mdash; the climb starts there.</p>
+    <a class="paybtn" href="/portal.html">Pay your block &amp; open the Foundry &#8250;</a>
+  </div>
+
   <!-- dashboard -->
   <div id="dash" class="card hide">
     <div class="top">
@@ -122,7 +134,7 @@
     auth: { flowType: "implicit", detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
   });
 
-  function show(id){ ["loading","signin","sent","noseat","dash"].forEach(function(x){
+  function show(id){ ["loading","signin","sent","noseat","awaiting","dash"].forEach(function(x){
     document.getElementById(x).classList.toggle("hide", x!==id); }); }
   function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
   function when(s){ if(!s) return ""; try{ return new Date(s).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return s; } }
@@ -137,6 +149,12 @@
         show("noseat"); return;
       }
       var f = j.founder;
+      if(f.status === "awaiting_payment" || f.status === "unpaid"){
+        document.getElementById("awEmail").textContent = j.email || f.email || "";
+        document.getElementById("awHello").textContent = f.name ? ("You’re admitted, " + f.name.split(" ")[0] + ".") : "You’re admitted.";
+        document.getElementById("awStage").textContent = "the " + (f.stage || "Seeker");
+        show("awaiting"); return;
+      }
       document.getElementById("dashEmail").textContent = j.email || f.email || "";
       document.getElementById("hello").textContent = f.name ? ("Welcome back, " + f.name.split(" ")[0] + ".") : "Welcome back.";
       document.getElementById("tStage").textContent = f.stage || "Seeker";
@@ -181,6 +199,7 @@
   document.getElementById("email").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("send").click(); });
   document.getElementById("backToSignin").addEventListener("click", function(){ show("signin"); });
   document.getElementById("signout1").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
+  document.getElementById("signout3").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
   document.getElementById("signout2").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
 
   route();
