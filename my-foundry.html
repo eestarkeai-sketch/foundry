@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Foundry &middot; Starke Foundry</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0d0b0a; --panel:#161311; --panel2:#1d1917; --line:#2a2523;
+    --ink:#f3ede6; --dim:#b8afa5; --faint:#8a807a;
+    --ember:#e8763a; --ember2:#f0a35e; --gold:#c9a24a; --ok:#7bbf6a; --bad:#d9705f;
+    --serif:'Fraunces',Georgia,serif; --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(1100px 560px at 50% -12%, rgba(232,118,58,0.09), transparent 60%); min-height:100vh;}
+  a{color:var(--ember2); text-decoration:none}
+  .wrap{max-width:680px; margin:0 auto; padding:52px 22px 90px}
+  .brand{text-align:center; margin-bottom:36px}
+  .brand .k{font-size:11px; letter-spacing:0.36em; color:var(--ember); font-weight:700}
+  .brand h1{font-family:var(--serif); font-weight:600; font-size:28px; letter-spacing:0.18em; margin:4px 0 0}
+  .brand h1 span{color:var(--ember)}
+  .card{background:linear-gradient(180deg,var(--panel),#131010); border:1px solid var(--line); border-radius:18px; padding:30px 30px 26px; margin-bottom:16px}
+  h2{font-family:var(--serif); font-weight:400; font-size:27px; margin:0 0 8px}
+  p.lede{color:var(--dim); font-size:15px; margin:0 0 22px}
+  label{display:block; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--faint); margin:0 0 7px}
+  input[type=email]{width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--ink);
+    border-radius:11px; padding:13px 15px; font-family:var(--sans); font-size:15.5px}
+  input[type=email]:focus{outline:none; border-color:var(--ember)}
+  button{width:100%; margin-top:14px; background:linear-gradient(180deg,var(--ember2),var(--ember)); color:#1a120c;
+    font-weight:600; border:none; border-radius:11px; padding:14px 18px; font-size:15.5px; cursor:pointer; font-family:var(--sans)}
+  button.ghost{background:transparent; color:var(--dim); border:1px solid var(--line); width:auto; padding:9px 16px; font-size:13.5px; margin:0}
+  .msg{margin-top:16px; font-size:14px; min-height:20px}
+  .msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+  .hide{display:none}
+
+  .top{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px}
+  .who{color:var(--faint); font-size:13px}
+  .who b{color:var(--dim); font-weight:600}
+  .climb{display:flex; gap:12px; flex-wrap:wrap; margin:4px 0 8px}
+  .tile{flex:1; min-width:150px; background:var(--panel2); border:1px solid var(--line); border-radius:14px; padding:16px 18px}
+  .tile .lbl{font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--faint)}
+  .tile .val{font-family:var(--serif); font-size:24px; margin-top:4px}
+  .tile .val.ember{color:var(--ember2)}
+  .pill{display:inline-block; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; padding:3px 11px; border-radius:999px; border:1px solid #2f4a2a; color:var(--ok)}
+  .pill.warn{border-color:#4a3a1f; color:var(--gold)}
+  .sec-h{font-family:var(--serif); font-size:18px; margin:26px 0 10px}
+  .sess{border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:10px}
+  .sess .w{color:var(--ember2); font-size:12px; letter-spacing:0.1em; text-transform:uppercase}
+  .sess .t{font-size:15px; margin-top:3px}
+  .sess .m{color:var(--faint); font-size:12.5px; margin-top:3px}
+  .empty{color:var(--faint); font-size:14px; padding:16px 0}
+  .foot{margin-top:30px; text-align:center; color:var(--faint); font-size:12px; letter-spacing:0.05em}
+  .foot .m{font-family:var(--serif); letter-spacing:0.2em; color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><div class="k">STARKE</div><h1>FO<span>U</span>NDRY</h1></div>
+
+  <!-- loading -->
+  <div id="loading" class="card"><p class="lede" style="margin:0">Opening your Foundry&hellip;</p></div>
+
+  <!-- signed out -->
+  <div id="signin" class="card hide">
+    <h2>Enter your Foundry.</h2>
+    <p class="lede">Sign in with the email you were admitted and paid under. We&rsquo;ll send you a one-tap link &mdash; no password to remember.</p>
+    <label>Email</label>
+    <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+    <button id="send">Send my sign-in link</button>
+    <div id="signinMsg" class="msg"></div>
+  </div>
+
+  <!-- sent -->
+  <div id="sent" class="card hide">
+    <h2>Check your email.</h2>
+    <p class="lede">We sent a sign-in link to <b id="sentTo"></b>. Open it on this device and you&rsquo;ll land right back here, inside your Foundry.</p>
+    <button class="ghost" id="backToSignin">Use a different email</button>
+  </div>
+
+  <!-- no seat -->
+  <div id="noseat" class="card hide">
+    <h2>No seat under that email.</h2>
+    <p class="lede">You&rsquo;re signed in as <b id="noseatEmail"></b>, but we don&rsquo;t see a paid Foundry seat there yet. Access opens when your first block is paid &mdash; use the same email you paid with. Questions? <a href="mailto:ethan@ethanstarke.com">Reach Ethan.</a></p>
+    <button class="ghost" id="signout1">Sign out</button>
+  </div>
+
+  <!-- dashboard -->
+  <div id="dash" class="card hide">
+    <div class="top">
+      <div class="who">Signed in as <b id="dashEmail"></b></div>
+      <button class="ghost" id="signout2">Sign out</button>
+    </div>
+    <h2 id="hello">Welcome back.</h2>
+    <p class="lede" id="dashLede">Your place is held. Here&rsquo;s where you stand.</p>
+    <div class="climb">
+      <div class="tile"><div class="lbl">Chamber</div><div class="val ember" id="tStage">&mdash;</div></div>
+      <div class="tile"><div class="lbl">Week</div><div class="val" id="tWeek">&mdash;</div></div>
+      <div class="tile"><div class="lbl">Standing</div><div class="val" id="tStatus" style="font-size:16px"><span class="pill" id="statusPill">&mdash;</span></div></div>
+    </div>
+    <div class="sec-h">Your sessions</div>
+    <div id="sessions"></div>
+  </div>
+
+  <div class="foot"><div class="m">STARKE FOUNDRY</div>Build the founder before the company.</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  var URL_ = "https://dxkmdjdkwmarifzelakr.supabase.co";
+  var KEY  = "sb_publishable_cgxjr49Fp01dLdEvycazwQ_D1s6eqKH";
+  var MEMBER = URL_ + "/functions/v1/member-data";
+  var REDIRECT = "https://foundry.ethanstarke.com/my-foundry.html";
+
+  var sb = window.supabase.createClient(URL_, KEY, {
+    auth: { flowType: "implicit", detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+  });
+
+  function show(id){ ["loading","signin","sent","noseat","dash"].forEach(function(x){
+    document.getElementById(x).classList.toggle("hide", x!==id); }); }
+  function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  function when(s){ if(!s) return ""; try{ return new Date(s).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return s; } }
+
+  async function loadDash(session){
+    show("loading");
+    try{
+      var r = await fetch(MEMBER, { headers: { Authorization: "Bearer " + session.access_token } });
+      var j = await r.json();
+      if(!j || j.founder == null){
+        document.getElementById("noseatEmail").textContent = j && j.email ? j.email : (session.user && session.user.email) || "";
+        show("noseat"); return;
+      }
+      var f = j.founder;
+      document.getElementById("dashEmail").textContent = j.email || f.email || "";
+      document.getElementById("hello").textContent = f.name ? ("Welcome back, " + f.name.split(" ")[0] + ".") : "Welcome back.";
+      document.getElementById("tStage").textContent = f.stage || "Seeker";
+      document.getElementById("tWeek").textContent = f.week || 1;
+      var pill = document.getElementById("statusPill");
+      pill.textContent = f.status || "active";
+      pill.className = "pill" + ((f.status==="active") ? "" : " warn");
+      var sess = j.sessions || [];
+      var el = document.getElementById("sessions");
+      if(!sess.length){ el.innerHTML = '<div class="empty">No sessions scheduled yet. Your coach will place them here as your block begins.</div>'; }
+      else { el.innerHTML = sess.map(function(s){
+        return '<div class="sess"><div class="w">Week '+(s.week||"")+'</div>'+
+          '<div class="t">'+(s.scheduled_at?when(s.scheduled_at):"To be scheduled")+'</div>'+
+          (s.zoom_number?('<div class="m">Zoom '+esc(s.zoom_number)+(s.passcode?(" &middot; passcode "+esc(s.passcode)):"")+'</div>'):'')+
+          (s.note?('<div class="m">'+esc(s.note)+'</div>'):'')+'</div>';
+      }).join(""); }
+      show("dash");
+    }catch(e){ document.getElementById("noseatEmail").textContent = (session.user&&session.user.email)||""; show("noseat"); }
+  }
+
+  async function route(){
+    var res = await sb.auth.getSession();
+    var session = res.data.session;
+    if(session){ loadDash(session); } else { show("signin"); }
+  }
+
+  sb.auth.onAuthStateChange(function(event, session){
+    if(session){ loadDash(session); }
+    else if(event === "SIGNED_OUT"){ show("signin"); }
+  });
+
+  document.getElementById("send").addEventListener("click", async function(){
+    var email = (document.getElementById("email").value||"").trim();
+    var msg = document.getElementById("signinMsg");
+    if(!email){ msg.className="msg bad"; msg.textContent="Enter your email first."; return; }
+    this.disabled = true; msg.className="msg"; msg.textContent="Sending…";
+    var out = await sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: REDIRECT, shouldCreateUser: true } });
+    this.disabled = false;
+    if(out.error){ msg.className="msg bad"; msg.textContent = out.error.message || "Could not send the link."; return; }
+    document.getElementById("sentTo").textContent = email; show("sent");
+  });
+  document.getElementById("email").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("send").click(); });
+  document.getElementById("backToSignin").addEventListener("click", function(){ show("signin"); });
+  document.getElementById("signout1").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
+  document.getElementById("signout2").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
+
+  route();
+})();
+</script>
+</body>
+</html>
