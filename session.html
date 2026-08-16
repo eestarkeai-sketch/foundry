@@ -43,7 +43,7 @@
   if(!mn){ msg("This session link is missing its meeting number. Please use the link from your portal.", true); return; }
   if(typeof ZoomMtg === "undefined"){ msg("Could not load the meeting client. Check your connection and refresh.", true); return; }
 
-  fetch("https://www.ethanstarke.com/_functions/zoomSig?cb=" + Date.now(), {
+  fetch("https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/zoom-sig", {
     method: "POST",
     cache: "no-store",
     body: JSON.stringify({ meetingNumber: mn })
