@@ -292,6 +292,18 @@
     <div class="err" id="err4"></div>
   </section>
 </form>
+
+<!-- Notification-only email: fires after the full application is saved to the admin desk -->
+<form id="notify" action="https://formsubmit.co/e8850b7408d0d73a5c64368b3c29b7fe" method="POST" style="display:none">
+  <input type="hidden" name="_subject" value="A Foundry application arrived &mdash; review it on the admin desk" />
+  <input type="hidden" name="_captcha" value="false" />
+  <input type="hidden" name="_template" value="table" />
+  <input type="hidden" name="_next" value="https://foundry.ethanstarke.com/apply.html?done=1" />
+  <input type="hidden" name="Applicant" id="n_name" value="" />
+  <input type="hidden" name="Email" id="n_email" value="" />
+  <input type="hidden" name="Eligible stage" id="n_stage" value="" />
+  <input type="hidden" name="Note" value="An application just arrived and is saved on your admin desk. Open Foundry Admin > Applications to read the essays, proof, and AI first-pass, then Welcome, Reject, or Block." />
+</form>
 </div>
 
 <div id="thanks" style="display:none">
@@ -482,6 +494,71 @@
     document.getElementById("intro").style.display="none";
     document.getElementById("thanks").style.display="block";
   }
+
+  // ---- Corrected submit: save the FULL application to the live admin desk, then send a short notice ----
+  // Fail-safe: if the backend save fails for any reason, we fall back to emailing Ethan the full
+  // application (native FormSubmit) so an application can never be silently lost.
+  var EP = "https://www.ethanstarke.com/_functions/";
+  var appForm = document.getElementById("app");
+  var notifyForm = document.getElementById("notify");
+  var submitting = false;
+  function gv(sel){ var e=document.querySelector(sel); return e ? (e.value||"").trim() : ""; }
+
+  function gatherApplication(){
+    var pl = computePlacement();
+    var stage = pl.tier; // Seeker | Builder | Sovereign
+    var name = gv('[name="Full name"]');
+    var email = gv('[name="Email"]');
+    var address = gv('[name="Location"]');
+    var lines = QUESTIONS.map(function(q){
+      var lv = val[q.id]; var idx = {a:0,b:1,c:2,d:3}[lv];
+      var ans = (idx!=null && q.o[idx]) ? q.o[idx] : "(no answer)";
+      return "• "+q.h+": "+ans+(lv==="d"?" [evidence-backed]":"");
+    }).join("\n");
+    var essays =
+      "WHAT THEY ARE BUILDING:\n"+gv('[name="What you are building"]')+"\n\n"+
+      "WHY NOW / WHY THEM:\n"+gv('[name="Why now"]')+"\n\n"+
+      "SELF-REPORTED CURRENT STAGE: "+gv('[name="Current stage"]')+"\n\n"+
+      "THIRTY-DAY TEST:\n"+gv('[name="Thirty-day test"]')+"\n\n"+
+      "ESSAY 1 — THE SPECIFIC SCENE:\n"+gv('[name="Essay 1 the specific scene"]')+"\n\n"+
+      "ESSAY 2 — THE HONEST FAILURE:\n"+gv('[name="Essay 2 the honest failure"]')+"\n\n"+
+      "ESSAY 3 — YOUR NON-OBVIOUS TRUTH:\n"+gv('[name="Essay 3 the non-obvious truth"]')+"\n\n"+
+      "SELF-ASSESSMENT (13 markers):\n"+lines;
+    var linkVals = Array.prototype.map.call(document.querySelectorAll('[name^="Or link "]'), function(i){
+      var lbl=i.name.replace(/^Or link /,""); var v=(i.value||"").trim(); return v?(lbl+": "+v):""; }).filter(Boolean);
+    var fileNotes = Array.prototype.map.call(document.querySelectorAll('input[type="file"][name^="Proof "]'), function(i){
+      var lbl=i.name.replace(/^Proof /,""); return (i.files&&i.files.length)?(lbl+": [file attached: "+i.files[0].name+"]"):""; }).filter(Boolean);
+    var proofLinks = linkVals.concat(fileNotes).join("\n") || "(no evidence-backed markers claimed; essays carry the weight)";
+    return {
+      name:name, fullName:name, email:email, phone:"",
+      address:address, location:address, city:address,
+      stagePlaced:stage, stage:stage, placed:stage, tier:stage,
+      status:"submitted", essays:essays, essayText:essays,
+      proof:proofLinks, proofLinks:proofLinks,
+      c1:pl.c1, c2:pl.c2, slope:(pl.c1+" of 7 / "+pl.c2+" of 6"),
+      currentStage:gv('[name="Current stage"]'), source:"apply.html"
+    };
+  }
+
+  appForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    if(submitting) return; submitting=true;
+    var btn=document.getElementById("submitBtn");
+    if(btn){ btn.disabled=true; btn.textContent="Submitting…"; }
+    var data; try{ data=gatherApplication(); }catch(err){ appForm.submit(); return; }
+    var done=false;
+    function notifyAndFinish(){ if(done)return; done=true;
+      try{ document.getElementById("n_name").value=data.name;
+           document.getElementById("n_email").value=data.email;
+           document.getElementById("n_stage").value=data.stagePlaced; }catch(_){}
+      notifyForm.submit(); }
+    function fullFallback(){ if(done)return; done=true; appForm.submit(); }
+    fetch(EP+"saveApplicantAddress?cb="+Date.now(), {method:"POST", cache:"no-store", body: JSON.stringify(data)})
+      .then(function(r){ return r.ok; })
+      .then(function(ok){ ok ? notifyAndFinish() : fullFallback(); })
+      .catch(function(){ fullFallback(); });
+    setTimeout(function(){ fullFallback(); }, 9000);
+  }, true);
 })();
 </script>
 <script>
