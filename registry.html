@@ -98,8 +98,9 @@
 
 <script>
 (function(){
-  // The register. Each entry: {id, name, stage, date}. Empty until the first founder clears the summit.
+  // The register. Each entry: {id, name, stage, date}. Loaded live from the public-registry function.
   var HOLDERS = [];
+  var REG_URL = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/public-registry";
 
   function render(){
     var wrap = document.getElementById("tablewrap");
@@ -133,11 +134,18 @@
   document.getElementById("vbtn").addEventListener("click", function(){ verify(document.getElementById("vid").value); });
   document.getElementById("vid").addEventListener("keydown", function(e){ if(e.key==="Enter") verify(this.value); });
 
-  // deep link: registry.html?id=SF-0001 auto-verifies
   var pid = new URLSearchParams(location.search).get("id");
-  if(pid){ document.getElementById("vid").value = pid; verify(pid); }
 
-  render();
+  function afterLoad(){
+    render();
+    if(pid){ document.getElementById("vid").value = pid; verify(pid); }
+  }
+
+  render(); // paint the honest empty state immediately
+  fetch(REG_URL, { headers: { "Accept": "application/json" } })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if(d && Array.isArray(d.holders)) HOLDERS = d.holders; afterLoad(); })
+    .catch(function(){ afterLoad(); });
 })();
 </script>
 </body>

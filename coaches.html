@@ -133,7 +133,7 @@
 
   <div class="banner" id="tplBanner">The bench is being assembled. The first Foundry coaches will be named here soon.</div>
 
-  <p class="cta">Are you an operator who builds founders, and this is your kind of work? <a href="/coach.html">Join the bench.</a></p>
+  <p class="cta">Are you an operator who builds founders, and this is your kind of work? <a href="/coaches-apply.html">Apply to the bench.</a> Already a coach? <a href="/coach.html">Sign in.</a></p>
 </div>
 
 
@@ -143,29 +143,35 @@
   // The bench. To add a coach, add an object to COACHES and it renders itself.
   //   name, role, bio, photo (a "/photo.jpg" in the repo or "" for the initial), delivers.
   // While COACHES is empty the page shows a dignified "bench being assembled" state.
-  var COACHES = [
-    // { name:"Real Coach Name", role:"Their domain", bio:"One to three plain, specific sentences.", photo:"/coach-1.jpg", delivers:"Sovereign, weeks 31 to 45" },
-  ];
+  var COACHES_URL = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/public-coaches";
 
   function initial(n){ n=(n||"").trim(); return n? n[0].toUpperCase() : "?"; }
   function esc(s){ return String(s||"").replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
 
-  var isEmpty = !COACHES.length;
   var g = document.getElementById("grid");
-  COACHES.forEach(function(c){
-    var el = document.createElement("div");
-    el.className = "coach";
-    var pic = c.photo ? '<img src="'+esc(c.photo)+'" alt="'+esc(c.name)+'" onerror="this.parentNode.innerHTML=\'<span>'+esc(initial(c.name))+'</span>\'" />' : '<span>'+esc(initial(c.name))+'</span>';
-    el.innerHTML =
-      '<div class="ph">'+pic+'</div>'+
-      '<div class="nm">'+esc(c.name)+'</div>'+
-      '<div class="role">'+esc(c.role)+'</div>'+
-      '<div class="bio">'+esc(c.bio)+'</div>'+
-      (c.delivers ? '<div class="delivers">Delivers: <b>'+esc(c.delivers)+'</b></div>' : '');
-    g.appendChild(el);
-  });
-  // Show the "being assembled" note only while the bench is empty.
-  document.getElementById("tplBanner").style.display = isEmpty ? "block" : "none";
+  function render(list){
+    g.innerHTML = "";
+    (list||[]).forEach(function(c){
+      var el = document.createElement("div");
+      el.className = "coach";
+      var pic = c.photo ? '<img src="'+esc(c.photo)+'" alt="'+esc(c.name)+'" onerror="this.parentNode.innerHTML=\'<span>'+esc(initial(c.name))+'</span>\'" />' : '<span>'+esc(initial(c.name))+'</span>';
+      el.innerHTML =
+        '<div class="ph">'+pic+'</div>'+
+        '<div class="nm">'+esc(c.name)+'</div>'+
+        '<div class="role">'+esc(c.role)+'</div>'+
+        '<div class="bio">'+esc(c.bio)+'</div>'+
+        (c.delivers ? '<div class="delivers">Delivers: <b>'+esc(c.delivers)+'</b></div>' : '');
+      g.appendChild(el);
+    });
+    // Show the "being assembled" note only while the bench is empty.
+    document.getElementById("tplBanner").style.display = (list && list.length) ? "none" : "block";
+  }
+
+  render([]); // honest empty state first
+  fetch(COACHES_URL, { headers: { "Accept": "application/json" } })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ render(d && Array.isArray(d.coaches) ? d.coaches : []); })
+    .catch(function(){ render([]); });
 })();
 </script>
 

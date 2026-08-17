@@ -115,6 +115,7 @@
   var BASE = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/";
   var READ = BASE + "admin-data";
   var WRITE = BASE + "admin-write";
+  var CERTIFY = BASE + "admin-certify";
   var STAGES = ["Seeker","Builder","Sovereign"];
   var token = "", DATA = null, TAB = "apps";
 
@@ -144,6 +145,17 @@
       if(!r.ok || j.error){ msg("Action failed: "+(j.error||r.status), false); if(btn) btn.disabled=false; return; }
       msg("Done.", true); await load();
     }catch(e){ msg("Action failed: "+e.message, false); if(btn) btn.disabled=false; }
+  }
+
+  async function doCertify(founderId, btn){
+    if(!confirm("Confer the certificate for their current chamber? This assigns a permanent credential ID and publishes them to the registry.")) return;
+    if(btn){ btn.disabled=true; }
+    try{
+      var r = await fetch(CERTIFY, { method:"POST", headers:{ "x-admin-token": token, "Content-Type":"application/json" }, body: JSON.stringify({ founder_id: founderId }) });
+      var j = await r.json();
+      if(!r.ok || j.error){ msg("Certify failed: "+(j.error||r.status), false); if(btn) btn.disabled=false; return; }
+      msg("Certified "+(j.credential_id||"")+(j.already?" (already on record)":"")+".", true); await load();
+    }catch(e){ msg("Certify failed: "+e.message, false); if(btn) btn.disabled=false; }
   }
 
   function render(){
@@ -188,7 +200,8 @@
         '<td>'+coachSelect(x, coaches||[])+'</td>'+
         '<td><div class="cellacts">'+stageSel("fstage", x.id, x.stage||"Seeker")+
         '<input class="fweek" data-id="'+x.id+'" type="number" min="1" value="'+(x.week||1)+'" style="width:56px" />'+
-        '<button class="mini save" data-fact="place" data-id="'+x.id+'">Save</button></div></td></tr>'; }).join("")+
+        '<button class="mini save" data-fact="place" data-id="'+x.id+'">Save</button>'+
+        '<button class="mini" data-fact="certify" data-id="'+x.id+'" title="Confer certificate + publish to registry">Certify</button></div></td></tr>'; }).join("")+
       '</tbody></table>';
   }
   function coachSelect(f, coaches){
@@ -242,6 +255,8 @@
     } else if(b.getAttribute("data-fact")==="place"){
       var st=document.querySelector('.fstage[data-id="'+id+'"]'), wk=document.querySelector('.fweek[data-id="'+id+'"]');
       doWrite({ action:"place", founder_id:id, stage: st?st.value:undefined, week: wk?parseInt(wk.value,10):undefined }, b);
+    } else if(b.getAttribute("data-fact")==="certify"){
+      doCertify(id, b);
     }
   });
   document.getElementById("view").addEventListener("change", function(e){
