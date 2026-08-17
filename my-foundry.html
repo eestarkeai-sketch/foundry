@@ -66,6 +66,30 @@
   .mrow button{width:auto; margin-top:0; padding:11px 18px}
   .foot{margin-top:30px; text-align:center; color:var(--faint); font-size:12px; letter-spacing:0.05em}
   .foot .m{font-family:var(--serif); letter-spacing:0.2em; color:var(--dim)}
+
+  .launch{display:block; text-align:center; text-decoration:none; margin-top:12px; background:linear-gradient(180deg,var(--ember2),var(--ember)); color:#1a120c; font-weight:600; padding:12px 18px; border-radius:11px}
+  .wk{border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:10px; background:var(--panel2)}
+  .wk.locked{opacity:0.62}
+  .wk-top{display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .wk-t{font-size:15px; font-weight:600}
+  .chip{display:inline-block; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; padding:3px 10px; border-radius:999px; border:1px solid var(--line); color:var(--faint); white-space:nowrap}
+  .chip.current{border-color:#4a3a1f; color:var(--gold)}
+  .chip.complete{border-color:#2f4a2a; color:var(--ok)}
+  .wk-lock{color:var(--faint); font-size:12.5px; margin-top:8px}
+  .wk-body{margin-top:10px}
+  .wk-read{color:var(--dim); font-size:13.5px; margin:8px 0}
+  .wk-prompt{font-size:14.5px; margin:8px 0}
+  .wk-done{color:var(--faint); font-size:13px; margin:6px 0}
+  .wk-bring{color:var(--dim); font-size:13.5px; margin:6px 0}
+  .wk-sub{background:var(--bg); border:1px solid var(--line); border-radius:11px; padding:12px 14px; margin-top:8px; font-size:14px; color:var(--dim); white-space:pre-wrap}
+  .wk-note{color:var(--gold); font-size:13px; margin-top:8px}
+  .wk-form{margin-top:12px}
+  .wk-form label{margin-top:10px}
+  .wk-form textarea{width:100%; background:var(--bg); border:1px solid var(--line); color:var(--ink); border-radius:11px; padding:12px 14px; font-family:var(--sans); font-size:15px; min-height:96px; resize:vertical}
+  .wk-form input[type=url]{width:100%; background:var(--bg); border:1px solid var(--line); color:var(--ink); border-radius:11px; padding:12px 14px; font-family:var(--sans); font-size:15px}
+  .wk-form textarea:focus, .wk-form input[type=url]:focus{outline:none; border-color:var(--ember)}
+  .wk-form button{width:auto; padding:11px 20px}
+  .wk-err{color:var(--bad); font-size:13.5px; margin-top:8px}
 </style>
 </head>
 <body>
@@ -125,6 +149,8 @@
     </div>
     <div class="sec-h">Your sessions</div>
     <div id="sessions"></div>
+    <div class="sec-h">Your Program</div>
+    <div id="program"></div>
     <div class="sec-h">Messages with your coach</div>
     <div id="thread" class="thread"></div>
     <div class="mrow"><input id="minput" placeholder="Message your coach&hellip;" autocomplete="off" /><button id="msend">Send</button></div>
@@ -141,6 +167,8 @@
   var KEY  = "sb_publishable_cgxjr49Fp01dLdEvycazwQ_D1s6eqKH";
   var MEMBER = URL_ + "/functions/v1/member-data";
   var SEND = URL_ + "/functions/v1/messages-send";
+  var CURR = URL_ + "/functions/v1/curriculum-data";
+  var SUBMIT = URL_ + "/functions/v1/deliverable-submit";
   var REDIRECT = "https://starkefoundry.com/my-foundry.html";
 
   var sb = window.supabase.createClient(URL_, KEY, {
@@ -181,8 +209,10 @@
       else { el.innerHTML = sess.map(function(s){
         return '<div class="sess"><div class="w">Week '+(s.week||"")+'</div>'+
           '<div class="t">'+(s.scheduled_at?when(s.scheduled_at):"To be scheduled")+'</div>'+
-          (s.zoom_number?('<div class="m">Zoom '+esc(s.zoom_number)+(s.passcode?(" &middot; passcode "+esc(s.passcode)):"")+'</div>'):'')+
-          (s.note?('<div class="m">'+esc(s.note)+'</div>'):'')+'</div>';
+          (s.zoom_number?('<div class="m">Zoom '+esc(s.zoom_number)+'</div>'):'')+
+          (s.note?('<div class="m">'+esc(s.note)+'</div>'):'')+
+          (s.zoom_number?('<a class="launch" href="/session.html?mn='+encodeURIComponent(s.zoom_number)+'&pwd='+encodeURIComponent(s.passcode||"")+'&name='+encodeURIComponent(f.name||"")+'">Join your session &#8250;</a>'):'')+
+          '</div>';
       }).join(""); }
       var msgs = j.messages || [];
       document.getElementById("thread").innerHTML = msgs.length ? msgs.map(function(m){
@@ -190,7 +220,90 @@
         return '<div class="bub '+(mine?"me":"them")+'"><div class="who2">'+esc(m.from_name||m.role||"")+'</div>'+esc(m.body||"")+'</div>';
       }).join("") : '<div style="color:var(--faint);font-size:14px;padding:8px 0">No messages yet. Say hello to your coach.</div>';
       show("dash");
+      loadProgram();
     }catch(e){ document.getElementById("noseatEmail").textContent = (session.user&&session.user.email)||""; show("noseat"); }
+  }
+
+  function weekHtml(w){
+    var wk = w.week;
+    var theme = esc(w.theme||"");
+    var state = !w.unlocked ? "Locked" : (w.complete ? "Complete" : "Current");
+    var chipCls = !w.unlocked ? "" : (w.complete ? "complete" : "current");
+    var head = '<div class="wk '+(w.unlocked?"":"locked")+'">'+
+      '<div class="wk-top"><div class="wk-t">Week '+esc(wk)+' — '+theme+'</div>'+
+      '<span class="chip '+chipCls+'">'+state+'</span></div>';
+    if(!w.unlocked){
+      return head + '<div class="wk-lock">Locked — unlocks when you complete the week before.</div></div>';
+    }
+    var body = '<div class="wk-body">';
+    body += '<div class="wk-read">This week you read: '+esc(w.your_reading||"")+'  &middot;  Market: '+esc(w.market_reading||"")+'</div>';
+    body += '<div class="wk-prompt">'+esc(w.deliverable_prompt||"")+'</div>';
+    body += '<div class="wk-done">What done looks like: '+esc(w.done_looks_like||"")+'</div>';
+    body += '<div class="wk-bring">Bring to your session: '+esc(w.brings_to_session||"")+'</div>';
+    var sub = w.submission;
+    if(w.complete && sub){
+      body += '<div class="wk-sub">'+esc(sub.body||"")+(sub.link?("\n"+esc(sub.link)):"")+'</div>';
+      body += '<div class="wk-done">Submitted'+(sub.submitted_at?(" &middot; "+when(sub.submitted_at)):"")+(sub.status?(" &middot; "+esc(sub.status)):"")+'</div>';
+      if(sub.review_note){ body += '<div class="wk-note">Coach note: '+esc(sub.review_note)+'</div>'; }
+    }
+    var pv = sub ? esc(sub.body||"") : "";
+    var lv = sub ? esc(sub.link||"") : "";
+    body += '<div class="wk-form">';
+    body += '<label>Your deliverable</label>';
+    body += '<textarea id="wkBody'+wk+'" placeholder="Write your deliverable&hellip;">'+pv+'</textarea>';
+    body += '<label>Or a link</label>';
+    body += '<input id="wkLink'+wk+'" type="url" placeholder="https://&hellip;" value="'+lv+'" />';
+    body += '<button id="wkSubmit'+wk+'">'+(w.complete?"Re-submit deliverable":"Submit deliverable")+'</button>';
+    body += '<div class="wk-err" id="wkErr'+wk+'"></div>';
+    body += '</div></div></div>';
+    return head + body;
+  }
+
+  function renderProgram(j){
+    var host = document.getElementById("program");
+    host.innerHTML = j.weeks.map(function(w){ return weekHtml(w); }).join("");
+    j.weeks.forEach(function(w){
+      var btn = document.getElementById("wkSubmit"+w.week);
+      if(btn){ btn.addEventListener("click", function(){ submitDeliverable(w.week); }); }
+    });
+  }
+
+  async function loadProgram(){
+    var host = document.getElementById("program");
+    if(!host) return;
+    var r = await sb.auth.getSession();
+    var t = r.data.session && r.data.session.access_token;
+    if(!t){ host.innerHTML = ""; return; }
+    try{
+      var res = await fetch(CURR, { headers: { Authorization: "Bearer " + t } });
+      var j = await res.json();
+      if(!j || !j.enrolled || !Array.isArray(j.weeks) || !j.weeks.length){
+        host.innerHTML = '<div class="empty">Your weekly program opens here when your block begins.</div>'; return;
+      }
+      renderProgram(j);
+    }catch(e){ host.innerHTML = '<div class="empty">Your program could not be loaded — refresh to try again.</div>'; }
+  }
+
+  async function submitDeliverable(week){
+    var bodyEl = document.getElementById("wkBody"+week);
+    var linkEl = document.getElementById("wkLink"+week);
+    var btn = document.getElementById("wkSubmit"+week);
+    var err = document.getElementById("wkErr"+week);
+    if(err){ err.textContent = ""; }
+    var body = ((bodyEl && bodyEl.value) || "").trim();
+    var link = ((linkEl && linkEl.value) || "").trim();
+    if(!body && !link){ if(err){ err.textContent = "Add your deliverable or a link first."; } return; }
+    var r = await sb.auth.getSession();
+    var t = r.data.session && r.data.session.access_token;
+    if(!t){ if(err){ err.textContent = "Session expired — refresh."; } return; }
+    var orig = btn ? btn.textContent : "";
+    if(btn){ btn.disabled = true; btn.textContent = "Submitting…"; }
+    try{
+      var res = await fetch(SUBMIT, { method:"POST", headers:{ Authorization:"Bearer "+t, "Content-Type":"application/json" }, body: JSON.stringify({ week: week, body: body, link: link }) });
+      var j = await res.json();
+      if(j.error){ if(err){ err.textContent = j.error; } if(btn){ btn.disabled=false; btn.textContent=orig; } return; }
+      loadProgram();
+    }catch(e){ if(err){ err.textContent = "Could not submit — try again."; } if(btn){ btn.disabled=false; btn.textContent=orig; } }
   }
 
   async function route(){
