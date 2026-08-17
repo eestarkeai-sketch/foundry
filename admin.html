@@ -79,6 +79,11 @@
   th{color:var(--faint); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; font-weight:600}
   .cellacts{display:flex; align-items:center; gap:6px}
   .empty{color:var(--faint); font-size:13.5px; padding:24px 4px}
+  .cwk{border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin:10px 0}
+  .cwkh{font-family:var(--serif); font-size:15px; margin-bottom:6px}
+  .cflab{display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--faint); margin:9px 0 3px}
+  .cfin{width:100%; box-sizing:border-box; background:rgba(0,0,0,0.22); color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-family:inherit; font-size:13px; line-height:1.45; resize:vertical}
+  .cwk .save{margin-top:12px}
   .foot{margin-top:34px; color:var(--faint); font-size:12px; letter-spacing:0.04em}
 </style>
 </head>
@@ -104,6 +109,7 @@
       <div class="tab" data-t="founders">Founders</div>
       <div class="tab" data-t="coaches">Coaches</div>
       <div class="tab" data-t="payments">Payments</div>
+      <div class="tab" data-t="curriculum">Curriculum</div>
     </div>
     <div id="view"></div>
     <div class="foot">Operating desk on the Supabase backend. Admit &amp; place opens an awaiting-payment seat; payment turns it active.</div>
@@ -116,6 +122,7 @@
   var READ = BASE + "admin-data";
   var WRITE = BASE + "admin-write";
   var CERTIFY = BASE + "admin-certify";
+  var CURR = BASE + "admin-curriculum";
   var STAGES = ["Seeker","Builder","Sovereign"];
   var token = "", DATA = null, TAB = "apps";
 
@@ -166,7 +173,43 @@
     if(TAB==="apps") v.innerHTML = renderApps(DATA.applications||[]);
     else if(TAB==="founders") v.innerHTML = renderFounders(DATA.founders||[], DATA.coaches||[]);
     else if(TAB==="coaches") v.innerHTML = renderCoaches(DATA.coach_applications||[], DATA.coaches||[]);
+    else if(TAB==="curriculum"){ v.innerHTML = '<div class="empty">Loading curriculum…</div>'; loadCurriculum(); }
     else v.innerHTML = renderPayments(DATA.payments||[]);
+  }
+
+  function loadCurriculum(){
+    fetch(CURR, { headers: { "x-admin-token": token } })
+      .then(function(r){ return r.json(); })
+      .then(function(j){ renderCurriculum(j.weeks||[]); })
+      .catch(function(){ document.getElementById("view").innerHTML = '<div class="empty">Could not load curriculum.</div>'; });
+  }
+  function renderCurriculum(weeks){
+    var v = document.getElementById("view");
+    if(TAB!=="curriculum") return;
+    if(!weeks.length){ v.innerHTML = '<div class="empty">No curriculum rows found.</div>'; return; }
+    var fields = [["theme","Theme",0],["your_reading","Your reading",1],["market_reading","Market reading",1],["deliverable_prompt","Deliverable prompt",1],["done_looks_like","What done looks like",1],["brings_to_session","Brings to session",1]];
+    var curStage = "", html = '<div class="foot" style="margin:0 0 8px">Edit any week and Save. Changes write straight to the live curriculum founders see. Seeker readings and all deliverables are drafts — refine them here.</div>';
+    weeks.forEach(function(w){
+      if(w.stage!==curStage){ curStage=w.stage; html += '<div class="sec">'+esc(curStage)+'</div>'; }
+      html += '<div class="cwk"><div class="cwkh">Week '+w.week+' <span class="meta">&middot; stage week '+esc(w.stage_week||"")+'</span></div>'+
+        fields.map(function(f){
+          var val = esc(w[f[0]]||"");
+          return '<label class="cflab">'+f[1]+'</label>'+
+            (f[2] ? '<textarea class="cfin" data-cf="'+f[0]+'" data-cwk="'+w.week+'" rows="2">'+val+'</textarea>'
+                  : '<input class="cfin" data-cf="'+f[0]+'" data-cwk="'+w.week+'" value="'+val+'" />');
+        }).join('')+
+        '<button class="mini save" data-cwk="'+w.week+'">Save week '+w.week+'</button></div>';
+    });
+    v.innerHTML = html;
+  }
+  function saveCurriculumWeek(week, btn){
+    var payload = { week: parseInt(week,10) };
+    Array.prototype.forEach.call(document.querySelectorAll('.cfin[data-cwk="'+week+'"]'), function(el){ payload[el.getAttribute("data-cf")] = el.value; });
+    if(btn) btn.disabled = true;
+    fetch(CURR, { method:"POST", headers:{ "x-admin-token": token, "Content-Type":"application/json" }, body: JSON.stringify(payload) })
+      .then(function(r){ return r.json(); })
+      .then(function(j){ if(j && j.ok){ msg("Week "+week+" saved.", true); } else { msg("Save failed: "+((j&&j.error)||"unknown"), false); } if(btn) btn.disabled=false; })
+      .catch(function(e){ msg("Save failed: "+e.message, false); if(btn) btn.disabled=false; });
   }
   function stat(n,l){ return '<div class="stat"><b>'+(n||0)+'</b><span>'+l+'</span></div>'; }
 
@@ -242,8 +285,9 @@
 
   // event delegation for action buttons
   document.getElementById("view").addEventListener("click", function(e){
-    var b = e.target && e.target.closest ? e.target.closest("button[data-act],button[data-fact],button[data-cact]") : null;
+    var b = e.target && e.target.closest ? e.target.closest("button[data-act],button[data-fact],button[data-cact],button[data-cwk]") : null;
     if(!b) return;
+    if(b.hasAttribute("data-cwk")){ saveCurriculumWeek(b.getAttribute("data-cwk"), b); return; }
     var id = b.getAttribute("data-id");
     if(b.hasAttribute("data-act")){
       var act = b.getAttribute("data-act");
