@@ -109,7 +109,7 @@
       <div class="tab" data-t="founders">Founders</div>
       <div class="tab" data-t="coaches">Coaches</div>
       <div class="tab" data-t="payments">Payments</div>
-      <div class="tab" data-t="curriculum">Curriculum</div>
+      <div class="tab" data-t="curriculum">Curriculum</div><div class="tab" data-t="ship">Ship</div>
     </div>
     <div id="view"></div>
     <div class="foot">Operating desk on the Supabase backend. Admit &amp; place opens an awaiting-payment seat; payment turns it active.</div>
@@ -315,6 +315,38 @@
   document.getElementById("refresh").addEventListener("click", function(){ if(token) load(); });
   Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(t){
     t.addEventListener("click", function(){ Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(o){o.classList.remove("on");}); t.classList.add("on"); TAB=t.getAttribute("data-t"); render(); });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var ORDERS="https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/admin-orders";
+  function esc(x){return String(x==null?"":x).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"})[c];});}
+  function loadShip(){
+    var view=document.getElementById("view"); if(!view)return;
+    view.innerHTML='<div style="padding:8px 0;color:#8a807a">Loading book orders...</div>';
+    fetch(ORDERS,{headers:{"x-admin-token":(typeof token!=="undefined"?token:"")}})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(!d||d.error){view.innerHTML='<div style="color:#d9705f;padding:8px 0">'+esc(d&&d.error||"error")+'</div>';return;}
+        var rows=d.orders||[], sum=d.summary||{};
+        var chips=Object.keys(sum).map(function(k){return '<span style="display:inline-block;margin:0 8px 6px 0;padding:3px 10px;border:1px solid #2a2523;border-radius:20px;font-size:12px;color:#b8afa5">'+esc(k)+': '+sum[k]+'</span>';}).join("");
+        var head='<tr style="text-align:left;color:#8a807a;font-size:12px"><th style="padding:8px 10px">Founder</th><th>Stage</th><th>Mv</th><th>Books</th><th>Status</th><th>Ship to</th><th>Zinc id</th><th>When</th></tr>';
+        var body=rows.map(function(o){
+          var st=o.status||"";
+          var col=st==="placed"?"#7bbf6a":(st==="failed"?"#d9705f":(String(st).indexOf("needs")===0?"#e8a33e":"#b8afa5"));
+          var ship=o.has_address?(esc(o.ship_city)+(o.ship_state?", "+esc(o.ship_state):"")):'<span style="color:#e8a33e">no address</span>';
+          var when=o.created_at?esc(String(o.created_at).slice(0,10)):"";
+          return '<tr style="border-top:1px solid #1d1917"><td style="padding:8px 10px">'+esc(o.founder_name||o.founder_email||"-")+'<div style="color:#6b625c;font-size:11px">'+esc(o.founder_email)+'</div></td><td>'+esc(o.stage)+'</td><td>'+esc(o.movement)+'</td><td>'+esc(o.book_count)+'</td><td style="color:'+col+'">'+esc(st)+'</td><td>'+ship+'</td><td style="font-size:11px;color:#8a807a">'+esc(o.zinc_order_id)+'</td><td style="font-size:11px;color:#8a807a">'+when+'</td></tr>';
+        }).join("");
+        view.innerHTML='<div style="margin:6px 0 14px">'+chips+'</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">'+head+body+'</table></div>'+(rows.length?"":'<div style="color:#8a807a;padding:10px 0">No book orders yet.</div>');
+      })
+      .catch(function(e){view.innerHTML='<div style="color:#d9705f;padding:8px 0">'+esc(e)+'</div>';});
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest?e.target.closest('[data-t="ship"]'):null;
+    if(!b)return; setTimeout(loadShip,0);
   });
 })();
 </script>
