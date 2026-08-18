@@ -352,5 +352,27 @@
   route();
 })();
 </script>
+
+<div id="foundry-activate" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#15181f;border-top:1px solid #e7c37a;padding:14px 18px;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#f3f5f8;box-shadow:0 -8px 24px rgba(0,0,0,.35)">
+  <div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div style="flex:1;min-width:220px"><b style="color:#e7c37a">Activate your place.</b> <span style="color:#c7ccd6">Add your card to begin. You're charged each five-week cycle; the rate rises by stage as you advance.</span></div>
+    <button id="foundry-activate-btn" style="background:#e7c37a;color:#15181f;border:0;border-radius:8px;padding:11px 20px;font-weight:700;cursor:pointer">Activate &amp; add card</button>
+  </div>
+</div>
+<script>
+(function(){
+  var BASE="https://dxkmdjdkwmarifzelakr.supabase.co";
+  function tok(){try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(/sb-.*-auth-token/.test(k)){var v=JSON.parse(localStorage.getItem(k));return (v&&(v.access_token||(v.currentSession&&v.currentSession.access_token)))||null;}}}catch(e){}return null;}
+  async function call(body){var t=tok();if(!t)return null;try{var r=await fetch(BASE+"/functions/v1/create-checkout-session",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+t},body:JSON.stringify(body)});var j=await r.json().catch(function(){return {};});return {s:r.status,j:j};}catch(e){return null;}}
+  function ready(){
+    var bar=document.getElementById("foundry-activate");
+    var btn=document.getElementById("foundry-activate-btn");
+    if(!bar||!btn)return;
+    btn.addEventListener("click",async function(){btn.disabled=true;btn.textContent="Redirecting...";var res=await call({});if(res&&res.j&&res.j.url){window.location=res.j.url;}else{btn.disabled=false;btn.textContent="Activate & add card";}});
+    setTimeout(async function(){var res=await call({probe:true});if(res&&res.s===200&&res.j&&res.j.probe&&!res.j.subscribed){bar.style.display="block";}},1400);
+  }
+  if(document.readyState!=="loading")ready();else document.addEventListener("DOMContentLoaded",ready);
+})();
+</script>
 </body>
 </html>
