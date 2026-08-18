@@ -161,5 +161,13 @@
 </script>
 
 <script id="foundry-a11y">try{document.querySelectorAll("input,select,textarea").forEach(function(el){if(el.type==="hidden")return;var named=el.getAttribute("aria-label")||el.getAttribute("aria-labelledby")||(el.id&&document.querySelector('label[for="'+el.id+'"]'))||el.closest("label");if(!named){var lbl=el.placeholder||el.getAttribute("title")||el.name||"";if(lbl)el.setAttribute("aria-label",lbl);}});}catch(e){}</script>
+
+<script id="foundry-bot-guard">
+(function(){
+  var t0=Date.now();
+  try{var hp=document.createElement("input");hp.type="text";hp.name="website_hp";hp.id="website_hp";hp.tabIndex=-1;hp.setAttribute("autocomplete","off");hp.setAttribute("aria-hidden","true");hp.style.cssText="position:absolute!important;left:-9999px!important;top:auto;width:1px;height:1px;opacity:0;pointer-events:none";var f=document.querySelector("form");if(f)f.appendChild(hp);}catch(e){}
+  document.addEventListener("submit",function(e){var hp=document.getElementById("website_hp");var tooFast=(Date.now()-t0)<2500;if((hp&&hp.value)||tooFast){e.preventDefault();e.stopImmediatePropagation();}},true);
+})();
+</script>
 </body>
 </html>
