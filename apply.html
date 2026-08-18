@@ -595,5 +595,22 @@
   <div class="sfx-foot-base"><span>&copy; 2026 Starke Foundry. All rights reserved.</span><span>By application. Foundry chooses its founders.</span></div>
 </div></footer>
 <script>(function(){var t=document.getElementById('sfxToggle'),l=document.getElementById('sfxLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.classList.toggle('open',o);t.setAttribute('aria-expanded',o?'true':'false');});Array.prototype.forEach.call(l.querySelectorAll('a'),function(a){a.addEventListener('click',function(){l.classList.remove('open');t.classList.remove('open');t.setAttribute('aria-expanded','false');});});})();</script>
+
+<script id="foundry-apply-cut-formsubmit">
+(function(){
+  // Applications post to apply-intake (primary); the applicant confirmation and the admin
+  // new-application alert are sent by the Foundry email system. Cut the FormSubmit tail:
+  // neutralize its native submits (no duplicate email, no off-site redirect) and show a
+  // native thank-you on success / a clear error on failure.
+  try { document.querySelectorAll('form[action*="formsubmit"]').forEach(function(f){ try { f.submit = function(){}; } catch(_){} }); } catch(_){}
+  var shown=false;
+  function done(ok){ if(shown)return; shown=true; var w=document.createElement("div");
+    w.style.cssText="position:fixed;inset:0;z-index:99999;background:#0d0b0a;display:flex;align-items:center;justify-content:center;padding:24px;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif";
+    w.innerHTML = ok ? "<div style=\"max-width:520px;text-align:center;color:#f3ede6\"><div style=\"font:700 27px/1.3 Georgia,serif;margin:0 0 14px\">Your application is in.</div><p style=\"color:#b8afa5;line-height:1.65;font-size:15px\">We read every one closely. Watch your inbox for our decision — if you're admitted, your next step is to activate your place and begin.</p><a href=\"/\" style=\"display:inline-block;margin-top:20px;color:#e8763a;text-decoration:none;font-weight:700\">Back to Starke Foundry</a></div>" : "<div style=\"max-width:520px;text-align:center;color:#f3ede6\"><div style=\"font:700 24px/1.3 Georgia,serif;margin:0 0 12px\">That didn't go through.</div><p style=\"color:#b8afa5;line-height:1.65;font-size:15px\">Something interrupted your submission. Please try again, or email <a href=\"mailto:ethan@ethanstarke.com\" style=\"color:#e8763a\">ethan@ethanstarke.com</a> and we'll take it from there.</p><button onclick=\"location.reload()\" style=\"margin-top:20px;background:#e8763a;color:#0d0b0a;border:0;border-radius:8px;padding:11px 22px;font-weight:700;cursor:pointer\">Try again</button></div>";
+    document.body.appendChild(w); }
+  var of=window.fetch;
+  window.fetch=function(u,o){ var p=of.apply(this,arguments); try{ if(String(u).indexOf("apply-intake")>=0){ p.then(function(r){ done(!!(r&&r.ok)); }).catch(function(){ done(false); }); } }catch(_){} return p; };
+})();
+</script>
 </body>
 </html>
