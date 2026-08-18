@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /admin-ai-review.html
+Disallow: /coach.html
+Disallow: /my-foundry.html
+Disallow: /portal.html
+Disallow: /coaches-apply.html
+
+Sitemap: https://starkefoundry.com/sitemap.xml
