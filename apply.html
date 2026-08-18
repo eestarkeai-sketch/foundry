@@ -132,20 +132,22 @@
 @media(max-width:760px){.sfx-foot-cols{grid-template-columns:1fr 1fr}.sfx-foot-brand-col{grid-column:1/-1}}
 @media(max-width:460px){.sfx-foot-cols{grid-template-columns:1fr}}
 </style>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Starke Foundry">
+<meta property="og:title" content="Apply · Starke Foundry">
+<meta property="og:description" content="The Starke Foundry placement application. A self-assessment that shows the stage you are eligible for, then your proof and essays.">
+<meta property="og:url" content="https://starkefoundry.com/apply.html">
+<meta property="og:image" content="https://starkefoundry.com/shield_mark.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Apply · Starke Foundry">
+<meta name="twitter:description" content="The Starke Foundry placement application. A self-assessment that shows the stage you are eligible for, then your proof and essays.">
+<meta name="twitter:image" content="https://starkefoundry.com/shield_mark.png">
 </head>
 <body>
 <nav class="sfx-nav"><div class="sfx-nav-in">
   <a class="sfx-brand" href="/index.html"><img src="/shield_mark.png" alt="Starke Foundry" /><span class="wm">STARKE&nbsp;&nbsp;FOUNDRY</span></a>
   <button class="sfx-toggle" id="sfxToggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-  <div class="sfx-links" id="sfxLinks">
-    <a href="/index.html#method">Method</a>
-    <a href="/index.html#programs">Programs</a>
-    <a href="/index.html#ethan">Ethan</a>
-    <a href="/coaches.html">The Bench</a>
-    <a href="/faq.html">FAQ</a>
-    <a href="/my-foundry.html">Sign In</a>
-    <a class="enter" href="/apply.html">Apply</a>
-  </div>
+  <div class="sfx-links" id="sfxLinks"><a href="/index.html#method">Method</a> <a href="/index.html#programs">Programs</a> <a href="/index.html#ethan">Ethan</a> <a href="/welcome.html">How It Works</a> <a href="/coaches.html">The Bench</a> <a href="/faq.html">FAQ</a> <a href="/my-foundry.html">Sign In</a> <a class="enter" href="/apply.html">Apply</a></div>
 </div></nav>
 
 
@@ -612,5 +614,7 @@
   window.fetch=function(u,o){ var p=of.apply(this,arguments); try{ if(String(u).indexOf("apply-intake")>=0){ p.then(function(r){ done(!!(r&&r.ok)); }).catch(function(){ done(false); }); } }catch(_){} return p; };
 })();
 </script>
+
+<script id="foundry-a11y">try{document.querySelectorAll("input,select,textarea").forEach(function(el){if(el.type==="hidden")return;var named=el.getAttribute("aria-label")||el.getAttribute("aria-labelledby")||(el.id&&document.querySelector('label[for="'+el.id+'"]'))||el.closest("label");if(!named){var lbl=el.placeholder||el.getAttribute("title")||el.name||"";if(lbl)el.setAttribute("aria-label",lbl);}});}catch(e){}</script>
 </body>
 </html>

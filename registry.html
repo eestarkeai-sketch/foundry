@@ -56,6 +56,16 @@
   footer{border-top:1px solid var(--line);padding:28px 0;color:var(--faint);font-size:13px;text-align:center}
   footer a{color:var(--ember2)}
 </style>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Starke Foundry">
+<meta property="og:title" content="The Registry · Starke Foundry">
+<meta property="og:description" content="The public registry of Starke Foundry certificate holders. Every founder who cleared the final gate, verifiable by credential ID.">
+<meta property="og:url" content="https://starkefoundry.com/registry.html">
+<meta property="og:image" content="https://starkefoundry.com/shield_mark.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Registry · Starke Foundry">
+<meta name="twitter:description" content="The public registry of Starke Foundry certificate holders. Every founder who cleared the final gate, verifiable by credential ID.">
+<meta name="twitter:image" content="https://starkefoundry.com/shield_mark.png">
 </head>
 <body>
 <nav>
@@ -148,5 +158,7 @@
     .catch(function(){ afterLoad(); });
 })();
 </script>
+
+<script id="foundry-a11y">try{document.querySelectorAll("input,select,textarea").forEach(function(el){if(el.type==="hidden")return;var named=el.getAttribute("aria-label")||el.getAttribute("aria-labelledby")||(el.id&&document.querySelector('label[for="'+el.id+'"]'))||el.closest("label");if(!named){var lbl=el.placeholder||el.getAttribute("title")||el.name||"";if(lbl)el.setAttribute("aria-label",lbl);}});}catch(e){}</script>
 </body>
 </html>
