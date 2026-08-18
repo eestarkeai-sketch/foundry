@@ -168,7 +168,7 @@
   </div>
 </header>
 
-<form id="app" class="wrap" action="https://formsubmit.co/e8850b7408d0d73a5c64368b3c29b7fe" method="POST" enctype="multipart/form-data" autocomplete="off">
+<form id="app" class="wrap" action="" method="POST" enctype="multipart/form-data" autocomplete="off">
   <input type="hidden" name="_subject" value="New Starke Foundry application" />
   <input type="hidden" name="_template" value="table" />
   <input type="hidden" name="_captcha" value="false" />
@@ -218,7 +218,7 @@
   <!-- STEP 2 ASSESSMENT -->
   <section class="step" data-step="2">
     <div class="sec-h">The assessment</div>
-    <div class="sec-s">Answer for what you have actually done, not what you intend. The strongest answers require evidence you can show, and you will be asked for it later. Be honest: placing too high sets you up to fail the summit.</div>
+    <div class="sec-s">Answer for what you have actually done, not what you intend. The strongest answers require evidence you can show, and you will be asked for it later. Be honest: placing too high sets you up to fail.</div>
     <div id="questions"></div>
     <div class="q">
       <div class="qh">The thirty-day test</div>
@@ -238,10 +238,10 @@
     <div class="reveal">
       <div class="rk">You are eligible for</div>
       <div class="rt" id="rv_tier">The Seeker</div>
-      <div class="rlen" id="rv_len">45 weeks</div>
+      <div class="rlen" id="rv_len">15 weeks</div>
       <div class="rwhy" id="rv_why"></div>
-      <div class="price">You start at <b id="rv_rate">$250</b> per week</div>
-      <div class="pricesub">Paid five weeks at a time. The rate rises by stage as you advance: Seeker $250/week, Builder $500/week, Sovereign $750/week. Leave any time; no refunds.</div>
+      <div class="price">You start at <b id="rv_rate">$1,250</b> per five-week block</div>
+      <div class="pricesub">Paid five weeks at a time. The rate rises by stage as you advance: Seeker $1,250, Builder $2,500, Sovereign $3,750 — each a five-week block. Leave any time; no refunds.</div>
     </div>
     <div class="ack">
       <label class="agree"><input type="checkbox" id="ack" name="Acknowledged placement" value="Yes" />
@@ -282,8 +282,8 @@
     <div class="sec-s">Submitting is a commitment, not an enquiry.</div>
     <div class="q">
       <label class="agree"><input type="checkbox" class="ag" name="Agree stage" value="Yes" /><span>I am applying to <b class="ack_tier2">The Seeker</b>, the stage I am eligible for, and not another.</span></label>
-      <label class="agree"><input type="checkbox" class="ag" name="Agree price" value="Yes" /><span>I agree to the price: paid weekly in five-week blocks, at the stage rate ($250, then $500, then $750 per week as I advance).</span></label>
-      <label class="agree"><input type="checkbox" class="ag" name="Agree terms" value="Yes" /><span>I have read and agree to the terms: placement is to one stage; paid weekly in five-week blocks at the stage rate; I may leave any time; no refunds; no certificate without finishing; a pause is capped at 20% of the program.</span></label>
+      <label class="agree"><input type="checkbox" class="ag" name="Agree price" value="Yes" /><span>I agree to the price: billed in five-week blocks, at the stage rate ($1,250, then $2,500, then $3,750 per five-week block as I advance).</span></label>
+      <label class="agree"><input type="checkbox" class="ag" name="Agree terms" value="Yes" /><span>I have read and agree to the terms: placement is to one stage; billed in five-week blocks at the stage rate; I may leave any time; no refunds; no certificate without finishing; a pause is capped at 20% of the program.</span></label>
       <label class="agree"><input type="checkbox" class="ag" name="Agree payment" value="Yes" /><span>If approved, I will process my first payment within five days of receiving my approval and welcome letter.</span></label>
       <label class="agree"><input type="checkbox" class="ag" name="Work is my own" value="Yes" /><span>The work in this application, including the essays, is my own and not written by AI.</span></label>
     </div>
@@ -296,7 +296,7 @@
 </form>
 
 <!-- Notification-only email: fires after the full application is saved to the admin desk -->
-<form id="notify" action="https://formsubmit.co/e8850b7408d0d73a5c64368b3c29b7fe" method="POST" style="display:none">
+<form id="notify" action="" method="POST" style="display:none">
   <input type="hidden" name="_subject" value="A Foundry application arrived &mdash; review it on the admin desk" />
   <input type="hidden" name="_captcha" value="false" />
   <input type="hidden" name="_template" value="table" />
@@ -369,9 +369,9 @@
     b13:"Product velocity: a changelog, commit history, or release record."
   };
   var TIERS = {
-    Sovereign:{len:"15 weeks",rate:"750",why:"You already demonstrate the behavioral mechanics and the commercial execution the summit assumes. You come to master capital and narrative, and to earn the certificate."},
-    Builder:{len:"30 weeks",rate:"500",why:"The founder in you is there. You have the behavioral base, but the commercial execution is still ahead. You build the venture's spine, then run the summit."},
-    Seeker:{len:"45 weeks",rate:"250",why:"The honest, deepest start. You bring conviction and agency; you build identity, commercial execution, and capital trajectory from the base. The longest climb, the largest transformation."}
+    Sovereign:{len:"15 weeks",rate:"3,750",why:"You already demonstrate the behavioral mechanics and the commercial execution this final stage assumes. You come to master capital and narrative, and to earn the certificate."},
+    Builder:{len:"15 weeks",rate:"2,500",why:"The founder in you is there. You have the behavioral base, but the commercial execution is still ahead. You build the venture's spine, then complete the arc."},
+    Seeker:{len:"15 weeks",rate:"1,250",why:"The honest, deepest start. You bring conviction and agency; you build identity, commercial execution, and capital trajectory from the base. The longest arc, the largest transformation."}
   };
 
   var val = {};
