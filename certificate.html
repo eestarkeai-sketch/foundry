@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Certificate &middot; Starke Foundry</title>
+<meta name="robots" content="noindex">
 <link rel="canonical" href="https://starkefoundry.com/certificate.html">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -143,7 +144,7 @@
     <div class="nameline"></div>
     <div class="body">
       entered the Starke Foundry, ran the full arc, and <b>cleared the final gate</b>. The gate is the standard, and clearing it is the whole of finishing. This founder was measured against their own slope, on evidence, at every gate along the way, and was found to have built the person an investor-grade venture is built on.
-      <div class="stage" id="c_stage">The Sovereign Summit</div>
+      <div class="stage" id="c_stage">The Full Arc</div>
       <div class="stagesub">Behavioral mechanics &middot; commercial execution &middot; capital trajectory</div>
     </div>
   </div>
@@ -188,7 +189,7 @@
   set("c_date","date");
   var stage=p.get("stage");
   if(stage){
-    var label = /sovereign/i.test(stage) ? "The Sovereign Summit"
+    var label = /sovereign/i.test(stage) ? "The Full Arc"
       : /builder/i.test(stage) ? "The Builder Stage"
       : /seeker/i.test(stage) ? "The Seeker Stage" : stage;
     document.getElementById("c_stage").textContent = label;
@@ -213,6 +214,6 @@
 </div></footer>
 <script>(function(){var t=document.getElementById('sfxToggle'),l=document.getElementById('sfxLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.classList.toggle('open',o);t.setAttribute('aria-expanded',o?'true':'false');});Array.prototype.forEach.call(l.querySelectorAll('a'),function(a){a.addEventListener('click',function(){l.classList.remove('open');t.classList.remove('open');t.setAttribute('aria-expanded','false');});});})();</script>
 
-<script>(function(){var id=(new URLSearchParams(location.search).get("id")||"").trim();var set=function(el,v){var n=document.getElementById(el); if(n) n.textContent=v;};var vEl=document.getElementById("c_verify");if(!id){ if(vEl) vEl.textContent="No certificate id provided — nothing to verify."; return; }if(vEl) vEl.textContent="Verifying against the Starke Foundry registry…";fetch("https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/public-registry?id="+encodeURIComponent(id)).then(function(r){return r.json();}).then(function(d){var m=d&&d.match;if(m){ if(m.name) set("c_name",m.name); if(m.stage) set("c_stage",m.stage); if(m.date) set("c_date",m.date); set("c_id",id);if(vEl) vEl.textContent="Verified ✓ — this credential is recorded in the Starke Foundry registry.";} else { set("c_name","—"); set("c_stage","Not verified"); set("c_date","—");if(vEl) vEl.textContent="This certificate could not be verified in the registry.";}}).catch(function(){ if(vEl) vEl.textContent="Verification is temporarily unavailable. Try again shortly."; });})();</script>
+<script>(function(){var id=(new URLSearchParams(location.search).get("id")||"").trim();var set=function(el,v){var n=document.getElementById(el); if(n) n.textContent=v;};var vEl=document.getElementById("c_verify");set("c_stage","The Full Arc"); set("c_name","\u2014"); set("c_date","\u2014");if(!id){ if(vEl) vEl.textContent="No certificate id provided \u2014 nothing to verify."; return; }if(vEl) vEl.textContent="Verifying against the Starke Foundry registry\u2026";fetch("https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/public-registry?id="+encodeURIComponent(id)).then(function(r){return r.json();}).then(function(d){var m=d&&d.match;if(m){ if(m.name) set("c_name",m.name); if(m.date) set("c_date",m.date); set("c_id",id);if(vEl) vEl.textContent="Verified \u2713 \u2014 this credential is recorded in the Starke Foundry registry.";} else { set("c_name","\u2014"); set("c_date","\u2014");if(vEl) vEl.textContent="This certificate could not be verified in the registry."; }}).catch(function(){ set("c_name","\u2014"); set("c_date","\u2014"); if(vEl) vEl.textContent="Verification is temporarily unavailable. Try again shortly."; });})();</script>
 </body>
 </html>
