@@ -189,6 +189,13 @@
       <input type="email" name="Email" placeholder="Email address" required />
     </div>
     <div class="q">
+      <div class="qh">Were you referred by a Foundry coach?</div>
+      <div class="qs">Optional. If a coach pointed you here, name them &mdash; it credits their work.</div>
+      <select name="Referred by coach" id="n_referrer">
+        <option value="">No, or not sure</option>
+      </select>
+    </div>
+    <div class="q">
       <div class="qh">What are you building, or trying to become the founder of?</div>
       <div class="qs">A company, an idea, or the intent without one yet. All three are valid.</div>
       <textarea name="What you are building" placeholder="Tell us in a few sentences." required></textarea>
@@ -502,6 +509,13 @@
   // Fail-safe: if the backend save fails for any reason, we fall back to emailing Ethan the full
   // application (native FormSubmit) so an application can never be silently lost.
   var EP = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/";
+  // Populate the "referred by a coach" dropdown from the public coach list.
+  (function loadReferrers(){
+    var sel=document.getElementById("n_referrer"); if(!sel) return;
+    fetch(EP+"coach-options",{cache:"no-store"}).then(function(r){return r.json();}).then(function(d){
+      ((d&&d.coaches)||[]).forEach(function(c){ var o=document.createElement("option"); o.value=c.id; o.textContent=c.name; sel.appendChild(o); });
+    }).catch(function(){});
+  })();
   var appForm = document.getElementById("app");
   var notifyForm = document.getElementById("notify");
   var submitting = false;
@@ -539,7 +553,8 @@
       status:"submitted", essays:essays, essayText:essays,
       proof:proofLinks, proofLinks:proofLinks,
       c1:pl.c1, c2:pl.c2, slope:(pl.c1+" of 7 / "+pl.c2+" of 6"),
-      currentStage:gv('[name="Current stage"]'), source:"apply.html"
+      currentStage:gv('[name="Current stage"]'), source:"apply.html",
+      referredByCoachId:(document.getElementById("n_referrer")||{}).value||""
     };
   }
 
@@ -549,6 +564,9 @@
     var btn=document.getElementById("submitBtn");
     if(btn){ btn.disabled=true; btn.textContent="Submitting…"; }
     var data; try{ data=gatherApplication(); }catch(err){ appForm.submit(); return; }
+    // Record a coach referral (fire-and-forget). Converts to credit only if this founder is later admitted.
+    try{ if(data.referredByCoachId){ fetch(EP+"record-referral?cb="+Date.now(), {method:"POST", cache:"no-store",
+      body: JSON.stringify({ coach_id:data.referredByCoachId, email:data.email }) }).catch(function(){}); } }catch(_){}
     var done=false;
     function notifyAndFinish(){ if(done)return; done=true;
       try{ document.getElementById("n_name").value=data.name;

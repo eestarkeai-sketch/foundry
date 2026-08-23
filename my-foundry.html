@@ -90,6 +90,12 @@
   .wk-form textarea:focus, .wk-form input[type=url]:focus{outline:none; border-color:var(--ember)}
   .wk-form button{width:auto; padding:11px 20px}
   .wk-err{color:var(--bad); font-size:13.5px; margin-top:8px}
+  .rgrid{display:flex; gap:12px; flex-wrap:wrap; margin-top:8px}
+  .rgrid>div{flex:1; min-width:150px}
+  .rsel{width:100%; background:var(--bg); border:1px solid var(--line); color:var(--ink); border-radius:10px; padding:11px 13px; font-family:var(--sans); font-size:15px}
+  .rsel:focus{outline:none; border-color:var(--ember)}
+  #rComment{width:100%; background:var(--bg); border:1px solid var(--line); color:var(--ink); border-radius:11px; padding:12px 14px; font-family:var(--sans); font-size:15px; min-height:70px; resize:vertical}
+  #rComment:focus{outline:none; border-color:var(--ember)}
 </style>
 <link rel="icon" type="image/png" href="/shield_mark.png">
 <meta name="description" content="Sign in to your Starke Foundry.">
@@ -167,6 +173,23 @@
     <div id="thread" class="thread"></div>
     <div class="mrow"><input id="minput" placeholder="Message your coach&hellip;" autocomplete="off" /><button id="msend">Send</button></div>
     <div id="mMsg" class="msg"></div>
+
+    <div class="sec-h">Rate your coach <span style="font-size:12px;color:var(--faint);letter-spacing:0;text-transform:none">&middot; private to the Foundry</span></div>
+    <div id="rateBox" class="wk" style="background:var(--panel2)">
+      <p style="color:var(--dim);font-size:13.5px;margin:0 0 12px">Confidential. Your coach never sees this &mdash; it helps the Foundry support you and calibrate coaching. Rate the stage you just finished, or your current one.</p>
+      <label>Stage</label>
+      <select id="rStage" class="rsel"></select>
+      <div class="rgrid">
+        <div><label>Presence &amp; reliability</label><select id="rD1" class="rsel"></select></div>
+        <div><label>Pushed my thinking</label><select id="rD2" class="rsel"></select></div>
+        <div><label>Usefulness</label><select id="rD3" class="rsel"></select></div>
+        <div><label>Would recommend</label><select id="rD4" class="rsel"></select></div>
+      </div>
+      <label style="margin-top:12px">Anything to add? (optional)</label>
+      <textarea id="rComment" placeholder="Only the Foundry sees this."></textarea>
+      <button id="rSubmit" style="width:auto;padding:11px 20px">Submit private rating</button>
+      <div id="rMsg" class="msg"></div>
+    </div>
   </div>
 
   <div class="foot"><div class="m">STARKE FOUNDRY</div>Build the founder before the company.</div>
@@ -181,6 +204,7 @@
   var SEND = URL_ + "/functions/v1/messages-send";
   var CURR = URL_ + "/functions/v1/curriculum-data";
   var SUBMIT = URL_ + "/functions/v1/deliverable-submit";
+  var RATE = URL_ + "/functions/v1/submit-rating";
   var REDIRECT = "https://starkefoundry.com/my-foundry.html";
 
   var sb = window.supabase.createClient(URL_, KEY, {
@@ -233,6 +257,7 @@
       }).join("") : '<div style="color:var(--faint);font-size:14px;padding:8px 0">No messages yet. Say hello to your coach.</div>';
       show("dash");
       loadProgram();
+      setupRating(f);
     }catch(e){ document.getElementById("noseatEmail").textContent = (session.user&&session.user.email)||""; show("noseat"); }
   }
 
@@ -316,6 +341,40 @@
       if(j.error){ if(err){ err.textContent = j.error; } if(btn){ btn.disabled=false; btn.textContent=orig; } return; }
       loadProgram();
     }catch(e){ if(err){ err.textContent = "Could not submit — try again."; } if(btn){ btn.disabled=false; btn.textContent=orig; } }
+  }
+
+  function setupRating(f){
+    var st=document.getElementById("rStage"); if(!st) return;
+    if(!st.dataset.init){
+      ["Seeker","Builder","Sovereign"].forEach(function(x){ var o=document.createElement("option"); o.value=x; o.textContent="The "+x; st.appendChild(o); });
+      ["rD1","rD2","rD3","rD4"].forEach(function(id){
+        var sel=document.getElementById(id);
+        var blank=document.createElement("option"); blank.value=""; blank.textContent="—"; sel.appendChild(blank);
+        [["5","5 — Excellent"],["4","4"],["3","3 — OK"],["2","2"],["1","1 — Poor"]].forEach(function(p){ var o=document.createElement("option"); o.value=p[0]; o.textContent=p[1]; sel.appendChild(o); });
+      });
+      document.getElementById("rSubmit").addEventListener("click", submitRating);
+      st.dataset.init="1";
+    }
+    st.value = f.stage || "Seeker";
+  }
+  function ratingVal(id){ var e=document.getElementById(id); var v=e&&e.value?parseInt(e.value,10):0; return v||0; }
+  async function submitRating(){
+    var msg=document.getElementById("rMsg"), btn=document.getElementById("rSubmit");
+    var stage=document.getElementById("rStage").value;
+    var dims={ presence:ratingVal("rD1"), challenge:ratingVal("rD2"), usefulness:ratingVal("rD3"), would_recommend:ratingVal("rD4") };
+    var clean={}; Object.keys(dims).forEach(function(k){ if(dims[k]>0) clean[k]=dims[k]; });
+    if(!Object.keys(clean).length){ msg.className="msg bad"; msg.textContent="Give at least one rating first."; return; }
+    var r=await sb.auth.getSession(); var t=r.data.session&&r.data.session.access_token;
+    if(!t){ msg.className="msg bad"; msg.textContent="Session expired — refresh."; return; }
+    btn.disabled=true; msg.className="msg"; msg.textContent="Sending…";
+    try{
+      var res=await fetch(RATE,{ method:"POST", headers:{ Authorization:"Bearer "+t, "Content-Type":"application/json" },
+        body: JSON.stringify({ stage:stage, dimensions:clean, comment:(document.getElementById("rComment").value||"").trim() }) });
+      var j=await res.json(); btn.disabled=false;
+      if(j.error){ msg.className="msg bad"; msg.textContent=j.error; return; }
+      if(j.recorded===false){ msg.className="msg"; msg.textContent=(j.reason==="no coach assigned")?"No coach assigned yet.":"Saved."; return; }
+      msg.className="msg ok"; msg.textContent="Thank you — your private rating is in.";
+    }catch(e){ btn.disabled=false; msg.className="msg bad"; msg.textContent="Could not submit — try again."; }
   }
 
   async function route(){
