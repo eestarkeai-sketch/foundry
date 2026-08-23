@@ -337,13 +337,21 @@
       var elig = c.eligible ? ' <span class="pill ok">eligible to promote</span>' : '';
       var ratings = (c.ratings||[]).length ? '<details><summary>Private ratings ('+c.ratings.length+')</summary>'+c.ratings.map(function(r){ return '<pre>'+esc(r.stage||"")+' · '+esc(r.overall)+'/5'+(r.comment?(' · '+esc(r.comment)):'')+' · '+when(r.created_at)+'</pre>'; }).join('')+'</details>' : '<div class="meta">No ratings yet.</div>';
       var refs = (c.referrals||[]).length ? '<details><summary>Referrals ('+c.referrals.length+')</summary>'+c.referrals.map(function(r){ var btn = (r.status==="converted" && !r.bonus_paid) ? ' <button class="mini" data-bonus="'+r.id+'">Mark bonus paid</button>' : (r.bonus_paid?' <span class="pill ok">bonus paid</span>':''); return '<div class="meta" style="margin:4px 0">'+esc(r.referred_email||"")+' · '+esc(r.status)+btn+'</div>'; }).join('')+'</details>' : '<div class="meta">No referrals yet.</div>';
+      var ob = c.onboarding||{};
+      function flagBtn(field,label,on){ return '<button class="mini" data-flag="'+field+'" data-cid="'+c.id+'" data-on="'+(on?'0':'1')+'">'+(on?('Undo '+label):('Mark '+label))+'</button>'; }
+      var obRow = '<div class="meta" style="margin-top:8px">Onboarding: '+
+        '<span class="pill '+((ob.conduct&&ob.agreement)?'ok':'')+'">signed '+((ob.conduct&&ob.agreement)?'✓':'—')+'</span> '+
+        '<span class="pill '+(ob.orientation?'ok':'')+'">orientation '+(ob.orientation?'✓':'—')+'</span> '+
+        '<span class="pill '+(ob.mock?'ok':'')+'">mock '+(ob.mock?'✓':'—')+'</span> '+
+        '<span class="pill '+(ob.activated?'ok':'')+'">activated '+(ob.activated?'✓':'—')+'</span></div>'+
+        '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">'+flagBtn('orientation_done_at','orientation',ob.orientation)+flagBtn('mock_passed_at','mock',ob.mock)+flagBtn('activated_at','activated',ob.activated)+'</div>';
       return '<div class="card"><div class="row1"><div>'+
         '<div class="nm">'+esc(c.name||"—")+' <span class="pill stage">'+esc(c.tier||"Guide")+'</span>'+elig+'</div>'+
         '<div class="em">'+esc(c.email||"")+'</div>'+
         '<div class="meta" style="margin-top:6px">'+comp+' · M '+(c.multiplier!=null?Number(c.multiplier).toFixed(2):"1.00")+' · standing '+esc(c.standing||"good")+'</div>'+
         '<div class="meta" style="margin-top:4px">'+nextTxt+'</div></div>'+
         '<div style="text-align:right"><div class="nm" style="color:var(--ember2);font-size:22px">'+(c.coach_score||0)+'</div><div class="meta">score</div></div></div>'+
-        ratings + refs +
+        obRow + ratings + refs +
         '<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
           '<input class="adjpts" data-id="'+c.id+'" type="number" placeholder="± points" style="width:110px" />'+
           '<input class="adjnote" data-id="'+c.id+'" type="text" placeholder="reason (optional)" style="flex:1;min-width:150px" />'+
@@ -353,7 +361,7 @@
     }).join('');
   }
   document.getElementById("view").addEventListener("click", async function(e){
-    var b = e.target && e.target.closest ? e.target.closest("button[data-adj],button[data-bonus]") : null;
+    var b = e.target && e.target.closest ? e.target.closest("button[data-adj],button[data-bonus],button[data-flag]") : null;
     if(!b) return;
     if(b.hasAttribute("data-adj")){
       var id = b.getAttribute("data-adj");
@@ -369,6 +377,12 @@
       var j2 = await coachAdmin({ action:"mark_bonus_paid", referral_id:rid, paid:true }); b.disabled=false;
       if(j2.error){ msg("Failed: "+j2.error, false); return; }
       msg("Bonus marked paid.", true); loadIncentives();
+    } else if(b.hasAttribute("data-flag")){
+      var cid = b.getAttribute("data-cid"), field = b.getAttribute("data-flag"), on = b.getAttribute("data-on")==="1";
+      b.disabled=true;
+      var jf = await coachAdmin({ action:"set_flag", coach_id:cid, field:field, on:on }); b.disabled=false;
+      if(jf.error){ msg("Failed: "+jf.error, false); return; }
+      msg("Onboarding updated.", true); loadIncentives();
     }
   });
 

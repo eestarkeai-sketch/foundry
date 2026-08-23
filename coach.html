@@ -73,6 +73,17 @@
   .prog .badge{font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; padding:2px 9px; border-radius:999px; border:1px solid #3a2f23; color:var(--gold)}
   .sess .held{color:var(--ok); font-size:11px; letter-spacing:0.06em; text-transform:uppercase}
   button.mini{padding:5px 11px; font-size:12px; margin-top:4px}
+  .draftflag{background:#2a2011; border:1px solid #4a3a1f; color:var(--gold); border-radius:10px; padding:11px 14px; font-size:12.5px; line-height:1.55; margin:0 0 16px}
+  .agreement{max-height:300px; overflow:auto; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:16px 18px; font-size:13.5px; line-height:1.6; color:var(--dim); margin:0 0 16px}
+  .agreement h4{font-family:var(--serif); color:var(--ink); font-size:15px; margin:16px 0 6px} .agreement h4:first-child{margin-top:0}
+  .agreement ol{margin:6px 0; padding-left:20px} .agreement li{margin:3px 0} .agreement b{color:var(--ink)}
+  .ck{display:flex; gap:10px; align-items:flex-start; font-size:13.5px; color:var(--dim); text-transform:none; letter-spacing:0; margin:0 0 10px; cursor:pointer}
+  .ck input{width:auto; margin-top:3px; flex:none}
+  .obsteps{margin:0 0 18px; padding:0; list-style:none}
+  .obstep{display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--line); font-size:14px; color:var(--dim)}
+  .obstep:first-child{border-top:none}
+  .obstep .dot{width:20px; height:20px; border-radius:999px; border:1px solid #3a2f23; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--faint); flex:none}
+  .obstep.done .dot{background:#1f3a1a; border-color:#2f4a2a; color:var(--ok)} .obstep.done{color:var(--ink)}
 </style>
 <link rel="icon" type="image/png" href="/shield_mark.png">
 <meta name="description" content="The Starke Foundry coach portal.">
@@ -114,6 +125,25 @@
     <p class="lede">You&rsquo;re signed in, but this email isn&rsquo;t on the Foundry Bench. If you applied, we&rsquo;ll reach out when you&rsquo;re admitted. <a href="mailto:ethan@ethanstarke.com">Reach Ethan.</a></p>
   </div>
 
+  <div id="onboard" class="card hide">
+    <div class="top"><div class="who">Signed in as <b id="obEmail"></b></div><button class="ghost" id="signout3">Sign out</button></div>
+    <h2 id="obTitle">Complete your onboarding.</h2>
+    <div class="draftflag"><b>Draft &mdash; not yet legally effective.</b> This agreement is a working draft, not the final legal version. It will be replaced by a counsel-reviewed, finalized version before the program becomes effective. Signing now records your intent and lets Foundry complete your setup.</div>
+    <ul class="obsteps" id="obSteps"></ul>
+    <div id="obSignWrap">
+      <div class="sub">The Foundry Coach Code of Conduct &amp; Agreement</div>
+      <div class="agreement" id="agreementBox"></div>
+      <label class="ck"><input type="checkbox" class="oback" id="ack1"> I have read and agree to the Foundry Coach Code of Conduct.</label>
+      <label class="ck"><input type="checkbox" class="oback" id="ack2"> I agree to the Coach Agreement, including that the Guide and Builder-Coach tiers are volunteer and uncompensated.</label>
+      <label class="ck"><input type="checkbox" class="oback" id="ack3"> I understand founders rate their coaching confidentially and that those ratings are not shared with me.</label>
+      <label class="ck"><input type="checkbox" class="oback" id="ack4"> The information I provided in my application is true and complete.</label>
+      <label style="margin-top:6px">Type your full legal name to sign</label>
+      <input id="sigName" type="text" placeholder="Your full legal name" autocomplete="name" />
+      <button id="signBtn" style="margin-top:12px" disabled>Sign &amp; submit</button>
+      <div id="obMsg" class="msg"></div>
+    </div>
+  </div>
+
   <div id="dash" class="card hide">
     <div class="top"><div class="who">Coach &middot; <b id="dashEmail"></b></div><button class="ghost" id="signout2">Sign out</button></div>
     <h2 id="hello">Your Bench.</h2>
@@ -136,12 +166,13 @@
   var SEND  = URL_ + "/functions/v1/messages-send";
   var SCORE = URL_ + "/functions/v1/coach-score";
   var MARK  = URL_ + "/functions/v1/mark-held";
+  var ONBOARD = URL_ + "/functions/v1/coach-onboard";
   var REDIRECT = "https://starkefoundry.com/coach.html";
 
   var sb = window.supabase.createClient(URL_, KEY, { auth: { flowType:"implicit", detectSessionInUrl:true, persistSession:true, autoRefreshToken:true } });
   var DATA = null;
 
-  function show(id){ ["loading","signin","sent","notcoach","dash"].forEach(function(x){ document.getElementById(x).classList.toggle("hide", x!==id); }); }
+  function show(id){ ["loading","signin","sent","notcoach","onboard","dash"].forEach(function(x){ document.getElementById(x).classList.toggle("hide", x!==id); }); }
   function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
   function stPill(s){ var c=(s==="active")?"ok":((s==="awaiting_payment"||s==="unpaid")?"warn":""); return '<span class="pill '+c+'">'+esc(s||"—")+'</span>'; }
   function when(s){ if(!s) return ""; try{ return new Date(s).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return s; } }
@@ -231,10 +262,64 @@
   async function loadDash(session){
     show("loading");
     try{
+      var st = await (await fetch(ONBOARD, { method:"POST", headers:{ Authorization:"Bearer "+session.access_token, "Content-Type":"application/json" }, body: JSON.stringify({ action:"state" }) })).json();
+      if(!st || !st.found){ document.getElementById("ncEmail").textContent=(session.user&&session.user.email)||""; show("notcoach"); return; }
+      if(!st.activated){ renderOnboard(st, session); return; }
       var j = await (await fetch(COACH, { headers:{ Authorization:"Bearer "+session.access_token } })).json();
       if(!j || j.coach == null){ document.getElementById("ncEmail").textContent=(j&&j.email)||(session.user&&session.user.email)||""; show("notcoach"); return; }
       DATA = j; show("dash"); render(); renderProgress();
     }catch(e){ document.getElementById("ncEmail").textContent=(session.user&&session.user.email)||""; show("notcoach"); }
+  }
+  var AGREEMENT_HTML =
+    '<div class="draftflag" style="margin-bottom:14px"><b>Draft for review.</b> Final terms are subject to counsel review; this version is not the effective legal agreement.</div>'+
+    '<h4>Part A — The Foundry Coach Code of Conduct</h4>'+
+    '<p>You commit, on your honor and as a binding term of this Agreement, to:</p>'+
+    '<ol>'+
+    '<li><b>Identity first.</b> Develop the founder, not merely the deliverable.</li>'+
+    '<li><b>Be socratic — guide, don&rsquo;t control.</b> The founder decides; you sharpen the thinking.</li>'+
+    '<li><b>Tell the truth, even when it&rsquo;s hard — never destructively.</b></li>'+
+    '<li><b>Hold the bar.</b> You won&rsquo;t lower the standard to be liked.</li>'+
+    '<li><b>Show up on a rhythm.</b> A reliable weekly session is the job.</li>'+
+    '<li><b>Respond within one business day.</b></li>'+
+    '<li><b>Give first.</b> The paid tier is earned, not the reason you&rsquo;re here.</li>'+
+    '<li><b>Hold everything in confidence.</b></li>'+
+    '<li><b>Disclose conflicts; never solicit</b> founders, coaches, or business off Foundry.</li>'+
+    '<li><b>Say &ldquo;I don&rsquo;t know&rdquo; when you don&rsquo;t</b> — then help them find who does.</li>'+
+    '</ol>'+
+    '<p>You will conduct yourself professionally and lawfully; harassment, discrimination, or abuse is grounds for immediate removal.</p>'+
+    '<h4>Part B — Coach Agreement (Starke Foundry, LLC)</h4>'+
+    '<p><b>Relationship.</b> You are an independent contractor. At the Guide and Builder-Coach tiers you serve as a <b>volunteer</b> and receive no compensation; at the Sovereign-Coach tier you are a paid contractor (1099).</p>'+
+    '<p><b>Onboarding.</b> Before any founder is assigned, you complete orientation and a mock session signed off by Foundry.</p>'+
+    '<p><b>Tiers &amp; progression.</b> Guide (Seeker) and Builder-Coach (Seeker+Builder) are volunteer; Sovereign-Coach (all stages) is paid. You advance by measured contribution — hours, founders completed, referrals — with confidential founder ratings as a quality multiplier. Stage-gate and certificate decisions are Foundry&rsquo;s.</p>'+
+    '<p><b>Compensation.</b> Guide and Builder-Coach are uncompensated. Sovereign-Coach earns a 10% revenue share of fees collected from assigned founders, plus a one-time 10% referral bonus when a founder you referred is admitted and pays their first block. Paid monthly on fees actually received.</p>'+
+    '<p><b>Confidentiality.</b> You keep all non-public Foundry and founder information confidential, during and after the engagement.</p>'+
+    '<p><b>Intellectual property.</b> Foundry&rsquo;s curriculum, methods, and brand remain Foundry&rsquo;s; work product you create for the Program is assigned to Foundry.</p>'+
+    '<p><b>Non-solicitation.</b> During the engagement and for 12 months after, you will not divert Foundry founders, coaches, or staff off Foundry.</p>'+
+    '<p><b>Founder ratings.</b> Founders rate their coaching confidentially at the end of each stage; ratings are held by Foundry and not shared with you.</p>'+
+    '<p><b>Term.</b> Either party may end the engagement; Foundry may remove immediately for breach of conduct, confidentiality, or non-solicitation, with forfeiture of any unpaid share. Governed by Delaware law; disputes by individual arbitration.</p>'+
+    '<p style="color:var(--faint)">The full agreement is provided to you in writing. By signing you agree to its terms as finalized.</p>';
+  function obStep(label, done){ return '<li class="obstep'+(done?' done':'')+'"><span class="dot">'+(done?'&check;':'')+'</span>'+label+'</li>'; }
+  function renderOnboard(st, session){
+    document.getElementById("obEmail").textContent = (session.user&&session.user.email)||"";
+    document.getElementById("obSteps").innerHTML =
+      obStep("Sign the agreement &amp; code of conduct", st.signed)+
+      obStep("Orientation", st.orientation)+
+      obStep("Mock session signed off", st.mock)+
+      obStep("Activated to the Bench", st.activated);
+    var wrap=document.getElementById("obSignWrap");
+    if(st.signed){
+      document.getElementById("obTitle").textContent = "You're in onboarding.";
+      wrap.innerHTML = '<div class="empty">You&rsquo;ve signed. Foundry will complete your orientation and mock sign-off, then activate you to the Bench &mdash; you&rsquo;ll land here when you&rsquo;re live.</div>';
+    } else {
+      document.getElementById("obTitle").textContent = "Complete your onboarding.";
+      document.getElementById("agreementBox").innerHTML = AGREEMENT_HTML;
+    }
+    show("onboard");
+  }
+  function checkAcks(){
+    var all = ["ack1","ack2","ack3","ack4"].every(function(id){ var el=document.getElementById(id); return el && el.checked; });
+    var nm = ((document.getElementById("sigName")||{}).value||"").trim();
+    var btn=document.getElementById("signBtn"); if(btn) btn.disabled = !(all && nm);
   }
   async function reload(){ var r = await sb.auth.getSession(); if(r.data.session) await loadDash(r.data.session); }
 
@@ -291,6 +376,18 @@
   document.getElementById("backToSignin").addEventListener("click", function(){ show("signin"); });
   document.getElementById("signout1").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
   document.getElementById("signout2").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
+  document.getElementById("signout3").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
+  ["ack1","ack2","ack3","ack4"].forEach(function(id){ var el=document.getElementById(id); if(el) el.addEventListener("change", checkAcks); });
+  (function(){ var sn=document.getElementById("sigName"); if(sn) sn.addEventListener("input", checkAcks); })();
+  document.getElementById("signBtn").addEventListener("click", async function(){
+    var btn=this, m=document.getElementById("obMsg");
+    var ack={ conduct:document.getElementById("ack1").checked, agreement:document.getElementById("ack2").checked, ratings:document.getElementById("ack3").checked, truthful:document.getElementById("ack4").checked };
+    var name=(document.getElementById("sigName").value||"").trim();
+    btn.disabled=true; m.className="msg"; m.textContent="Signing…";
+    var j=await post(ONBOARD, { action:"sign", typed_name:name, ack:ack });
+    if(j && j.error){ m.className="msg bad"; m.textContent=j.error; btn.disabled=false; return; }
+    m.className="msg"; m.textContent="Signed."; reload();
+  });
 
   route();
 })();
