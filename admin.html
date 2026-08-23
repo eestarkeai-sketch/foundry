@@ -55,6 +55,9 @@
   .tabs{display:flex; gap:6px; margin:8px 0 18px; border-bottom:1px solid var(--line)}
   .tab{padding:9px 14px; font-size:13.5px; color:var(--dim); cursor:pointer; border-bottom:2px solid transparent}
   .tab.on{color:var(--ink); border-bottom-color:var(--ember)}
+  .mini{padding:6px 12px; font-size:12.5px}
+  .adjpts,.adjnote{background:var(--panel2); border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:7px 10px; font-family:var(--sans); font-size:13px}
+  .adjpts:focus,.adjnote:focus{outline:none; border-color:var(--ember)}
   .card{background:linear-gradient(180deg,var(--panel),#131010); border:1px solid var(--line); border-radius:14px;
     padding:16px 18px; margin-bottom:12px}
   .row1{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap}
@@ -108,6 +111,7 @@
       <div class="tab on" data-t="apps">Applications</div>
       <div class="tab" data-t="founders">Founders</div>
       <div class="tab" data-t="coaches">Coaches</div>
+      <div class="tab" data-t="incentives">Incentives</div>
       <div class="tab" data-t="payments">Payments</div>
       <div class="tab" data-t="curriculum">Curriculum</div><div class="tab" data-t="ship">Ship</div>
     </div>
@@ -123,6 +127,7 @@
   var WRITE = BASE + "admin-write";
   var CERTIFY = BASE + "admin-certify";
   var CURR = BASE + "admin-curriculum";
+  var COACHADMIN = BASE + "admin-coach";
   var STAGES = ["Seeker","Builder","Sovereign"];
   var token = "", DATA = null, TAB = "apps";
 
@@ -174,6 +179,7 @@
     else if(TAB==="founders") v.innerHTML = renderFounders(DATA.founders||[], DATA.coaches||[]);
     else if(TAB==="coaches") v.innerHTML = renderCoaches(DATA.coach_applications||[], DATA.coaches||[]);
     else if(TAB==="curriculum"){ v.innerHTML = '<div class="empty">Loading curriculum…</div>'; loadCurriculum(); }
+    else if(TAB==="incentives"){ v.innerHTML = '<div class="empty">Loading incentives…</div>'; loadIncentives(); }
     else v.innerHTML = renderPayments(DATA.payments||[]);
   }
 
@@ -307,6 +313,62 @@
     var s = e.target;
     if(s && s.classList && s.classList.contains("fcoach")){
       doWrite({ action:"assign_coach", founder_id: s.getAttribute("data-id"), coach_id: s.value || null });
+    }
+  });
+
+  async function coachAdmin(payload){
+    var r = await fetch(COACHADMIN, { method:"POST", headers:{ "x-admin-token": token, "Content-Type":"application/json" }, body: JSON.stringify(payload) });
+    return await r.json();
+  }
+  function loadIncentives(){
+    var v = document.getElementById("view");
+    coachAdmin({ action:"list" }).then(function(j){
+      if(!j || j.error){ v.innerHTML = '<div class="empty">'+esc((j&&j.error)||"Could not load incentives.")+'</div>'; return; }
+      if(TAB==="incentives") v.innerHTML = renderIncentives(j.coaches||[]);
+    }).catch(function(e){ v.innerHTML = '<div class="empty">'+esc(e.message||"error")+'</div>'; });
+  }
+  function renderIncentives(cs){
+    if(!cs.length) return '<div class="empty">No coaches yet. Score, private ratings, and referrals appear here as coaches are admitted and start working.</div>';
+    return cs.map(function(c){
+      var comp = '<span class="pill">'+(c.volunteer_hours||0)+' hrs</span> <span class="pill">'+(c.founders_completed||0)+' founders</span> <span class="pill">'+(c.referrals_converted||0)+' referrals</span>';
+      var nx = c.next, nextTxt;
+      if(nx){ var bits=[]; if(nx.score_to_go>0)bits.push(nx.score_to_go+" pts"); if(nx.founders_to_go>0)bits.push(nx.founders_to_go+" founders"); if(nx.referrals_to_go>0)bits.push(nx.referrals_to_go+" referrals"); if(nx.needs_agreement && !nx.agreement_signed)bits.push("sign agreement"); nextTxt = "Next: "+esc(nx.tier)+" — "+(bits.length?bits.join(", "):"eligible"); }
+      else nextTxt = "Top tier";
+      var elig = c.eligible ? ' <span class="pill ok">eligible to promote</span>' : '';
+      var ratings = (c.ratings||[]).length ? '<details><summary>Private ratings ('+c.ratings.length+')</summary>'+c.ratings.map(function(r){ return '<pre>'+esc(r.stage||"")+' · '+esc(r.overall)+'/5'+(r.comment?(' · '+esc(r.comment)):'')+' · '+when(r.created_at)+'</pre>'; }).join('')+'</details>' : '<div class="meta">No ratings yet.</div>';
+      var refs = (c.referrals||[]).length ? '<details><summary>Referrals ('+c.referrals.length+')</summary>'+c.referrals.map(function(r){ var btn = (r.status==="converted" && !r.bonus_paid) ? ' <button class="mini" data-bonus="'+r.id+'">Mark bonus paid</button>' : (r.bonus_paid?' <span class="pill ok">bonus paid</span>':''); return '<div class="meta" style="margin:4px 0">'+esc(r.referred_email||"")+' · '+esc(r.status)+btn+'</div>'; }).join('')+'</details>' : '<div class="meta">No referrals yet.</div>';
+      return '<div class="card"><div class="row1"><div>'+
+        '<div class="nm">'+esc(c.name||"—")+' <span class="pill stage">'+esc(c.tier||"Guide")+'</span>'+elig+'</div>'+
+        '<div class="em">'+esc(c.email||"")+'</div>'+
+        '<div class="meta" style="margin-top:6px">'+comp+' · M '+(c.multiplier!=null?Number(c.multiplier).toFixed(2):"1.00")+' · standing '+esc(c.standing||"good")+'</div>'+
+        '<div class="meta" style="margin-top:4px">'+nextTxt+'</div></div>'+
+        '<div style="text-align:right"><div class="nm" style="color:var(--ember2);font-size:22px">'+(c.coach_score||0)+'</div><div class="meta">score</div></div></div>'+
+        ratings + refs +
+        '<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+          '<input class="adjpts" data-id="'+c.id+'" type="number" placeholder="± points" style="width:110px" />'+
+          '<input class="adjnote" data-id="'+c.id+'" type="text" placeholder="reason (optional)" style="flex:1;min-width:150px" />'+
+          '<button class="mini" data-adj="'+c.id+'">Apply adjustment</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+  document.getElementById("view").addEventListener("click", async function(e){
+    var b = e.target && e.target.closest ? e.target.closest("button[data-adj],button[data-bonus]") : null;
+    if(!b) return;
+    if(b.hasAttribute("data-adj")){
+      var id = b.getAttribute("data-adj");
+      var pts = document.querySelector('.adjpts[data-id="'+id+'"]'), nt = document.querySelector('.adjnote[data-id="'+id+'"]');
+      var val = pts && pts.value!=="" ? parseFloat(pts.value) : NaN;
+      if(!isFinite(val)){ msg("Enter a point value.", false); return; }
+      b.disabled=true;
+      var j = await coachAdmin({ action:"adjust", coach_id:id, points:val, note: nt?nt.value:"" }); b.disabled=false;
+      if(j.error){ msg("Adjust failed: "+j.error, false); return; }
+      msg("Adjustment applied.", true); loadIncentives();
+    } else if(b.hasAttribute("data-bonus")){
+      var rid = b.getAttribute("data-bonus"); b.disabled=true;
+      var j2 = await coachAdmin({ action:"mark_bonus_paid", referral_id:rid, paid:true }); b.disabled=false;
+      if(j2.error){ msg("Failed: "+j2.error, false); return; }
+      msg("Bonus marked paid.", true); loadIncentives();
     }
   });
 
