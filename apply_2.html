@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apply &middot; Starke Foundry</title>
+<link rel="canonical" href="https://starkefoundry.com/apply.html">
+<meta name="description" content="The Starke Foundry placement application. A self-assessment that shows the stage you are eligible for, then your proof and essays." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/png" href="/shield_mark.png" />
+<style>
+  :root{
+    --ink:#0a0908;--ink-2:#12100e;--panel:#17140f;--panel-2:#1c1712;--line:rgba(255,255,255,0.09);
+    --paper:#f4efe7;--paper-dim:#b7ad9e;--paper-faint:#8a8072;
+    --ember:#ff6a1a;--ember-2:#ff9d2e;--coal:#b5341a;--glow:rgba(255,106,26,0.45);--ok:#5fce8f;
+    --serif:'Fraunces',Georgia,'Times New Roman',serif;
+    --sans:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:820px;margin:0 auto;padding:0 24px}
+  h1,h2,h3,.serif{font-family:var(--serif);font-weight:500;letter-spacing:-0.01em;line-height:1.12}
+  .eyebrow{font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:var(--ember-2);font-weight:600}
+
+  nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(10,9,8,0.72);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1120px;margin:0 auto;padding:0 24px}
+  .brandlock{display:flex;align-items:center;gap:11px}
+  .brandmark{height:38px;width:auto;display:block;filter:drop-shadow(0 5px 12px rgba(0,0,0,.55))}
+  .brandwm{display:flex;flex-direction:column;line-height:1}
+  .bw-s{font-size:9.5px;letter-spacing:0.36em;color:var(--ember-2);font-weight:600;margin-bottom:3px}
+  .bw-f{font-family:var(--serif);font-weight:600;font-size:19px;letter-spacing:0.16em}
+  .bw-f b{color:var(--ember)}
+  .nav-back{font-size:14px;color:var(--paper-dim)}
+  .nav-back:hover{color:var(--ember-2)}
+
+  header{padding:54px 0 8px}
+  header h1{font-size:clamp(30px,5vw,44px);margin:10px 0 10px}
+  header p{color:var(--paper-dim);max-width:60ch}
+  .steps{display:flex;gap:8px;margin:30px 0 6px;flex-wrap:wrap}
+  .pip{flex:1;min-width:120px;border-top:2px solid var(--line);padding-top:8px;font-size:12px;letter-spacing:0.04em;color:var(--paper-faint)}
+  .pip.active{border-top-color:var(--ember);color:var(--ember-2);font-weight:600}
+  .pip.done{border-top-color:var(--ok);color:var(--paper-dim)}
+
+  form{padding:14px 0 90px}
+  .step{display:none;animation:fade .3s ease}
+  .step.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .q{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px 22px;margin-bottom:16px}
+  .q .qh{font-family:var(--serif);font-size:19px;margin-bottom:4px}
+  .q .qs{color:var(--paper-faint);font-size:13.5px;margin-bottom:14px}
+  label.opt{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:8px;margin-top:9px;cursor:pointer;transition:border-color .15s,background .15s;color:var(--paper-dim);font-size:15px}
+  label.opt:hover{border-color:rgba(255,106,26,0.4)}
+  label.opt input{margin-top:3px;accent-color:var(--ember);flex-shrink:0}
+  label.opt.sel{border-color:var(--ember);background:rgba(255,106,26,0.06);color:var(--paper)}
+  input[type=text],input[type=email],select,textarea{width:100%;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;color:var(--paper);font-family:var(--sans);font-size:15px;padding:12px 14px;margin-top:8px}
+  textarea{min-height:120px;resize:vertical;line-height:1.55}
+  input[type=file]{width:100%;color:var(--paper-dim);font-size:14px;margin-top:8px}
+  .fieldlbl{font-weight:500;font-size:15px}
+  .fieldlbl span{color:var(--ember-2)}
+  .hint{color:var(--paper-faint);font-size:13px;margin-top:4px}
+  .cta-row{display:flex;justify-content:space-between;gap:12px;margin-top:26px}
+  .btn{display:inline-flex;align-items:center;font-family:var(--sans);font-weight:600;font-size:15px;padding:13px 26px;border-radius:3px;cursor:pointer;border:none;transition:transform .15s,box-shadow .2s,opacity .2s}
+  .btn-fire{color:#160b04;background:linear-gradient(180deg,var(--ember-2),var(--ember));box-shadow:0 0 0 1px rgba(255,157,46,0.4),0 14px 40px -12px var(--glow)}
+  .btn-fire:hover{transform:translateY(-2px)}
+  .btn-fire:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+  .btn-ghost{color:var(--paper);border:1px solid rgba(255,255,255,0.18);background:transparent}
+  .btn-ghost:hover{border-color:var(--ember);color:var(--ember-2)}
+  .err{color:#ff6b6b;font-size:14px;margin-top:12px;min-height:18px}
+
+  .reveal{border:1px solid rgba(255,106,26,0.4);border-radius:12px;background:linear-gradient(180deg,rgba(255,106,26,0.10),var(--panel));padding:34px 30px;text-align:center;margin-bottom:8px}
+  .reveal .rk{font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:var(--ember-2);font-weight:600}
+  .reveal .rt{font-family:var(--serif);font-size:clamp(34px,7vw,52px);margin:10px 0 6px}
+  .reveal .rlen{font-size:13px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ember-2);font-weight:600;border:1px solid rgba(255,106,26,0.3);border-radius:999px;padding:5px 16px;display:inline-block;margin-bottom:16px}
+  .reveal .rwhy{color:var(--paper-dim);max-width:52ch;margin:0 auto 18px;font-size:15.5px}
+  .reveal .price{font-size:20px;color:var(--paper)}
+  .reveal .price b{color:var(--ember-2)}
+  .reveal .pricesub{color:var(--paper-faint);font-size:14px;margin-top:6px}
+  .ack{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-top:16px}
+  .agree{display:flex;gap:12px;align-items:flex-start;margin-top:12px;color:var(--paper-dim);font-size:14.5px;cursor:pointer}
+  .agree input{margin-top:3px;accent-color:var(--ember);flex-shrink:0;width:17px;height:17px}
+  .sec-h{font-family:var(--serif);font-size:22px;margin:6px 0 4px}
+  .sec-s{color:var(--paper-faint);font-size:14px;margin-bottom:16px}
+  .done-card{text-align:center;padding:70px 20px}
+  .done-card .shield{height:110px;margin-bottom:20px}
+  .done-card h2{font-size:34px;margin-bottom:12px}
+  .done-card p{color:var(--paper-dim);max-width:52ch;margin:0 auto 8px}
+  footer{border-top:1px solid var(--line);padding:30px 0;color:var(--paper-faint);font-size:13px;text-align:center}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style id="sfx-chrome">
+.sfx-nav{position:sticky;top:0;z-index:9000;background:rgba(5,4,3,0.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06);font-family:'Inter',system-ui,-apple-system,sans-serif}
+.sfx-nav *{box-sizing:border-box}
+.sfx-nav-in{display:flex;align-items:center;justify-content:space-between;height:78px;max-width:1180px;margin:0 auto;padding:0 40px}
+.sfx-brand{display:flex;align-items:center;gap:13px;text-decoration:none}
+.sfx-brand img{height:32px;width:auto;display:block;opacity:.9}
+.sfx-brand .wm{font-size:13px;letter-spacing:0.34em;color:#f2ece3;font-weight:600}
+.sfx-links{display:flex;gap:34px;align-items:center}
+.sfx-links a{font-size:12.5px;letter-spacing:0.14em;text-transform:uppercase;color:#a49b8e;text-decoration:none;transition:color .3s}
+.sfx-links a:hover{color:#f2ece3}
+.sfx-links a.enter{border:1px solid rgba(255,255,255,0.2);padding:9px 18px;color:#f2ece3;border-radius:1px}
+.sfx-links a.enter:hover{border-color:#ff6a1a;color:#ffa23c}
+.sfx-toggle{display:none;background:none;border:0;cursor:pointer;width:30px;height:22px;position:relative;padding:0}
+.sfx-toggle span{display:block;height:2px;width:100%;background:#f2ece3;border-radius:2px;position:absolute;left:0;transition:.25s}
+.sfx-toggle span:nth-child(1){top:0}.sfx-toggle span:nth-child(2){top:10px}.sfx-toggle span:nth-child(3){top:20px}
+.sfx-toggle.open span:nth-child(1){top:10px;transform:rotate(45deg)}
+.sfx-toggle.open span:nth-child(2){opacity:0}
+.sfx-toggle.open span:nth-child(3){top:10px;transform:rotate(-45deg)}
+@media(max-width:860px){
+  .sfx-toggle{display:block}
+  .sfx-links{position:absolute;top:78px;left:0;right:0;background:rgba(5,4,3,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06);flex-direction:column;gap:0;align-items:stretch;padding:8px 0;display:none}
+  .sfx-links.open{display:flex}
+  .sfx-links a:not(.enter){padding:14px 40px;font-size:14px}
+  .sfx-links a.enter{margin:12px 40px;text-align:center}
+}
+.sfx-foot{border-top:1px solid rgba(255,255,255,0.06);background:#050403;padding:64px 0 40px;font-family:'Inter',system-ui,-apple-system,sans-serif}
+.sfx-foot *{box-sizing:border-box}
+.sfx-foot-in{max-width:1180px;margin:0 auto;padding:0 40px}
+.sfx-foot-cols{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px}
+.sfx-foot-brand{display:flex;align-items:center;gap:12px}
+.sfx-foot-brand img{height:30px;width:auto}
+.sfx-foot-brand span{font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:#f2ece3;font-weight:600}
+.sfx-foot-tag{margin-top:16px;max-width:38ch;line-height:1.6;font-size:14px;color:#6b6358}
+.sfx-foot h5{font-size:11px;letter-spacing:0.26em;text-transform:uppercase;color:#ffa23c;font-weight:600;margin-bottom:16px}
+.sfx-foot-col a{display:block;color:#a49b8e;font-size:14px;margin-bottom:11px;text-decoration:none;letter-spacing:0.01em}
+.sfx-foot-col a:hover{color:#ffa23c}
+.sfx-foot-base{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:44px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06);color:#6b6358;font-size:12.5px;letter-spacing:0.04em}
+@media(max-width:760px){.sfx-foot-cols{grid-template-columns:1fr 1fr}.sfx-foot-brand-col{grid-column:1/-1}}
+@media(max-width:460px){.sfx-foot-cols{grid-template-columns:1fr}}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Starke Foundry">
+<meta property="og:title" content="Apply · Starke Foundry">
+<meta property="og:description" content="The Starke Foundry placement application. A self-assessment that shows the stage you are eligible for, then your proof and essays.">
+<meta property="og:url" content="https://starkefoundry.com/apply.html">
+<meta property="og:image" content="https://starkefoundry.com/shield_mark.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Apply · Starke Foundry">
+<meta name="twitter:description" content="The Starke Foundry placement application. A self-assessment that shows the stage you are eligible for, then your proof and essays.">
+<meta name="twitter:image" content="https://starkefoundry.com/shield_mark.png">
+</head>
+<body>
+<nav class="sfx-nav"><div class="sfx-nav-in">
+  <a class="sfx-brand" href="/index.html"><img src="/shield_mark.png" alt="Starke Foundry" /><span class="wm">STARKE&nbsp;&nbsp;FOUNDRY</span></a>
+  <button class="sfx-toggle" id="sfxToggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="sfx-links" id="sfxLinks"><a href="/index.html#method">Method</a> <a href="/index.html#programs">Programs</a> <a href="/index.html#ethan">Ethan</a> <a href="/welcome.html">How It Works</a> <a href="/coaches.html">The Bench</a> <a href="/faq.html">FAQ</a> <a href="/my-foundry.html">Sign In</a> <a class="enter" href="/apply.html">Apply</a></div>
+</div></nav>
+
+
+
+
+<div id="intro">
+<header>
+  <div class="wrap">
+    <div class="eyebrow">The placement application</div>
+    <h1>Find your fire, and your stage.</h1>
+    <p>This is a self-assessment before commitment. You will answer honestly, and the application will show you the one stage you are eligible for and what it costs. Then you will submit proof and write a few short essays. It takes about twenty minutes, and it is worth doing carefully. Nothing here is scored by a person until you submit. Ethan reads every application himself and replies within three business days.</p>
+    <div class="steps">
+      <div class="pip active" data-pip="1">1 &middot; Orientation</div>
+      <div class="pip" data-pip="2">2 &middot; Assessment</div>
+      <div class="pip" data-pip="3">3 &middot; Your placement</div>
+      <div class="pip" data-pip="4">4 &middot; Proof, essays, submit</div>
+    </div>
+  </div>
+</header>
+
+<form id="app" class="wrap" action="" method="POST" enctype="multipart/form-data" autocomplete="off">
+  <input type="hidden" name="_subject" value="New Starke Foundry application" />
+  <input type="hidden" name="_template" value="table" />
+  <input type="hidden" name="_captcha" value="false" />
+  <input type="text" name="_honey" style="display:none" />
+  <input type="hidden" name="_next" value="https://starkefoundry.com/apply.html?done=1" />
+  <input type="hidden" name="Computed placement" id="f_tier" value="" />
+  <input type="hidden" name="Category 1 score" id="f_c1" value="" />
+  <input type="hidden" name="Category 2 score" id="f_c2" value="" />
+
+  <!-- STEP 1 ORIENTATION -->
+  <section class="step on" data-step="1">
+    <div class="q">
+      <div class="qh">Who are you?</div>
+      <div class="qs">Your name and where you are based.</div>
+      <input type="text" name="Full name" placeholder="Full name" required />
+      <input type="text" name="Location" placeholder="City, country" />
+      <input type="email" name="Email" placeholder="Email address" required />
+    </div>
+    <div class="q">
+      <div class="qh">Were you referred by a Foundry coach?</div>
+      <div class="qs">Optional. If a coach pointed you here, name them &mdash; it credits their work.</div>
+      <select name="Referred by coach" id="n_referrer">
+        <option value="">No, or not sure</option>
+      </select>
+    </div>
+    <div class="q">
+      <div class="qh">What are you building, or trying to become the founder of?</div>
+      <div class="qs">A company, an idea, or the intent without one yet. All three are valid.</div>
+      <textarea name="What you are building" placeholder="Tell us in a few sentences." required></textarea>
+    </div>
+    <div class="q">
+      <div class="qh">Where does it stand today?</div>
+      <div class="qs">This does not decide your placement. It calibrates how we read your answers.</div>
+      <select name="Current stage" required>
+        <option value="" disabled selected>Choose one</option>
+        <option>Pre-idea or exploring</option>
+        <option>Idea, nothing built yet</option>
+        <option>Building, pre-revenue</option>
+        <option>Has revenue</option>
+        <option>Has raised outside capital</option>
+      </select>
+    </div>
+    <div class="q">
+      <div class="qh">Why now, and why does this problem belong to you?</div>
+      <textarea name="Why now" placeholder="Two or three sentences." required></textarea>
+    </div>
+    <div class="cta-row">
+      <span></span>
+      <button type="button" class="btn btn-fire" data-next="2">Begin the assessment &#8250;</button>
+    </div>
+    <div class="err" id="err1"></div>
+  </section>
+
+  <!-- STEP 2 ASSESSMENT -->
+  <section class="step" data-step="2">
+    <div class="sec-h">The assessment</div>
+    <div class="sec-s">Answer for what you have actually done, not what you intend. The strongest answers require evidence you can show, and you will be asked for it later. Be honest: placing too high sets you up to fail.</div>
+    <div id="questions"></div>
+    <div class="q">
+      <div class="qh">The thirty-day test</div>
+      <div class="qs">One scenario. There are no wrong words here; write plainly.</div>
+      <p style="color:var(--paper-dim);font-size:15px;margin-bottom:4px">Thirty days ago, an investor gave you hard, specific feedback: your core assumption is probably wrong, and here is exactly why. It is now thirty days later and you are back in the room. What would you have done, and what would you put on the table today?</p>
+      <textarea name="Thirty-day test" placeholder="Be concrete." required></textarea>
+    </div>
+    <div class="cta-row">
+      <button type="button" class="btn btn-ghost" data-back="1">&#8249; Back</button>
+      <button type="button" class="btn btn-fire" data-next="3">See my placement &#8250;</button>
+    </div>
+    <div class="err" id="err2"></div>
+  </section>
+
+  <!-- STEP 3 PLACEMENT -->
+  <section class="step" data-step="3">
+    <div class="reveal">
+      <div class="rk">You are eligible for</div>
+      <div class="rt" id="rv_tier">The Seeker</div>
+      <div class="rlen" id="rv_len">15 weeks</div>
+      <div class="rwhy" id="rv_why"></div>
+      <div class="price">You start at <b id="rv_rate">$1,250</b> per five-week block</div>
+      <div class="pricesub">Paid five weeks at a time. The rate rises by stage as you advance: Seeker $1,250, Builder $2,500, Sovereign $3,750 — each a five-week block. Cancel anytime to stop future blocks; blocks already paid aren’t refunded.</div>
+    </div>
+    <div class="ack">
+      <label class="agree"><input type="checkbox" id="ack" name="Acknowledged placement" value="Yes" />
+        <span>I understand I am applying to <b id="ack_tier">The Seeker</b>, the one stage I am eligible for, at the stage rates shown above, and I want to complete my application.</span></label>
+    </div>
+    <div class="cta-row">
+      <button type="button" class="btn btn-ghost" data-back="2">&#8249; Back</button>
+      <button type="button" class="btn btn-fire" id="toStep4" data-next="4" disabled>Complete my application &#8250;</button>
+    </div>
+    <div class="err" id="err3"></div>
+  </section>
+
+  <!-- STEP 4 PROOF + ESSAYS + AGREEMENTS -->
+  <section class="step" data-step="4">
+    <div class="sec-h">Proof</div>
+    <div class="sec-s">Substantiate the claims you made at the top level. Upload a document, a screenshot, or a link in the notes. Anything you claimed but cannot support will not count.</div>
+    <div id="proof"></div>
+
+    <div class="sec-h" style="margin-top:26px">Essays</div>
+    <div class="sec-s">Write these yourself. They are read closely, and they are designed to show whether the words are yours. Roughly 250 words each.</div>
+    <div class="q">
+      <div class="qh">1. The specific scene</div>
+      <div class="qs">One real conversation, with a customer, co-founder, or investor, that changed what you are doing. Name the person or their role, where you were, what they said, and what you did next.</div>
+      <textarea name="Essay 1 the specific scene" required></textarea>
+    </div>
+    <div class="q">
+      <div class="qh">2. The honest failure</div>
+      <div class="qs">Something you got wrong that cost you time, money, or a relationship. What you believed, what happened, and what it changed in you.</div>
+      <textarea name="Essay 2 the honest failure" required></textarea>
+    </div>
+    <div class="q">
+      <div class="qh">3. Your non-obvious truth</div>
+      <div class="qs">The one thing about your space, customer, or model that is true, that you learned the hard way, and that most people would disagree with.</div>
+      <textarea name="Essay 3 the non-obvious truth" required></textarea>
+    </div>
+
+    <div class="sec-h" style="margin-top:26px">Agreements</div>
+    <div class="sec-s">Submitting is a commitment, not an enquiry.</div>
+    <div class="q">
+      <label class="agree"><input type="checkbox" class="ag" name="Agree stage" value="Yes" /><span>I am applying to <b class="ack_tier2">The Seeker</b>, the stage I am eligible for, and not another.</span></label>
+      <label class="agree"><input type="checkbox" class="ag" name="Agree price" value="Yes" /><span>I agree to the price: billed in five-week blocks, at the stage rate ($1,250, then $2,500, then $3,750 per five-week block as I advance).</span></label>
+      <label class="agree"><input type="checkbox" class="ag" name="Agree terms" value="Yes" /><span>I have read and agree to the terms: placement is to one stage; billed in five-week blocks at the stage rate; I may leave any time; no refunds; no certificate without finishing; a pause is capped at 20% of the program.</span></label>
+      <label class="agree"><input type="checkbox" class="ag" name="Agree payment" value="Yes" /><span>If approved, I will process my first payment within five days of receiving my approval and welcome letter.</span></label>
+      <label class="agree"><input type="checkbox" class="ag" name="Work is my own" value="Yes" /><span>The work in this application, including the essays, is my own and not written by AI.</span></label>
+    </div>
+    <div class="cta-row">
+      <button type="button" class="btn btn-ghost" data-back="3">&#8249; Back</button>
+      <button type="submit" class="btn btn-fire" id="submitBtn" disabled>Submit my application</button>
+    </div>
+    <div class="err" id="err4"></div>
+  </section>
+</form>
+
+<!-- Notification-only email: fires after the full application is saved to the admin desk -->
+<form id="notify" action="" method="POST" style="display:none">
+  <input type="hidden" name="_subject" value="A Foundry application arrived &mdash; review it on the admin desk" />
+  <input type="hidden" name="_captcha" value="false" />
+  <input type="hidden" name="_template" value="table" />
+  <input type="hidden" name="_next" value="https://starkefoundry.com/apply.html?done=1" />
+  <input type="hidden" name="Applicant" id="n_name" value="" />
+  <input type="hidden" name="Email" id="n_email" value="" />
+  <input type="hidden" name="Eligible stage" id="n_stage" value="" />
+  <input type="hidden" name="Note" value="An application just arrived and is saved on your admin desk. Open Foundry Admin > Applications to read the essays, proof, and AI first-pass, then Welcome, Reject, or Block." />
+</form>
+</div>
+
+<div id="thanks" style="display:none">
+  <div class="done-card wrap">
+    <img class="shield" src="/shield_mark.png" alt="Starke Foundry" />
+    <h2>Your application is in.</h2>
+    <p>Thank you for the care you put into it. Ethan reviews every application himself, on the evidence you submitted. If it is a fit, you will receive an approval and welcome letter, and your place is held when you complete the first payment within five days.</p>
+    <p style="color:var(--paper-faint);margin-top:14px">You can close this page.</p>
+  </div>
+</div>
+
+<div id="paused" style="display:none">
+  <div class="done-card wrap">
+    <img class="shield" src="/shield_mark.png" alt="Starke Foundry" />
+    <h2>Applications are paused right now.</h2>
+    <p>We hold intake when our coaches are at capacity, so every founder who joins gets the attention the program promises. This is temporary &mdash; please check back soon.</p>
+    <p id="paused_wait" style="display:none">Want to be first to know when we reopen? Email <a href="mailto:hello@starkefoundry.com?subject=Foundry%20waitlist" style="color:var(--ember-2)">hello@starkefoundry.com</a> and we&rsquo;ll add you to the list.</p>
+    <p style="color:var(--paper-faint);margin-top:14px">Thank you for your interest in Starke Foundry.</p>
+  </div>
+</div>
+
+
+
+<script>
+(function(){
+  var QUESTIONS = [
+    {id:"b1",cat:1,h:"Rate of iteration",s:"When you get feedback that means real rework, what usually happens?",
+     o:["I think about it and revisit when I can.","I plan a change over the next few weeks.","I turn it around within a week.","I close the loop in days, and I can point to a specific recent example."]},
+    {id:"b2",cat:1,h:"Information density",s:"How do you naturally describe your venture or last project?",
+     o:["In terms of the vision and mission.","In terms of the market opportunity.","In terms of what we built and why.","In precise metrics and structural realities, which I can produce on request."]},
+    {id:"b3",cat:1,h:"Earned insight",s:"What do you know about your space that most outsiders get wrong?",
+     o:["I am still learning the space.","I have a general view.","I have a point of view from experience.","A specific, non-obvious insight from primary research I did myself, and I can source it."]},
+    {id:"b4",cat:1,h:"High-agency problem solving",s:"The last time a rule or gatekeeper blocked you, what did you do?",
+     o:["Waited for the right channel.","Escalated and asked permission.","Found a workaround eventually.","Routed around it directly and got the outcome; I can describe the instance."]},
+    {id:"b5",cat:1,h:"Defensive clarity",s:"When someone attacks your plan with hard, specific pushback, your honest reaction is:",
+     o:["I defend the work I have put in.","I get some distance, then reconsider.","I take the useful parts.","I treat it as a free optimization and engage the hardest version on the spot."]},
+    {id:"b6",cat:1,h:"Talent gravity",s:"Have you persuaded high-caliber people to work with you for less than they are worth?",
+     o:["Not yet.","I have convinced people to help informally.","One or two, with effort.","Yes, more than once, and I can name who and what they gave up to join."]},
+    {id:"b7",cat:1,h:"Extreme coachability",s:"The last time you abandoned a plan you were invested in:",
+     o:["I tend to see plans through.","I have adjusted plans under pressure.","I have dropped a plan when the data was clear.","I have killed a plan I loved quickly and without drama, and I can describe it."]},
+    {id:"b8",cat:2,h:"Customer obsession",s:"How close are you to the people you serve?",
+     o:["I have an idea of who they are.","I have talked to some.","I talk to them regularly.","A continuous loop; I can recite my top ten users' exact pains from memory."]},
+    {id:"b9",cat:2,h:"Ruthless prioritization",s:"What is the one metric that decides whether your venture lives?",
+     o:["I track several things.","I have a rough sense.","I have a primary metric.","One metric, named, and I can explain why it and not the vanity numbers, with the current figure."]},
+    {id:"b10",cat:2,h:"GTM resourcefulness",s:"How have you acquired your users or early audience?",
+     o:["Not yet.","Through my personal network.","A mix of channels.","Through a creative, low-cost channel I engineered, no paid-ad burn, and I can show it."]},
+    {id:"b11",cat:2,h:"Speed to revenue",s:"Has money changed hands for what you offer?",
+     o:["Not yet, it is early.","I have interest but no charge.","I have charged a few times.","I charged deliberately and early to test willingness to pay, and I can show the result."]},
+    {id:"b12",cat:2,h:"Operational transparency",s:"What is the state of your data room, model, and cap table?",
+     o:["I have not built these.","Some documents exist.","I have a model and rough numbers.","A clean, current data room, model, and cap table an investor could open tomorrow."]},
+    {id:"b13",cat:2,h:"Product velocity",s:"How consistently does your team ship?",
+     o:["No build yet.","In bursts.","Roughly on a cadence.","A consistent release cadence under real deadlines, which I can evidence."]}
+  ];
+  var PROOF = {
+    b3:"Earned insight: your primary research artifact (notes, transcripts, data).",
+    b6:"Talent gravity: who joined and what they gave up (a name, a note, a message).",
+    b9:"One metric: your current dashboard or figure.",
+    b10:"GTM channel: the channel and its result (analytics, a post, a funnel).",
+    b11:"Speed to revenue: a receipt, invoice, or payment record.",
+    b12:"Operational transparency: the data room, model, or cap table.",
+    b13:"Product velocity: a changelog, commit history, or release record."
+  };
+  var TIERS = {
+    Sovereign:{len:"15 weeks",rate:"3,750",why:"You already demonstrate the behavioral mechanics and the commercial execution this final stage assumes. You come to master capital and narrative, and to earn the certificate."},
+    Builder:{len:"15 weeks",rate:"2,500",why:"The founder in you is there. You have the behavioral base, but the commercial execution is still ahead. You build the venture's spine, then complete the arc."},
+    Seeker:{len:"15 weeks",rate:"1,250",why:"The honest, deepest start. You bring conviction and agency; you build identity, commercial execution, and capital trajectory from the base. The longest arc, the largest transformation."}
+  };
+
+  var val = {};
+  var qwrap = document.getElementById("questions");
+  QUESTIONS.forEach(function(q){
+    var el = document.createElement("div"); el.className="q";
+    var html = '<div class="qh">'+q.h+'</div><div class="qs">'+q.s+'</div>';
+    q.o.forEach(function(txt,i){
+      var v = ["a","b","c","d"][i];
+      html += '<label class="opt"><input type="radio" name="'+q.id+'_'+q.h+'" value="'+v+'" data-q="'+q.id+'" data-v="'+v+'"><span>'+txt+'</span></label>';
+    });
+    el.innerHTML = html; qwrap.appendChild(el);
+  });
+
+  // option select styling + capture
+  document.addEventListener("change", function(e){
+    var inp = e.target;
+    if(inp.type==="radio" && inp.dataset.q){
+      val[inp.dataset.q] = inp.dataset.v;
+      var group = inp.closest(".q");
+      group.querySelectorAll("label.opt").forEach(function(l){l.classList.remove("sel");});
+      inp.closest("label.opt").classList.add("sel");
+    }
+  });
+
+  function computePlacement(){
+    var c1=0,c2=0;
+    QUESTIONS.forEach(function(q){
+      if(val[q.id]==="d"){ if(q.cat===1) c1++; else c2++; }
+    });
+    var c1held = c1>=5, c2held = c2>=4;
+    var tier = "Seeker";
+    if(c1held && c2held) tier="Sovereign";
+    else if(c1held) tier="Builder";
+    return {tier:tier,c1:c1,c2:c2};
+  }
+
+  function renderPlacement(){
+    var r = computePlacement();
+    var t = TIERS[r.tier];
+    document.getElementById("rv_tier").textContent = "The "+r.tier;
+    document.getElementById("rv_len").textContent = t.len;
+    document.getElementById("rv_rate").textContent = "$"+t.rate;
+    document.getElementById("rv_why").textContent = t.why;
+    document.getElementById("ack_tier").textContent = "The "+r.tier;
+    Array.prototype.forEach.call(document.querySelectorAll(".ack_tier2"),function(n){n.textContent="The "+r.tier;});
+    document.getElementById("f_tier").value = "The "+r.tier+" ("+t.len+")";
+    document.getElementById("f_c1").value = r.c1+" of 7 (need 5)";
+    document.getElementById("f_c2").value = r.c2+" of 6 (need 4)";
+    // build conditional proof fields
+    var pv = document.getElementById("proof"); pv.innerHTML="";
+    var any=false;
+    QUESTIONS.forEach(function(q){
+      if(val[q.id]==="d" && PROOF[q.id]){
+        any=true;
+        var el=document.createElement("div"); el.className="q";
+        el.innerHTML='<div class="fieldlbl">'+PROOF[q.id]+'</div>'+
+          '<input type="file" name="Proof '+q.h+'" />'+
+          '<input type="text" name="Or link '+q.h+'" placeholder="Or paste a link" />';
+        pv.appendChild(el);
+      }
+    });
+    if(!any){
+      pv.innerHTML='<div class="q"><div class="qs">You did not claim any evidence-backed markers, so no proof is required. Your essays carry the weight.</div></div>';
+    }
+  }
+
+  function show(n){
+    Array.prototype.forEach.call(document.querySelectorAll(".step"),function(s){s.classList.toggle("on", s.dataset.step==String(n));});
+    Array.prototype.forEach.call(document.querySelectorAll(".pip"),function(p){
+      var i=+p.dataset.pip; p.classList.toggle("active",i==n); p.classList.toggle("done",i<n);
+    });
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  function validateStep(n){
+    if(n==1){
+      var req = document.querySelectorAll('[data-step="1"] [required]');
+      for(var i=0;i<req.length;i++){ if(!req[i].value.trim()){ return "Please complete every field to continue."; } }
+      return "";
+    }
+    if(n==2){
+      for(var j=0;j<QUESTIONS.length;j++){ if(!val[QUESTIONS[j].id]) return "Please answer all thirteen questions."; }
+      var vt=document.querySelector('[name="Thirty-day test"]'); if(!vt.value.trim()) return "Please answer the thirty-day test.";
+      return "";
+    }
+    return "";
+  }
+
+  document.addEventListener("click", function(e){
+    var b=e.target.closest("[data-next]"); var bb=e.target.closest("[data-back]");
+    if(b){
+      var cur=+b.closest(".step").dataset.step;
+      var msg=validateStep(cur);
+      var errEl=document.getElementById("err"+cur);
+      if(msg){ if(errEl) errEl.textContent=msg; return; }
+      if(errEl) errEl.textContent="";
+      var nx=+b.dataset.next;
+      if(nx==3) renderPlacement();
+      show(nx);
+    }
+    if(bb){ show(+bb.dataset.back); }
+  });
+
+  // acknowledge gate
+  document.getElementById("ack").addEventListener("change",function(){
+    document.getElementById("toStep4").disabled = !this.checked;
+  });
+  // agreements gate
+  function checkAgrees(){
+    var all=document.querySelectorAll(".ag");
+    var ok=true; all.forEach(function(c){ if(!c.checked) ok=false; });
+    var essays=document.querySelectorAll('[data-step="4"] textarea');
+    essays.forEach(function(t){ if(!t.value.trim()) ok=false; });
+    document.getElementById("submitBtn").disabled=!ok;
+  }
+  document.querySelectorAll(".ag").forEach(function(c){c.addEventListener("change",checkAgrees);});
+  document.addEventListener("input",function(e){ if(e.target.closest('[data-step="4"]')) checkAgrees(); });
+
+  // thank-you state
+  if(location.search.indexOf("done=1")>-1){
+    document.getElementById("intro").style.display="none";
+    document.getElementById("thanks").style.display="block";
+  }
+
+  // ---- Corrected submit: save the FULL application to the live admin desk, then send a short notice ----
+  // Fail-safe: if the backend save fails for any reason, we fall back to emailing Ethan the full
+  // application (native FormSubmit) so an application can never be silently lost.
+  var EP = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/";
+  // Populate the "referred by a coach" dropdown from the public coach list.
+  (function loadReferrers(){
+    var sel=document.getElementById("n_referrer"); if(!sel) return;
+    fetch(EP+"coach-options",{cache:"no-store"}).then(function(r){return r.json();}).then(function(d){
+      ((d&&d.coaches)||[]).forEach(function(c){ var o=document.createElement("option"); o.value=c.id; o.textContent=c.name; sel.appendChild(o); });
+    }).catch(function(){});
+  })();
+  var appForm = document.getElementById("app");
+  var notifyForm = document.getElementById("notify");
+  var submitting = false;
+  function gv(sel){ var e=document.querySelector(sel); return e ? (e.value||"").trim() : ""; }
+
+  function gatherApplication(){
+    var pl = computePlacement();
+    var stage = pl.tier; // Seeker | Builder | Sovereign
+    var name = gv('[name="Full name"]');
+    var email = gv('[name="Email"]');
+    var address = gv('[name="Location"]');
+    var lines = QUESTIONS.map(function(q){
+      var lv = val[q.id]; var idx = {a:0,b:1,c:2,d:3}[lv];
+      var ans = (idx!=null && q.o[idx]) ? q.o[idx] : "(no answer)";
+      return "• "+q.h+": "+ans+(lv==="d"?" [evidence-backed]":"");
+    }).join("\n");
+    var essays =
+      "WHAT THEY ARE BUILDING:\n"+gv('[name="What you are building"]')+"\n\n"+
+      "WHY NOW / WHY THEM:\n"+gv('[name="Why now"]')+"\n\n"+
+      "SELF-REPORTED CURRENT STAGE: "+gv('[name="Current stage"]')+"\n\n"+
+      "THIRTY-DAY TEST:\n"+gv('[name="Thirty-day test"]')+"\n\n"+
+      "ESSAY 1 — THE SPECIFIC SCENE:\n"+gv('[name="Essay 1 the specific scene"]')+"\n\n"+
+      "ESSAY 2 — THE HONEST FAILURE:\n"+gv('[name="Essay 2 the honest failure"]')+"\n\n"+
+      "ESSAY 3 — YOUR NON-OBVIOUS TRUTH:\n"+gv('[name="Essay 3 the non-obvious truth"]')+"\n\n"+
+      "SELF-ASSESSMENT (13 markers):\n"+lines;
+    var linkVals = Array.prototype.map.call(document.querySelectorAll('[name^="Or link "]'), function(i){
+      var lbl=i.name.replace(/^Or link /,""); var v=(i.value||"").trim(); return v?(lbl+": "+v):""; }).filter(Boolean);
+    var fileNotes = Array.prototype.map.call(document.querySelectorAll('input[type="file"][name^="Proof "]'), function(i){
+      var lbl=i.name.replace(/^Proof /,""); return (i.files&&i.files.length)?(lbl+": [file attached: "+i.files[0].name+"]"):""; }).filter(Boolean);
+    var proofLinks = linkVals.concat(fileNotes).join("\n") || "(no evidence-backed markers claimed; essays carry the weight)";
+    return {
+      name:name, fullName:name, email:email, phone:"",
+      address:address, location:address, city:address,
+      stagePlaced:stage, stage:stage, placed:stage, tier:stage,
+      status:"submitted", essays:essays, essayText:essays,
+      proof:proofLinks, proofLinks:proofLinks,
+      c1:pl.c1, c2:pl.c2, slope:(pl.c1+" of 7 / "+pl.c2+" of 6"),
+      currentStage:gv('[name="Current stage"]'), source:"apply.html",
+      referredByCoachId:(document.getElementById("n_referrer")||{}).value||""
+    };
+  }
+
+  appForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    if(submitting) return; submitting=true;
+    var btn=document.getElementById("submitBtn");
+    if(btn){ btn.disabled=true; btn.textContent="Submitting…"; }
+    var data; try{ data=gatherApplication(); }catch(err){ appForm.submit(); return; }
+    // Record a coach referral (fire-and-forget). Converts to credit only if this founder is later admitted.
+    try{ if(data.referredByCoachId){ fetch(EP+"record-referral?cb="+Date.now(), {method:"POST", cache:"no-store",
+      body: JSON.stringify({ coach_id:data.referredByCoachId, email:data.email }) }).catch(function(){}); } }catch(_){}
+    var done=false;
+    function notifyAndFinish(){ if(done)return; done=true;
+      try{ document.getElementById("n_name").value=data.name;
+           document.getElementById("n_email").value=data.email;
+           document.getElementById("n_stage").value=data.stagePlaced; }catch(_){}
+      notifyForm.submit(); }
+    function fullFallback(){ if(done)return; done=true; appForm.submit(); }
+    fetch(EP+"apply-intake?cb="+Date.now(), {method:"POST", cache:"no-store", body: JSON.stringify(data)})
+      .then(function(r){ return r.ok; })
+      .then(function(ok){ ok ? notifyAndFinish() : fullFallback(); })
+      .catch(function(){ fullFallback(); });
+    setTimeout(function(){ fullFallback(); }, 9000);
+  }, true);
+})();
+</script>
+<script>
+/* Waitlist brake: if intake is closed in the Settings collection, show the paused panel
+   instead of the application. Any failure leaves the application open (fail-open). */
+(function(){
+  if(location.search.indexOf("done=1")>-1) return; // just submitted -> keep thank-you
+  function show(id,disp){ var e=document.getElementById(id); if(e) e.style.display=disp; }
+  fetch("https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/public-settings",{cache:"no-store"})
+    .then(function(r){ return r.json(); })
+    .then(function(s){
+      if(s && s.intakeOpen===false){
+        show("intro","none");
+        show("thanks","none");
+        show("paused","block");
+        if(s.waitlistOpen===true) show("paused_wait","block");
+      }
+    })
+    .catch(function(){ /* leave application open on any error */ });
+})();
+</script>
+
+
+<footer class="sfx-foot"><div class="sfx-foot-in">
+  <div class="sfx-foot-cols">
+    <div class="sfx-foot-brand-col">
+      <div class="sfx-foot-brand"><img src="/shield_mark.png" alt="Starke Foundry" /><span>Starke Foundry</span></div>
+      <div class="sfx-foot-tag">An identity-first founder incubator led by Ethan Starke. We build the founder before the company.</div>
+    </div>
+    <div class="sfx-foot-col"><h5>Program</h5><a href="/index.html#method">The Method</a><a href="/index.html#programs">Programs</a><a href="/coaches.html">The Bench</a><a href="/apply.html">Apply</a></div>
+    <div class="sfx-foot-col"><h5>Foundry</h5><a href="/faq.html">FAQ</a><a href="/my-foundry.html">Member Sign In</a><a href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call</a></div>
+    <div class="sfx-foot-col"><h5>Legal</h5><a href="/terms.html">Terms &amp; Conditions</a><a href="/privacy.html">Privacy Policy</a></div>
+  </div>
+  <div class="sfx-foot-base"><span>&copy; 2026 Starke Foundry. All rights reserved.</span><span>By application. Foundry chooses its founders.</span></div>
+</div></footer>
+<script>(function(){var t=document.getElementById('sfxToggle'),l=document.getElementById('sfxLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.classList.toggle('open',o);t.setAttribute('aria-expanded',o?'true':'false');});Array.prototype.forEach.call(l.querySelectorAll('a'),function(a){a.addEventListener('click',function(){l.classList.remove('open');t.classList.remove('open');t.setAttribute('aria-expanded','false');});});})();</script>
+
+<script id="foundry-apply-cut-formsubmit">
+(function(){
+  // Applications post to apply-intake (primary); the applicant confirmation and the admin
+  // new-application alert are sent by the Foundry email system. Cut the FormSubmit tail:
+  // neutralize its native submits (no duplicate email, no off-site redirect) and show a
+  // native thank-you on success / a clear error on failure.
+  try { document.querySelectorAll('form[action*="formsubmit"]').forEach(function(f){ try { f.submit = function(){}; } catch(_){} }); } catch(_){}
+  var shown=false;
+  function done(ok){ if(shown)return; shown=true; var w=document.createElement("div");
+    w.style.cssText="position:fixed;inset:0;z-index:99999;background:#0d0b0a;display:flex;align-items:center;justify-content:center;padding:24px;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif";
+    w.innerHTML = ok ? "<div style=\"max-width:520px;text-align:center;color:#f3ede6\"><div style=\"font:700 27px/1.3 Georgia,serif;margin:0 0 14px\">Your application is in.</div><p style=\"color:#b8afa5;line-height:1.65;font-size:15px\">We read every one closely. Watch your inbox for our decision — if you're admitted, your next step is to activate your place and begin.</p><a href=\"/\" style=\"display:inline-block;margin-top:20px;color:#e8763a;text-decoration:none;font-weight:700\">Back to Starke Foundry</a></div>" : "<div style=\"max-width:520px;text-align:center;color:#f3ede6\"><div style=\"font:700 24px/1.3 Georgia,serif;margin:0 0 12px\">That didn't go through.</div><p style=\"color:#b8afa5;line-height:1.65;font-size:15px\">Something interrupted your submission. Please try again, or email <a href=\"mailto:hello@starkefoundry.com\" style=\"color:#e8763a\">hello@starkefoundry.com</a> and we'll take it from there.</p><button onclick=\"location.reload()\" style=\"margin-top:20px;background:#e8763a;color:#0d0b0a;border:0;border-radius:8px;padding:11px 22px;font-weight:700;cursor:pointer\">Try again</button></div>";
+    document.body.appendChild(w); }
+  var of=window.fetch;
+  window.fetch=function(u,o){ var p=of.apply(this,arguments); try{ if(String(u).indexOf("apply-intake")>=0){ p.then(function(r){ done(!!(r&&r.ok)); }).catch(function(){ done(false); }); } }catch(_){} return p; };
+})();
+</script>
+
+<script id="foundry-a11y">try{document.querySelectorAll("input,select,textarea").forEach(function(el){if(el.type==="hidden")return;var named=el.getAttribute("aria-label")||el.getAttribute("aria-labelledby")||(el.id&&document.querySelector('label[for="'+el.id+'"]'))||el.closest("label");if(!named){var lbl=el.placeholder||el.getAttribute("title")||el.name||"";if(lbl)el.setAttribute("aria-label",lbl);}});}catch(e){}</script>
+
+<script id="foundry-bot-guard">
+(function(){
+  var t0=Date.now();
+  try{var hp=document.createElement("input");hp.type="text";hp.name="website_hp";hp.id="website_hp";hp.tabIndex=-1;hp.setAttribute("autocomplete","off");hp.setAttribute("aria-hidden","true");hp.style.cssText="position:absolute!important;left:-9999px!important;top:auto;width:1px;height:1px;opacity:0;pointer-events:none";var f=document.querySelector("form");if(f)f.appendChild(hp);}catch(e){}
+  document.addEventListener("submit",function(e){var hp=document.getElementById("website_hp");var tooFast=(Date.now()-t0)<2500;if((hp&&hp.value)||tooFast){e.preventDefault();e.stopImmediatePropagation();}},true);
+})();
+</script>
+</body>
+</html>
