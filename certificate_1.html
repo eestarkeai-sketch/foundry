@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Certificate &middot; Starke Foundry</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://starkefoundry.com/certificate.html">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/png" href="/shield_mark.png" />
+<style>
+  :root{
+    --ink:#0a0908;--panel:#14110d;--line:rgba(255,255,255,0.10);
+    --paper:#f4efe7;--dim:#b7ad9e;--faint:#8a8072;--ember:#ff6a1a;--ember2:#ff9d2e;--gold:#e9c98a;
+    --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'Inter',system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#050403;color:var(--paper);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:34px 18px}
+  .sheet{max-width:960px;margin:0 auto;background:
+      radial-gradient(120% 80% at 50% -10%,rgba(255,106,26,0.10),transparent 60%),
+      linear-gradient(180deg,#0d0b09,#100d0a);
+    border:1px solid rgba(233,201,138,0.28);border-radius:8px;padding:64px 66px 54px;position:relative;
+    box-shadow:0 40px 120px -40px rgba(0,0,0,0.9),inset 0 0 0 1px rgba(255,255,255,0.02)}
+  .sheet::before{content:"";position:absolute;inset:14px;border:1px solid rgba(233,201,138,0.18);border-radius:4px;pointer-events:none}
+  .top{display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;z-index:1}
+  .shield{height:74px;width:auto;margin-bottom:16px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.6))}
+  .brand{font-family:var(--serif);font-weight:600;font-size:22px;letter-spacing:0.22em}
+  .brand .u{color:var(--ember)}
+  .kicker{font-size:11px;letter-spacing:0.42em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-top:6px}
+  .rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--ember),transparent);margin:26px auto 22px}
+  .lead{font-family:var(--serif);font-size:16px;color:var(--dim);font-style:italic}
+  .name{font-family:var(--serif);font-weight:600;font-size:clamp(34px,6vw,50px);margin:14px 0 6px;color:var(--paper);letter-spacing:-0.01em;line-height:1.05}
+  .nameline{width:min(560px,80%);height:1px;background:rgba(233,201,138,0.35);margin:6px auto 22px}
+  .body{max-width:60ch;margin:0 auto;text-align:center;color:var(--dim);font-size:16px;line-height:1.7}
+  .body b{color:var(--paper);font-weight:500}
+  .stage{font-family:var(--serif);font-size:20px;color:var(--ember2);margin:20px 0 2px;font-weight:600}
+  .stagesub{font-size:12.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--faint);font-weight:600}
+  .meta{display:flex;justify-content:center;gap:54px;flex-wrap:wrap;margin:38px 0 6px}
+  .meta .m{text-align:center}
+  .meta .ml{font-size:10.5px;letter-spacing:0.24em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:7px}
+  .meta .mv{font-family:var(--serif);font-size:16px;color:var(--paper)}
+  .sig{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-top:44px}
+  .sigblock{flex:1;text-align:center}
+  .sigmark{font-family:'Fraunces',cursive;font-size:26px;color:var(--paper);padding-bottom:6px}
+  .sigline{border-top:1px solid rgba(233,201,138,0.4);padding-top:8px;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--faint);font-weight:600}
+  .verify{text-align:center;margin-top:34px;font-size:12px;color:var(--faint);line-height:1.7}
+  .verify b{color:var(--gold);font-weight:600;letter-spacing:0.04em}
+  .verify a{color:var(--ember2);text-decoration:none}
+  .actions{max-width:960px;margin:22px auto 0;display:flex;gap:12px;justify-content:center}
+  .btn{font-family:var(--sans);font-weight:600;font-size:14px;padding:11px 22px;border-radius:3px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--paper)}
+  .btn.fire{background:linear-gradient(92deg,var(--ember),var(--ember2));color:#180c03;border:none}
+  .tmplnote{max-width:960px;margin:16px auto 0;text-align:center;color:var(--faint);font-size:12.5px}
+  @media print{
+    body{background:#fff;color:#111;padding:0}
+    .sheet{background:#fff;border:2px solid #b8892f;box-shadow:none;max-width:100%;color:#111}
+    .sheet::before{border-color:#d8b877}
+    .lead,.body,.meta .mv,.name{color:#111}
+    .body b{color:#111}
+    .kicker,.stagesub,.meta .ml,.sigline{color:#7a6a44}
+    .brand{color:#111}.brand .u{color:#a8460f}.stage{color:#a8460f}
+    .verify{color:#555}.verify b{color:#8a6a1f}
+    .actions,.tmplnote{display:none}
+    .nameline,.sigline{border-color:#b8892f}
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style id="sfx-chrome">
+.sfx-nav{position:sticky;top:0;z-index:9000;background:rgba(5,4,3,0.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06);font-family:'Inter',system-ui,-apple-system,sans-serif}
+.sfx-nav *{box-sizing:border-box}
+.sfx-nav-in{display:flex;align-items:center;justify-content:space-between;height:78px;max-width:1180px;margin:0 auto;padding:0 40px}
+.sfx-brand{display:flex;align-items:center;gap:13px;text-decoration:none}
+.sfx-brand img{height:32px;width:auto;display:block;opacity:.9}
+.sfx-brand .wm{font-size:13px;letter-spacing:0.34em;color:#f2ece3;font-weight:600}
+.sfx-links{display:flex;gap:34px;align-items:center}
+.sfx-links a{font-size:12.5px;letter-spacing:0.14em;text-transform:uppercase;color:#a49b8e;text-decoration:none;transition:color .3s}
+.sfx-links a:hover{color:#f2ece3}
+.sfx-links a.enter{border:1px solid rgba(255,255,255,0.2);padding:9px 18px;color:#f2ece3;border-radius:1px}
+.sfx-links a.enter:hover{border-color:#ff6a1a;color:#ffa23c}
+.sfx-toggle{display:none;background:none;border:0;cursor:pointer;width:30px;height:22px;position:relative;padding:0}
+.sfx-toggle span{display:block;height:2px;width:100%;background:#f2ece3;border-radius:2px;position:absolute;left:0;transition:.25s}
+.sfx-toggle span:nth-child(1){top:0}.sfx-toggle span:nth-child(2){top:10px}.sfx-toggle span:nth-child(3){top:20px}
+.sfx-toggle.open span:nth-child(1){top:10px;transform:rotate(45deg)}
+.sfx-toggle.open span:nth-child(2){opacity:0}
+.sfx-toggle.open span:nth-child(3){top:10px;transform:rotate(-45deg)}
+@media(max-width:860px){
+  .sfx-toggle{display:block}
+  .sfx-links{position:absolute;top:78px;left:0;right:0;background:rgba(5,4,3,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06);flex-direction:column;gap:0;align-items:stretch;padding:8px 0;display:none}
+  .sfx-links.open{display:flex}
+  .sfx-links a:not(.enter){padding:14px 40px;font-size:14px}
+  .sfx-links a.enter{margin:12px 40px;text-align:center}
+}
+.sfx-foot{border-top:1px solid rgba(255,255,255,0.06);background:#050403;padding:64px 0 40px;font-family:'Inter',system-ui,-apple-system,sans-serif}
+.sfx-foot *{box-sizing:border-box}
+.sfx-foot-in{max-width:1180px;margin:0 auto;padding:0 40px}
+.sfx-foot-cols{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px}
+.sfx-foot-brand{display:flex;align-items:center;gap:12px}
+.sfx-foot-brand img{height:30px;width:auto}
+.sfx-foot-brand span{font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:#f2ece3;font-weight:600}
+.sfx-foot-tag{margin-top:16px;max-width:38ch;line-height:1.6;font-size:14px;color:#6b6358}
+.sfx-foot h5{font-size:11px;letter-spacing:0.26em;text-transform:uppercase;color:#ffa23c;font-weight:600;margin-bottom:16px}
+.sfx-foot-col a{display:block;color:#a49b8e;font-size:14px;margin-bottom:11px;text-decoration:none;letter-spacing:0.01em}
+.sfx-foot-col a:hover{color:#ffa23c}
+.sfx-foot-base{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:44px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06);color:#6b6358;font-size:12.5px;letter-spacing:0.04em}
+@media(max-width:760px){.sfx-foot-cols{grid-template-columns:1fr 1fr}.sfx-foot-brand-col{grid-column:1/-1}}
+@media(max-width:460px){.sfx-foot-cols{grid-template-columns:1fr}}
+</style>
+<meta name="description" content="A Starke Foundry certificate of completion.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Starke Foundry">
+<meta property="og:title" content="Certificate · Starke Foundry">
+<meta property="og:description" content="A Starke Foundry certificate of completion.">
+<meta property="og:url" content="https://starkefoundry.com/certificate.html">
+<meta property="og:image" content="https://starkefoundry.com/shield_mark.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Certificate · Starke Foundry">
+<meta name="twitter:description" content="A Starke Foundry certificate of completion.">
+<meta name="twitter:image" content="https://starkefoundry.com/shield_mark.png">
+<style id="foundry-focus">:focus-visible{outline:2px solid #ffa23c;outline-offset:2px;border-radius:3px}a:focus-visible,button:focus-visible{outline-offset:3px}</style>
+</head>
+<body>
+<h1 id="foundry-cert-h1" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0">Starke Foundry Certificate</h1>
+<nav class="sfx-nav"><div class="sfx-nav-in">
+  <a class="sfx-brand" href="/index.html"><img src="/shield_mark.png" alt="Starke Foundry" /><span class="wm">STARKE&nbsp;&nbsp;FOUNDRY</span></a>
+  <button class="sfx-toggle" id="sfxToggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="sfx-links" id="sfxLinks"><a href="/index.html#method">Method</a> <a href="/index.html#programs">Programs</a> <a href="/index.html#ethan">Ethan</a> <a href="/welcome.html">How It Works</a> <a href="/coaches.html">The Bench</a> <a href="/faq.html">FAQ</a> <a href="/my-foundry.html">Sign In</a> <a class="enter" href="/apply.html">Apply</a></div>
+</div></nav>
+
+
+<div class="sheet">
+  <div class="top">
+    <img class="shield" src="/shield_mark.png" alt="Starke Foundry" onerror="this.style.display='none'" />
+    <div class="brand">STARKE&nbsp;FO<span class="u">U</span>NDRY</div>
+    <div class="kicker">Certificate of the Forged Founder</div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div style="text-align:center">
+    <div class="lead">This certifies that</div>
+    <div class="name" id="c_name">Founder Name</div>
+    <div class="nameline"></div>
+    <div class="body">
+      entered the Starke Foundry, ran the full arc, and <b>cleared the final gate</b>. The gate is the standard, and clearing it is the whole of finishing. This founder was measured against their own slope, on evidence, at every gate along the way, and was found to have built the person an investor-grade venture is built on.
+      <div class="stage" id="c_stage">The Full Arc</div>
+      <div class="stagesub">Behavioral mechanics &middot; commercial execution &middot; capital trajectory</div>
+    </div>
+  </div>
+
+  <div class="meta">
+    <div class="m"><div class="ml">Conferred</div><div class="mv" id="c_date">Date of certification</div></div>
+    <div class="m"><div class="ml">Credential ID</div><div class="mv" id="c_id">SF-0000</div></div>
+  </div>
+
+  <div class="sig">
+    <div class="sigblock">
+      <div class="sigmark">Ethan Starke</div>
+      <div class="sigline">Founder, Starke Foundry</div>
+    </div>
+    <div class="sigblock">
+      <div class="sigmark" id="c_seal">&#9670;</div>
+      <div class="sigline">The Forge Seal</div>
+    </div>
+  </div>
+
+  <div class="verify">
+    <b>Verify this credential</b><br/>
+    Every certificate is recorded in the public registry. Confirm this one by its Credential ID at
+    <a href="/registry.html" id="c_verify">starkefoundry.com/registry.html</a>.
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn fire" onclick="window.print()">Print or save as PDF</button>
+</div>
+<div class="tmplnote">
+  Template. This certificate fills from the link it is opened with, for example
+  <code>certificate.html?name=Jordan%20Reyes&amp;id=SF-0001&amp;stage=Sovereign&amp;date=12%20August%202026</code>. With no link values it shows the placeholder above.
+</div>
+
+<script>
+(function(){
+  var p = new URLSearchParams(location.search);
+  function set(id,key){ var v=p.get(key); if(v) document.getElementById(id).textContent=v; }
+  set("c_name","name");
+  set("c_id","id");
+  set("c_date","date");
+  var stage=p.get("stage");
+  if(stage){
+    var label = /sovereign/i.test(stage) ? "The Full Arc"
+      : /builder/i.test(stage) ? "The Builder Stage"
+      : /seeker/i.test(stage) ? "The Seeker Stage" : stage;
+    document.getElementById("c_stage").textContent = label;
+  }
+  var id=p.get("id");
+  if(id){ document.getElementById("c_verify").textContent = "starkefoundry.com/registry.html?id="+id; document.getElementById("c_verify").href="/registry.html?id="+encodeURIComponent(id); }
+  // Real certificate (opened with any link value): hide the template/dev note.
+  if(Array.prototype.slice.call(p.keys()).length){ var tn=document.querySelector(".tmplnote"); if(tn) tn.style.display="none"; }
+})();
+</script>
+
+
+<footer class="sfx-foot"><div class="sfx-foot-in">
+  <div class="sfx-foot-cols">
+    <div class="sfx-foot-brand-col">
+      <div class="sfx-foot-brand"><img src="/shield_mark.png" alt="Starke Foundry" /><span>Starke Foundry</span></div>
+      <div class="sfx-foot-tag">An identity-first founder incubator led by Ethan Starke. We build the founder before the company.</div>
+    </div>
+    <div class="sfx-foot-col"><h5>Program</h5><a href="/index.html#method">The Method</a><a href="/index.html#programs">Programs</a><a href="/coaches.html">The Bench</a><a href="/apply.html">Apply</a></div>
+    <div class="sfx-foot-col"><h5>Foundry</h5><a href="/faq.html">FAQ</a><a href="/my-foundry.html">Member Sign In</a><a href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call</a></div>
+    <div class="sfx-foot-col"><h5>Legal</h5><a href="/terms.html">Terms &amp; Conditions</a><a href="/privacy.html">Privacy Policy</a></div>
+  </div>
+  <div class="sfx-foot-base"><span>&copy; 2026 Starke Foundry. All rights reserved.</span><span>By application. Foundry chooses its founders.</span></div>
+</div></footer>
+<script>(function(){var t=document.getElementById('sfxToggle'),l=document.getElementById('sfxLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.classList.toggle('open',o);t.setAttribute('aria-expanded',o?'true':'false');});Array.prototype.forEach.call(l.querySelectorAll('a'),function(a){a.addEventListener('click',function(){l.classList.remove('open');t.classList.remove('open');t.setAttribute('aria-expanded','false');});});})();</script>
+
+<script>(function(){var id=(new URLSearchParams(location.search).get("id")||"").trim();var set=function(el,v){var n=document.getElementById(el); if(n) n.textContent=v;};var vEl=document.getElementById("c_verify");set("c_stage","The Full Arc"); set("c_name","\u2014"); set("c_date","\u2014");if(!id){ if(vEl) vEl.textContent="No certificate id provided \u2014 nothing to verify."; return; }if(vEl) vEl.textContent="Verifying against the Starke Foundry registry\u2026";fetch("https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/public-registry?id="+encodeURIComponent(id)).then(function(r){return r.json();}).then(function(d){var m=d&&d.match;if(m){ if(m.name) set("c_name",m.name); if(m.date) set("c_date",m.date); set("c_id",id);if(vEl) vEl.textContent="Verified \u2713 \u2014 this credential is recorded in the Starke Foundry registry.";} else { set("c_name","\u2014"); set("c_date","\u2014");if(vEl) vEl.textContent="This certificate could not be verified in the registry."; }}).catch(function(){ set("c_name","\u2014"); set("c_date","\u2014"); if(vEl) vEl.textContent="Verification is temporarily unavailable. Try again shortly."; });})();</script>
+</body>
+</html>
