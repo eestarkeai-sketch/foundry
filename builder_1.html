@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Builder, 15 weeks &middot; Starke Foundry</title>
+<link rel="canonical" href="https://starkefoundry.com/builder.html">
+<meta name="description" content="The Builder is Foundry's 30-week tier for the founder who has the foundation and conviction but no durable momentum. Builder, then the Sovereign summit, straight through to fundable." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/png" href="/shield_mark.png" />
+<style>
+  :root{
+    --ink:#0a0908;--ink-2:#12100e;--panel:#17140f;--line:rgba(255,255,255,0.08);
+    --paper:#f4efe7;--paper-dim:#b7ad9e;--paper-faint:#8a8072;
+    --ember:#ff6a1a;--ember-2:#ff9d2e;--coal:#b5341a;--glow:rgba(255,106,26,0.45);
+    --serif:'Fraunces',Georgia,'Times New Roman',serif;
+    --sans:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:18px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:0 28px}
+  h1,h2,h3,.serif{font-family:var(--serif);font-weight:500;letter-spacing:-0.01em;line-height:1.1}
+  a{color:inherit;text-decoration:none}
+  .eyebrow{font-size:13px;letter-spacing:0.32em;text-transform:uppercase;color:var(--ember-2);font-weight:600}
+  nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(10,9,8,0.72);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:66px;max-width:1120px;margin:0 auto;padding:0 28px}
+  .brand{font-family:var(--serif);font-weight:600;font-size:22px;letter-spacing:0.18em}
+  .brand b{color:var(--ember)}
+  .nav-links{display:flex;gap:26px;align-items:center}
+  .nav-links a{font-size:14px;color:var(--paper-dim);transition:color .2s}
+  .nav-links a:hover{color:var(--paper)}
+  .btn{display:inline-block;font-family:var(--sans);font-weight:600;font-size:15px;padding:13px 24px;border-radius:2px;cursor:pointer;transition:transform .15s ease, box-shadow .2s ease}
+  .btn-fire{color:#160b04;background:linear-gradient(180deg,var(--ember-2),var(--ember));box-shadow:0 0 0 1px rgba(255,157,46,0.4), 0 14px 40px -12px var(--glow)}
+  .btn-fire:hover{transform:translateY(-2px)}
+  .btn-ghost{color:var(--paper);border:1px solid rgba(255,255,255,0.18)}
+  .btn-ghost:hover{border-color:var(--ember);color:var(--ember-2)}
+  .nav-cta{padding:10px 18px;font-size:14px}
+  @media(max-width:760px){.nav-links a.hidemob{display:none}}
+
+  header{position:relative;padding:96px 0 70px;overflow:hidden}
+  .hero-glow{position:absolute;left:50%;top:-20%;transform:translateX(-50%);width:min(1100px,140vw);height:680px;background:radial-gradient(ellipse 50% 50% at 50% 42%, rgba(255,106,26,0.26), rgba(181,52,26,0.12) 45%, transparent 70%);filter:blur(20px);z-index:0;pointer-events:none}
+  .hero-in{position:relative;z-index:2;max-width:820px}
+  .backlink{font-size:14px;color:var(--paper-faint);margin-bottom:20px;display:inline-block}
+  .backlink:hover{color:var(--ember-2)}
+  .flame{font-size:26px}
+  .hero h1{font-size:clamp(40px,6.4vw,72px);margin:14px 0 0}
+  .hero h1 .fire{background:linear-gradient(92deg,var(--ember-2),var(--ember) 55%,var(--coal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .len{display:inline-block;margin-top:18px;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ember-2);font-weight:600;border:1px solid rgba(255,106,26,0.3);border-radius:999px;padding:5px 14px}
+  .hero .lede{font-size:clamp(19px,2.4vw,23px);color:var(--paper-dim);margin-top:24px;max-width:640px}
+  .hero .lede b{color:var(--paper);font-weight:500}
+  .cta-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+
+  section{padding:74px 0;position:relative}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent)}
+  .section-title{font-size:clamp(27px,3.8vw,40px);max-width:20ch}
+  .kicker{margin-bottom:16px}
+  .lead{font-size:clamp(17px,2vw,20px);color:var(--paper-dim);max-width:66ch;margin-top:18px}
+
+  .accept{background:var(--ink-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .accept-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:44px;margin-top:40px;align-items:start}
+  @media(max-width:820px){.accept-grid{grid-template-columns:1fr;gap:30px}}
+  .checklist{list-style:none;margin-top:8px}
+  .checklist li{position:relative;padding:12px 0 12px 30px;border-bottom:1px solid var(--line);color:var(--paper-dim);font-size:16px}
+  .checklist li:before{content:"\2192";position:absolute;left:0;color:var(--ember-2);font-weight:700}
+  .checklist li b{color:var(--paper);font-weight:500}
+  .callout{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:26px 24px}
+  .callout h4{font-family:var(--sans);font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ember-2);font-weight:600;margin-bottom:12px}
+  .callout p{color:var(--paper-dim);font-size:16px;margin-bottom:12px}
+  .callout p:last-child{margin-bottom:0}
+  .callout b{color:var(--paper);font-weight:500}
+
+  .movement{margin-top:40px;border-left:2px solid rgba(255,106,26,0.35);padding:2px 0 6px 26px}
+  .movement + .movement{margin-top:38px}
+  .movement .mv-k{font-size:12.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--paper-faint);font-weight:600}
+  .movement h3{font-size:24px;margin:6px 0 6px}
+  .movement .mv-sub{color:var(--paper-faint);font-size:15px;margin-bottom:14px}
+  .lessons{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:680px){.lessons{grid-template-columns:1fr}}
+  .lesson{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
+  .lesson .lt{font-family:var(--serif);font-size:17px}
+  .lesson .ld{color:var(--paper-dim);font-size:14.5px;margin-top:5px}
+  .summit{margin-top:40px;background:linear-gradient(180deg,rgba(255,106,26,0.08),transparent);border:1px solid rgba(255,106,26,0.22);border-radius:8px;padding:28px 26px}
+  .summit h3{font-size:23px;margin-bottom:8px}
+  .summit p{color:var(--paper-dim);font-size:16px}
+  .summit a{color:var(--ember-2);font-weight:600;font-size:15px;display:inline-block;margin-top:12px}
+  .summit a:hover{color:var(--ember)}
+
+  .caliber{background:var(--ink-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .markers{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:38px}
+  @media(max-width:820px){.markers{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.markers{grid-template-columns:1fr}}
+  .marker{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 18px;position:relative;overflow:hidden}
+  .marker::before{content:"";position:absolute;left:0;top:0;height:3px;width:100%;background:linear-gradient(90deg,var(--ember),var(--ember-2))}
+  .marker .mt{font-family:var(--serif);font-size:17px}
+  .marker .md{color:var(--paper-dim);font-size:14px;margin-top:5px}
+  .cap-note{margin-top:34px;font-size:17px;color:var(--paper);max-width:64ch}
+  .cap-note b{color:var(--ember-2);font-weight:600}
+
+  .cta{padding:88px 0;text-align:center}
+  .cta h2{font-size:clamp(28px,4vw,44px);max-width:18ch;margin:0 auto}
+  .cta p{color:var(--paper-dim);margin-top:18px;max-width:52ch;margin-left:auto;margin-right:auto}
+  .cta .cta-row{justify-content:center}
+  .fineprint{margin-top:22px;font-size:14px;color:var(--paper-faint)}
+  footer{border-top:1px solid var(--line);padding:40px 0;color:var(--paper-faint);font-size:14px}
+  .foot-in{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;max-width:1040px;margin:0 auto;padding:0 28px}
+  footer a{color:var(--paper-faint)}footer a:hover{color:var(--ember-2)}
+
+  /* STARKE FOUNDRY brand lockup */
+  .brandlock{display:flex;align-items:center;gap:12px;text-decoration:none}
+  .brandmark{height:42px;width:auto;display:block;filter:drop-shadow(0 5px 12px rgba(0,0,0,.55))}
+  .brandwm{display:flex;flex-direction:column;line-height:1}
+  .bw-s{font-family:var(--sans);font-size:10px;letter-spacing:0.36em;color:var(--ember-2);font-weight:600;margin-bottom:3px}
+  .bw-f{font-family:var(--serif);font-weight:600;font-size:21px;letter-spacing:0.16em;color:var(--paper)}
+  .bw-f b{color:var(--ember)}
+  .foot-lock{display:flex;align-items:center;gap:12px}
+  .foot-lock img{height:40px;width:auto}
+  .hero-crest{height:78px;width:auto;display:block;margin-bottom:14px;filter:drop-shadow(0 16px 30px rgba(0,0,0,.6))}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style id="sfx-chrome">
+.sfx-nav{position:sticky;top:0;z-index:9000;background:rgba(5,4,3,0.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06);font-family:'Inter',system-ui,-apple-system,sans-serif}
+.sfx-nav *{box-sizing:border-box}
+.sfx-nav-in{display:flex;align-items:center;justify-content:space-between;height:78px;max-width:1180px;margin:0 auto;padding:0 40px}
+.sfx-brand{display:flex;align-items:center;gap:13px;text-decoration:none}
+.sfx-brand img{height:32px;width:auto;display:block;opacity:.9}
+.sfx-brand .wm{font-size:13px;letter-spacing:0.34em;color:#f2ece3;font-weight:600}
+.sfx-links{display:flex;gap:34px;align-items:center}
+.sfx-links a{font-size:12.5px;letter-spacing:0.14em;text-transform:uppercase;color:#a49b8e;text-decoration:none;transition:color .3s}
+.sfx-links a:hover{color:#f2ece3}
+.sfx-links a.enter{border:1px solid rgba(255,255,255,0.2);padding:9px 18px;color:#f2ece3;border-radius:1px}
+.sfx-links a.enter:hover{border-color:#ff6a1a;color:#ffa23c}
+.sfx-toggle{display:none;background:none;border:0;cursor:pointer;width:30px;height:22px;position:relative;padding:0}
+.sfx-toggle span{display:block;height:2px;width:100%;background:#f2ece3;border-radius:2px;position:absolute;left:0;transition:.25s}
+.sfx-toggle span:nth-child(1){top:0}.sfx-toggle span:nth-child(2){top:10px}.sfx-toggle span:nth-child(3){top:20px}
+.sfx-toggle.open span:nth-child(1){top:10px;transform:rotate(45deg)}
+.sfx-toggle.open span:nth-child(2){opacity:0}
+.sfx-toggle.open span:nth-child(3){top:10px;transform:rotate(-45deg)}
+@media(max-width:860px){
+  .sfx-toggle{display:block}
+  .sfx-links{position:absolute;top:78px;left:0;right:0;background:rgba(5,4,3,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06);flex-direction:column;gap:0;align-items:stretch;padding:8px 0;display:none}
+  .sfx-links.open{display:flex}
+  .sfx-links a:not(.enter){padding:14px 40px;font-size:14px}
+  .sfx-links a.enter{margin:12px 40px;text-align:center}
+}
+.sfx-foot{border-top:1px solid rgba(255,255,255,0.06);background:#050403;padding:64px 0 40px;font-family:'Inter',system-ui,-apple-system,sans-serif}
+.sfx-foot *{box-sizing:border-box}
+.sfx-foot-in{max-width:1180px;margin:0 auto;padding:0 40px}
+.sfx-foot-cols{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px}
+.sfx-foot-brand{display:flex;align-items:center;gap:12px}
+.sfx-foot-brand img{height:30px;width:auto}
+.sfx-foot-brand span{font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:#f2ece3;font-weight:600}
+.sfx-foot-tag{margin-top:16px;max-width:38ch;line-height:1.6;font-size:14px;color:#6b6358}
+.sfx-foot h5{font-size:11px;letter-spacing:0.26em;text-transform:uppercase;color:#ffa23c;font-weight:600;margin-bottom:16px}
+.sfx-foot-col a{display:block;color:#a49b8e;font-size:14px;margin-bottom:11px;text-decoration:none;letter-spacing:0.01em}
+.sfx-foot-col a:hover{color:#ffa23c}
+.sfx-foot-base{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:44px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06);color:#6b6358;font-size:12.5px;letter-spacing:0.04em}
+@media(max-width:760px){.sfx-foot-cols{grid-template-columns:1fr 1fr}.sfx-foot-brand-col{grid-column:1/-1}}
+@media(max-width:460px){.sfx-foot-cols{grid-template-columns:1fr}}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Starke Foundry">
+<meta property="og:title" content="The Builder, 15 weeks · Starke Foundry">
+<meta property="og:description" content="The Builder is Foundry's 30-week tier for the founder who has the foundation and conviction but no durable momentum. Builder, then the Sovereign summit, straight through to fundable.">
+<meta property="og:url" content="https://starkefoundry.com/builder.html">
+<meta property="og:image" content="https://starkefoundry.com/shield_mark.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Builder, 15 weeks · Starke Foundry">
+<meta name="twitter:description" content="The Builder is Foundry's 30-week tier for the founder who has the foundation and conviction but no durable momentum. Builder, then the Sovereign summit, straight through to fundable.">
+<meta name="twitter:image" content="https://starkefoundry.com/shield_mark.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Course",
+  "name": "The Builder · Starke Foundry",
+  "description": "The middle stage of the Starke Foundry arc: turning a founder's conviction into real commercial traction over fifteen weeks with weekly 1:1 coaching.",
+  "url": "https://starkefoundry.com",
+  "provider": { "@type": "Organization", "name": "Starke Foundry", "url": "https://starkefoundry.com" },
+  "educationalCredentialAwarded": "Starke Foundry Certificate of the Forged Founder"
+}
+</script>
+</head>
+<body>
+<nav class="sfx-nav"><div class="sfx-nav-in">
+  <a class="sfx-brand" href="/index.html"><img src="/shield_mark.png" alt="Starke Foundry" /><span class="wm">STARKE&nbsp;&nbsp;FOUNDRY</span></a>
+  <button class="sfx-toggle" id="sfxToggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="sfx-links" id="sfxLinks"><a href="/index.html#method">Method</a> <a href="/index.html#programs">Programs</a> <a href="/index.html#ethan">Ethan</a> <a href="/welcome.html">How It Works</a> <a href="/coaches.html">The Bench</a> <a href="/faq.html">FAQ</a> <a href="/my-foundry.html">Sign In</a> <a class="enter" href="/apply.html">Apply</a></div>
+</div></nav>
+
+
+
+
+<header>
+  <div class="hero-glow"></div>
+  <div class="wrap hero-in">
+    <a class="backlink" href="https://starkefoundry.com/#programs">&#8249; All three programs</a>
+    <img class="hero-crest" src="/shield_mark.png" alt="Starke Foundry shield" />
+    <div class="eyebrow" style="margin-top:10px">The momentum tier</div>
+    <h1>The <span class="fire">Builder</span></h1>
+    <span class="len">15 weeks</span>
+    <p class="lede">For the founder who has a foundation and conviction but no durable momentum. We build the founder and the venture's spine together, <b>the model, your leadership, your financial fluency, and the culture the company will run on, straight through to fundable.</b></p>
+    <div class="cta-row">
+      <a class="btn btn-fire" href="/apply.html">Apply now</a>
+      <a class="btn btn-ghost" href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call with Ethan</a>
+      <a class="btn btn-ghost" href="https://starkefoundry.com/#programs">Compare the tiers</a>
+    </div>
+  </div>
+</header>
+
+<section class="accept">
+  <div class="wrap">
+    <div class="eyebrow kicker">What places you here</div>
+    <h2 class="section-title">The founder-as-person is there. The venture is not, yet.</h2>
+    <p class="lead">Your placement is decided by the application, on evidence. The Builder is for founders who already demonstrate the behavioral base, high agency and coachability, but have not yet built durable commercial execution: real customers, revenue, and a company an investor can inspect.</p>
+    <div class="accept-grid">
+      <ul class="checklist">
+        <li>You move. You <b>iterate fast</b>, take pushback well, and end weeks with real progress, not plans.</li>
+        <li>You have <b>conviction and a foundation</b>: a concept, maybe a build, and a problem that belongs to you.</li>
+        <li>You are <b>coachable</b> and will change course on evidence without losing yourself.</li>
+        <li>But you do <b>not yet</b> have a continuous customer loop, validated willingness to pay, or a clean data room.</li>
+        <li>Your momentum comes in bursts, not on a durable cadence.</li>
+      </ul>
+      <div class="callout">
+        <h4>How placement works</h4>
+        <p>The application measures you across Foundry's investor-grade markers. The Builder requires the <b>Behavioral Mechanics</b> markers, held with proof, and is the right start when <b>Commercial Execution</b> is still ahead of you.</p>
+        <p>Already have real traction, revenue, and a data room? You may be placed into <b>The Sovereign</b>. Still building the identity and foundation? <b>The Seeker</b> is the deeper start.</p>
+        <p><b>Every tier ends at the same certificate.</b> The Builder gives you the thirty weeks to earn it in full.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow kicker">What you build</div>
+    <h2 class="section-title">Thirty weeks: fifteen to build the machine, fifteen to reach fundable.</h2>
+    <p class="lead">You begin at Builder, where a real venture takes shape, then run straight into the Sovereign summit. The first fifteen weeks are three movements that turn conviction into commercial traction an investor can see.</p>
+
+    <div class="movement">
+      <div class="mv-k">Movement I &middot; Weeks 1 to 5</div>
+      <h3>Truth from the Market</h3>
+      <div class="mv-sub">Stop guessing, start hearing.</div>
+      <div class="lessons">
+        <div class="lesson"><div class="lt">The one metric</div><div class="ld">Choose the single number that moves the company; kill the vanity dashboards.</div></div>
+        <div class="lesson"><div class="lt">Customer closeness</div><div class="ld">Build a continuous user loop; know your top ten customers' exact pains by heart.</div></div>
+        <div class="lesson"><div class="lt">Real demand</div><div class="ld">Run a formal demand test; seek disconfirmation, not applause.</div></div>
+        <div class="lesson"><div class="lt">Iteration discipline</div><div class="ld">Ship a full cycle in days, and kill a feature you love.</div></div>
+        <div class="lesson"><div class="lt">Product taste</div><div class="ld">A friction and quality audit; raise the bar on what ships.</div></div>
+      </div>
+    </div>
+
+    <div class="movement">
+      <div class="mv-k">Movement II &middot; Weeks 6 to 10</div>
+      <h3>Traction and Revenue</h3>
+      <div class="mv-sub">Charge, distribute, prove.</div>
+      <div class="lessons">
+        <div class="lesson"><div class="lt">Speed to revenue</div><div class="ld">Charge a real customer; validate true willingness to pay, early.</div></div>
+        <div class="lesson"><div class="lt">GTM resourcefulness</div><div class="ld">Acquire users through a creative, low-cost channel, with no paid-ad burn.</div></div>
+        <div class="lesson"><div class="lt">Design partners</div><div class="ld">Land an alpha customer or design partner, and run the relationship.</div></div>
+        <div class="lesson"><div class="lt">Pricing and monetization</div><div class="ld">Structure pricing and the model; own your unit economics.</div></div>
+        <div class="lesson"><div class="lt">The traction story</div><div class="ld">Tell the traction narrative in public; your founder's voice emerges.</div></div>
+      </div>
+    </div>
+
+    <div class="movement">
+      <div class="mv-k">Movement III &middot; Weeks 11 to 15</div>
+      <h3>The Machine and the Team</h3>
+      <div class="mv-sub">Build what an investor can inspect. Ends at the Momentum Gate.</div>
+      <div class="lessons">
+        <div class="lesson"><div class="lt">Runway and burn</div><div class="ld">Build the cash-flow and burn model; own the numbers, do not fear them.</div></div>
+        <div class="lesson"><div class="lt">The data room begins</div><div class="ld">Start a clean, current data room; it is completed at the summit.</div></div>
+        <div class="lesson"><div class="lt">First key hires</div><div class="ld">Make or define the first key hire; become someone worth joining.</div></div>
+        <div class="lesson"><div class="lt">Mentors and the pod</div><div class="ld">The matched mentor and the pod at full cadence, pressure-testing weekly.</div></div>
+        <div class="lesson"><div class="lt">Pivot or persevere, the Momentum Gate</div><div class="ld">The mid-journey Velocity checkpoint: on evidence, commit or pivot, then graduate.</div></div>
+      </div>
+    </div>
+
+    <div class="summit">
+      <h3>Then the summit: Sovereign, weeks 16 to 30</h3>
+      <p>With Categories 1 and 2 in hand, you run the same fifteen-week summit The Sovereign runs: the fundable narrative, the raise, the boardroom, exit optionality, and the certificate gate. Same finish, earned in full.</p>
+      <a href="https://starkefoundry.com/sovereign.html">See the Sovereign summit in detail &#8250;</a>
+    </div>
+  </div>
+</section>
+
+<section class="caliber">
+  <div class="wrap">
+    <div class="eyebrow kicker">Who you are when you finish</div>
+    <h2 class="section-title">Commercial traction that is real, then a founder investors back.</h2>
+    <p class="lead">The Builder takes you through two of the three investor-grade dimensions on top of the behavioral base you arrived with: <b>Commercial Execution and Velocity</b>, then <b>Capital Trajectory and Narrative Control</b>. By the end you hold all the markers the certificate certifies.</p>
+    <div class="markers">
+      <div class="marker"><div class="mt">Customer obsession</div><div class="md">A continuous loop with the people you serve.</div></div>
+      <div class="marker"><div class="mt">Ruthless prioritization</div><div class="md">One metric that decides the business, owned.</div></div>
+      <div class="marker"><div class="mt">Speed to revenue</div><div class="md">Real willingness to pay, validated early.</div></div>
+      <div class="marker"><div class="mt">Operational transparency</div><div class="md">A clean data room, model, and cap table.</div></div>
+      <div class="marker"><div class="mt">Product velocity</div><div class="md">A release cadence that proves execution.</div></div>
+      <div class="marker"><div class="mt">The full Capital Trajectory set</div><div class="md">Vision, fundraising urgency, allocation, equity hygiene, and updates, at the summit.</div></div>
+    </div>
+    <p class="cap-note">And the same finish as every tier: <b>the Foundry certificate</b>, conferred by Ethan Starke on demonstrated execution, not attendance.</p>
+  </div>
+</section>
+
+<div class="cta">
+  <div class="wrap">
+    <h2>You have the fire. Come build the venture around it.</h2>
+    <p>Start with a conversation, or go straight to the application. Either way, placement is decided on evidence.</p>
+    <div class="cta-row">
+      <a class="btn btn-fire" href="/apply.html">Apply now</a>
+      <a class="btn btn-ghost" href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call with Ethan</a>
+      <a class="btn btn-ghost" href="https://starkefoundry.com/#programs">See all three programs</a>
+    </div>
+    <div class="fineprint">One method, one bench, one weekly rhythm. You are placed by readiness, not by price.</div>
+  </div>
+</div>
+
+
+
+
+
+<footer class="sfx-foot"><div class="sfx-foot-in">
+  <div class="sfx-foot-cols">
+    <div class="sfx-foot-brand-col">
+      <div class="sfx-foot-brand"><img src="/shield_mark.png" alt="Starke Foundry" /><span>Starke Foundry</span></div>
+      <div class="sfx-foot-tag">An identity-first founder incubator led by Ethan Starke. We build the founder before the company.</div>
+    </div>
+    <div class="sfx-foot-col"><h5>Program</h5><a href="/index.html#method">The Method</a><a href="/index.html#programs">Programs</a><a href="/coaches.html">The Bench</a><a href="/apply.html">Apply</a></div>
+    <div class="sfx-foot-col"><h5>Foundry</h5><a href="/faq.html">FAQ</a><a href="/my-foundry.html">Member Sign In</a><a href="https://calendly.com/ethan-starke/foundry-request-a-call" target="_blank" rel="noopener">Request a call</a></div>
+    <div class="sfx-foot-col"><h5>Legal</h5><a href="/terms.html">Terms &amp; Conditions</a><a href="/privacy.html">Privacy Policy</a></div>
+  </div>
+  <div class="sfx-foot-base"><span>&copy; 2026 Starke Foundry. All rights reserved.</span><span>By application. Foundry chooses its founders.</span></div>
+</div></footer>
+<script>(function(){var t=document.getElementById('sfxToggle'),l=document.getElementById('sfxLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.classList.toggle('open',o);t.setAttribute('aria-expanded',o?'true':'false');});Array.prototype.forEach.call(l.querySelectorAll('a'),function(a){a.addEventListener('click',function(){l.classList.remove('open');t.classList.remove('open');t.setAttribute('aria-expanded','false');});});})();</script>
+</body>
+</html>
