@@ -196,6 +196,8 @@
   }
   var id=p.get("id");
   if(id){ document.getElementById("c_verify").textContent = "starkefoundry.com/registry.html?id="+id; document.getElementById("c_verify").href="/registry.html?id="+encodeURIComponent(id); }
+  // Real certificate (opened with any link value): hide the template/dev note.
+  if(Array.prototype.slice.call(p.keys()).length){ var tn=document.querySelector(".tmplnote"); if(tn) tn.style.display="none"; }
 })();
 </script>
 
