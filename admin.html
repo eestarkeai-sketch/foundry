@@ -104,16 +104,25 @@
   <div id="desk">
     <div class="bar">
       <div class="stats" id="stats"></div>
-      <button class="ghost" id="refresh">Refresh</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="q" type="search" placeholder="Search name / email…" style="background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:8px 12px;font-family:var(--sans);font-size:13px;min-width:200px" />
+        <button class="ghost" id="refresh">Refresh</button>
+      </div>
     </div>
     <div id="deskMsg"></div>
     <div class="tabs">
-      <div class="tab on" data-t="apps">Applications</div>
+      <div class="tab on" data-t="overview">Overview</div>
+      <div class="tab" data-t="apps">Applications</div>
       <div class="tab" data-t="founders">Founders</div>
       <div class="tab" data-t="coaches">Coaches</div>
+      <div class="tab" data-t="messages">Messages</div>
+      <div class="tab" data-t="sessions">Sessions</div>
+      <div class="tab" data-t="deliverables">Deliverables</div>
       <div class="tab" data-t="incentives">Incentives</div>
       <div class="tab" data-t="payments">Payments</div>
-      <div class="tab" data-t="curriculum">Curriculum</div><div class="tab" data-t="ship">Ship</div>
+      <div class="tab" data-t="support">Support</div>
+      <div class="tab" data-t="curriculum">Curriculum</div>
+      <div class="tab" data-t="ship">Ship</div>
     </div>
     <div id="view"></div>
     <div class="foot">Operating desk on the Supabase backend. Admit &amp; place opens an awaiting-payment seat; payment turns it active.</div>
@@ -128,12 +137,14 @@
   var CERTIFY = BASE + "admin-certify";
   var CURR = BASE + "admin-curriculum";
   var COACHADMIN = BASE + "admin-coach";
+  var OPS = BASE + "admin-ops";
   var STAGES = ["Seeker","Builder","Sovereign"];
-  var token = "", DATA = null, TAB = "apps";
+  var token = "", DATA = null, TAB = "overview", Q = "";
 
   var gate = document.getElementById("gate"), desk = document.getElementById("desk"),
       err = document.getElementById("gateErr"), deskMsg = document.getElementById("deskMsg");
 
+  function fq(arr){ if(!Q) return arr||[]; return (arr||[]).filter(function(x){ return (((x.name||"")+" "+(x.email||""))).toLowerCase().indexOf(Q)>-1; }); }
   function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
   function money(c){ if(c==null) return "—"; return "$"+(c/100).toLocaleString("en-US",{minimumFractionDigits:0}); }
   function when(s){ if(!s) return ""; try{ return new Date(s).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return s; } }
@@ -175,12 +186,17 @@
     var c = DATA.counts || {applications:0,founders:0,payments:0};
     document.getElementById("stats").innerHTML = stat(c.applications,"Applications")+stat(c.founders,"Founders")+stat(c.payments,"Payments");
     var v = document.getElementById("view");
-    if(TAB==="apps") v.innerHTML = renderApps(DATA.applications||[]);
-    else if(TAB==="founders") v.innerHTML = renderFounders(DATA.founders||[], DATA.coaches||[]);
-    else if(TAB==="coaches") v.innerHTML = renderCoaches(DATA.coach_applications||[], DATA.coaches||[]);
+    if(TAB==="overview") v.innerHTML = renderOverview();
+    else if(TAB==="apps") v.innerHTML = renderApps(fq(DATA.applications));
+    else if(TAB==="founders") v.innerHTML = renderFounders(fq(DATA.founders), DATA.coaches||[]);
+    else if(TAB==="coaches") v.innerHTML = renderCoaches(fq(DATA.coach_applications), fq(DATA.coaches));
     else if(TAB==="curriculum"){ v.innerHTML = '<div class="empty">Loading curriculum…</div>'; loadCurriculum(); }
     else if(TAB==="incentives"){ v.innerHTML = '<div class="empty">Loading incentives…</div>'; loadIncentives(); }
-    else v.innerHTML = renderPayments(DATA.payments||[]);
+    else if(TAB==="messages"){ v.innerHTML = '<div class="empty">Loading messages…</div>'; loadOps("messages"); }
+    else if(TAB==="sessions"){ v.innerHTML = '<div class="empty">Loading sessions…</div>'; loadOps("sessions"); }
+    else if(TAB==="deliverables"){ v.innerHTML = '<div class="empty">Loading deliverables…</div>'; loadOps("deliverables"); }
+    else if(TAB==="support"){ v.innerHTML = '<div class="empty">Loading support…</div>'; loadOps("support"); }
+    else if(TAB==="payments") v.innerHTML = renderPayments(fq(DATA.payments));
   }
 
   function loadCurriculum(){
@@ -289,6 +305,74 @@
       '</tbody></table>';
   }
 
+  function sum(arr,f){ return arr.reduce(function(a,x){ return a+(f(x)||0); },0); }
+  function has(s,arr){ return arr.indexOf(s)>-1; }
+  function mCard(n,l,goto,tone){ var col=tone==="bad"?"var(--bad)":(tone==="warn"?"var(--gold)":"var(--ember2)");
+    return '<div class="stat" '+(goto?('data-goto="'+goto+'" style="cursor:pointer;min-width:132px"'):'style="min-width:132px"')+'><b style="color:'+col+'">'+n+'</b><span>'+l+'</span></div>'; }
+
+  function renderOverview(){
+    var apps=DATA.applications||[], founders=DATA.founders||[], coaches=DATA.coaches||[], capps=DATA.coach_applications||[], pays=DATA.payments||[];
+    var active=founders.filter(function(f){return f.status==="active";});
+    var awaiting=founders.filter(function(f){return has(f.status,["awaiting_payment","unpaid"]);});
+    var pastDue=founders.filter(function(f){return f.status==="past_due";});
+    var appsPending=apps.filter(function(a){return a.status==="submitted";});
+    var cappsPending=capps.filter(function(a){return a.status==="submitted";});
+    var noCoach=active.filter(function(f){return !f.coach_id;});
+    var revenue=sum(pays.filter(function(p){return has(p.status,["paid","succeeded"]);}),function(p){return p.amount;});
+    var byStage={Seeker:0,Builder:0,Sovereign:0}; active.forEach(function(f){ if(byStage[f.stage]!=null) byStage[f.stage]++; });
+    var cap=sum(coaches,function(c){return c.capacity||6;}), assigned=active.filter(function(f){return f.coach_id;}).length;
+
+    var metrics='<div class="stats" style="margin-bottom:16px">'+
+      mCard(active.length,"Active founders","founders")+
+      mCard(money(revenue),"Revenue collected","payments")+
+      mCard(appsPending.length,"Applications to review","apps", appsPending.length?"warn":null)+
+      mCard(cappsPending.length,"Coach apps to review","coaches", cappsPending.length?"warn":null)+
+      mCard(awaiting.length,"Awaiting payment","founders", awaiting.length?"warn":null)+
+      mCard(pastDue.length,"Past due","payments", pastDue.length?"bad":null)+
+    '</div>';
+
+    // Needs attention queue
+    var items=[];
+    if(appsPending.length) items.push(['warn',appsPending.length+' founder application'+(appsPending.length>1?'s':'')+' awaiting review','apps']);
+    if(cappsPending.length) items.push(['warn',cappsPending.length+' coach application'+(cappsPending.length>1?'s':'')+' awaiting review','coaches']);
+    if(noCoach.length) items.push(['bad',noCoach.length+' active founder'+(noCoach.length>1?'s':'')+' with no coach assigned','founders']);
+    if(pastDue.length) items.push(['bad',pastDue.length+' founder'+(pastDue.length>1?'s':'')+' past due on payment','payments']);
+    if(awaiting.length) items.push(['warn',awaiting.length+' admitted founder'+(awaiting.length>1?'s':'')+' have not paid yet','founders']);
+    var attn='<div class="sec">Needs attention</div>'+(items.length?
+      items.map(function(it){ return '<div class="card" data-goto="'+it[2]+'" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 16px"><span class="pill '+(it[0])+'">'+(it[0]==="bad"?"action":"review")+'</span><span>'+esc(it[1])+'</span><span style="margin-left:auto;color:var(--faint)">&rarr;</span></div>'; }).join('')
+      : '<div class="empty">All clear. Nothing needs your attention right now.</div>');
+
+    // Breakdown
+    var funnel='<div class="sec" style="margin-top:20px">Pipeline &amp; roster</div>'+
+      '<div class="card" style="display:flex;gap:26px;flex-wrap:wrap">'+
+        '<div><div class="meta">Funnel</div><div style="margin-top:4px">'+apps.length+' applied &rarr; '+founders.length+' admitted &rarr; '+active.length+' active</div></div>'+
+        '<div><div class="meta">Active by chamber</div><div style="margin-top:4px">Seeker '+byStage.Seeker+' &middot; Builder '+byStage.Builder+' &middot; Sovereign '+byStage.Sovereign+'</div></div>'+
+        '<div><div class="meta">Coach bench</div><div style="margin-top:4px">'+coaches.length+' coaches &middot; '+assigned+' / '+cap+' capacity used</div></div>'+
+      '</div>';
+
+    return metrics+attn+funnel;
+  }
+
+  // Data-dependent ops tabs (messages / sessions / deliverables / support) — populated by the admin-ops function.
+  function loadOps(kind){
+    var v=document.getElementById("view");
+    fetch(OPS+"?kind="+kind, { headers:{ "x-admin-token": token } })
+      .then(function(r){ if(r.status===404) throw new Error("__NODEPLOY__"); if(!r.ok) throw new Error("Server error ("+r.status+")."); return r.json(); })
+      .then(function(j){ if(TAB!==kind) return; v.innerHTML = renderOps(kind, (j&&j.rows)||[]); })
+      .catch(function(e){ if(TAB!==kind) return;
+        if(e.message==="__NODEPLOY__") v.innerHTML='<div class="card"><div class="nm">Backend not deployed yet</div><div class="meta" style="margin-top:6px">This view reads from the <code>admin-ops</code> Edge Function, which is not deployed. Deploy it (code + table SQL provided by Joshua) and this '+esc(kind)+' view activates automatically. No frontend change needed.</div></div>';
+        else v.innerHTML='<div class="empty">'+esc(e.message||"error")+'</div>'; });
+  }
+  function renderOps(kind, rows){
+    if(!rows.length) return '<div class="empty">No '+esc(kind)+' yet.</div>';
+    if(kind==="messages") return '<table><thead><tr><th>When</th><th>From</th><th>To</th><th>Message</th></tr></thead><tbody>'+rows.map(function(m){ return '<tr><td class="meta">'+when(m.created_at)+'</td><td>'+esc(m.from_name||m.from_email||"—")+'</td><td>'+esc(m.to_name||m.to_email||"—")+'</td><td>'+esc((m.body||"").slice(0,240))+'</td></tr>'; }).join('')+'</tbody></table>';
+    if(kind==="sessions") return '<table><thead><tr><th>When</th><th>Founder</th><th>Coach</th><th>Status</th><th>Recording</th></tr></thead><tbody>'+rows.map(function(x){ return '<tr><td class="meta">'+when(x.scheduled_at||x.created_at)+'</td><td>'+esc(x.founder_name||x.founder_email||"—")+'</td><td>'+esc(x.coach_name||x.coach_email||"—")+'</td><td>'+stPill(x.status)+'</td><td>'+(x.recording_url?('<a href="'+esc(x.recording_url)+'" target="_blank" rel="noopener">view</a>'):'<span class="meta">—</span>')+'</td></tr>'; }).join('')+'</tbody></table>';
+    if(kind==="deliverables") return '<table><thead><tr><th>When</th><th>Founder</th><th>Stage</th><th>Week</th><th>Status</th></tr></thead><tbody>'+rows.map(function(x){ return '<tr><td class="meta">'+when(x.created_at)+'</td><td>'+esc(x.founder_name||x.founder_email||"—")+'</td><td>'+stPill_stage(x.stage)+'</td><td>'+esc(x.week||"—")+'</td><td>'+stPill(x.status||"submitted")+'</td></tr>'; }).join('')+'</tbody></table>';
+    if(kind==="support") return rows.map(function(t){ return '<div class="card"><div class="row1"><div><div class="nm">'+esc(t.subject||t.type||"Ticket")+'</div><div class="em">'+esc(t.from_email||"")+(t.kind?(" &middot; "+esc(t.kind)):"")+'</div><div class="meta">'+when(t.created_at)+'</div></div><div>'+stPill(t.status||"open")+'</div></div>'+(t.body?('<pre>'+esc(t.body)+'</pre>'):'')+'</div>'; }).join('');
+    return '<div class="empty">—</div>';
+  }
+  function goTab(name){ Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(o){ o.classList.toggle("on", o.getAttribute("data-t")===name); }); TAB=name; render(); }
+
   // event delegation for action buttons
   document.getElementById("view").addEventListener("click", function(e){
     var b = e.target && e.target.closest ? e.target.closest("button[data-act],button[data-fact],button[data-cact],button[data-cwk]") : null;
@@ -386,6 +470,8 @@
     }
   });
 
+  document.getElementById("view").addEventListener("click", function(e){ var g=e.target&&e.target.closest?e.target.closest("[data-goto]"):null; if(g){ goTab(g.getAttribute("data-goto")); } });
+  document.getElementById("q").addEventListener("input", function(){ Q=(this.value||"").toLowerCase(); if(DATA) render(); });
   document.getElementById("open").addEventListener("click", function(){ token=document.getElementById("tok").value.trim(); if(token) load(); });
   document.getElementById("tok").addEventListener("keydown", function(e){ if(e.key==="Enter"){ token=this.value.trim(); if(token) load(); } });
   document.getElementById("refresh").addEventListener("click", function(){ if(token) load(); });
