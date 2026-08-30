@@ -190,6 +190,21 @@
       <button id="rSubmit" style="width:auto;padding:11px 20px">Submit private rating</button>
       <div id="rMsg" class="msg"></div>
     </div>
+
+    <div class="sec-h">Report a problem <span style="font-size:12px;color:var(--faint);letter-spacing:0;text-transform:none">&middot; goes straight to the Foundry desk</span></div>
+    <div id="supportBox" class="wk" style="background:var(--panel2)">
+      <p style="color:var(--dim);font-size:13.5px;margin:0 0 12px">Something broken, not working, or a question? Send it here and it lands on the Foundry desk.</p>
+      <label>Type</label>
+      <select id="spKind" class="rsel">
+        <option value="bug">Something&rsquo;s broken</option>
+        <option value="question">A question</option>
+        <option value="feedback">Feedback</option>
+      </select>
+      <label style="margin-top:12px">What&rsquo;s going on?</label>
+      <textarea id="spBody" placeholder="Describe it &mdash; what you did, what happened, what you expected." style="width:100%;background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:11px;padding:12px 14px;font-family:var(--sans);font-size:15px;min-height:90px;resize:vertical"></textarea>
+      <button id="spSubmit" style="width:auto;padding:11px 20px">Send to the Foundry</button>
+      <div id="spMsg" class="msg"></div>
+    </div>
   </div>
 
   <div class="foot"><div class="m">STARKE FOUNDRY</div>Build the founder before the company.</div>
@@ -441,6 +456,34 @@
     if(!bar||!btn)return;
     btn.addEventListener("click",async function(){btn.disabled=true;btn.textContent="Redirecting...";var res=await call({});if(res&&res.j&&res.j.url){window.location=res.j.url;}else{btn.disabled=false;btn.textContent="Activate & add card";}});
     setTimeout(async function(){var res=await call({probe:true});if(res&&res.s===200&&res.j&&res.j.probe&&!res.j.subscribed){bar.style.display="block";}},1400);
+  }
+  if(document.readyState!=="loading")ready();else document.addEventListener("DOMContentLoaded",ready);
+})();
+</script>
+
+<script id="foundry-support">
+(function(){
+  var SUPPORT="https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/support-intake";
+  function ready(){
+    var btn=document.getElementById("spSubmit");
+    if(!btn) return;
+    btn.addEventListener("click", async function(){
+      var msg=document.getElementById("spMsg");
+      var body=(document.getElementById("spBody").value||"").trim();
+      if(!body){ msg.className="msg bad"; msg.textContent="Tell us what’s going on first."; return; }
+      var kind=document.getElementById("spKind").value||"bug";
+      var emailEl=document.getElementById("dashEmail");
+      var from_email=emailEl?(emailEl.textContent||"").trim():"";
+      btn.disabled=true; msg.className="msg"; msg.textContent="Sending…";
+      try{
+        var res=await fetch(SUPPORT,{method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({ kind:kind, body:body, from_email:from_email, from_role:"founder", page_url:location.href })});
+        var j=await res.json().catch(function(){return {};});
+        btn.disabled=false;
+        if(j&&j.ok){ msg.className="msg ok"; msg.textContent="Sent. The Foundry has it — thank you."; document.getElementById("spBody").value=""; }
+        else { msg.className="msg bad"; msg.textContent=(j&&j.error)||"Could not send — try again."; }
+      }catch(e){ btn.disabled=false; msg.className="msg bad"; msg.textContent="Could not send — try again."; }
+    });
   }
   if(document.readyState!=="loading")ready();else document.addEventListener("DOMContentLoaded",ready);
 })();
