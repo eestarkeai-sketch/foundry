@@ -154,6 +154,7 @@
 
   function load(){
     err.textContent = "Opening…";
+    try{ window.__deskToken = token; }catch(e){}
     return fetch(READ, { headers: { "x-admin-token": token } })
       .then(function(r){ if(r.status===401) throw new Error("Wrong desk key."); if(!r.ok) throw new Error("Server error ("+r.status+")."); return r.json(); })
       .then(function(j){ DATA=j; gate.style.display="none"; desk.style.display="block"; render(); })
@@ -488,7 +489,7 @@
   function loadShip(){
     var view=document.getElementById("view"); if(!view)return;
     view.innerHTML='<div style="padding:8px 0;color:#8a807a">Loading book orders...</div>';
-    fetch(ORDERS,{headers:{"x-admin-token":(typeof token!=="undefined"?token:"")}})
+    fetch(ORDERS,{headers:{"x-admin-token":(window.__deskToken||"")}})
       .then(function(r){return r.json();})
       .then(function(d){
         if(!d||d.error){view.innerHTML='<div style="color:#d9705f;padding:8px 0">'+esc(d&&d.error||"error")+'</div>';return;}

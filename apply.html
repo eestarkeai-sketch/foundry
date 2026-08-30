@@ -568,17 +568,24 @@
     try{ if(data.referredByCoachId){ fetch(EP+"record-referral?cb="+Date.now(), {method:"POST", cache:"no-store",
       body: JSON.stringify({ coach_id:data.referredByCoachId, email:data.email }) }).catch(function(){}); } }catch(_){}
     var done=false;
-    function notifyAndFinish(){ if(done)return; done=true;
-      try{ document.getElementById("n_name").value=data.name;
-           document.getElementById("n_email").value=data.email;
-           document.getElementById("n_stage").value=data.stagePlaced; }catch(_){}
-      notifyForm.submit(); }
-    function fullFallback(){ if(done)return; done=true; appForm.submit(); }
+    function showThanks(){ if(done)return; done=true;
+      try{ document.getElementById("intro").style.display="none"; }catch(_){}
+      try{ appForm.style.display="none"; }catch(_){}
+      try{ document.getElementById("thanks").style.display="block"; }catch(_){}
+      try{ window.scrollTo(0,0); }catch(_){}
+    }
+    function failOpen(){ if(done)return; submitting=false;
+      var b=document.getElementById("submitBtn");
+      if(b){ b.disabled=false; b.textContent="Submit my application"; }
+      var e=document.getElementById("submitErr");
+      if(!e){ e=document.createElement("div"); e.id="submitErr"; e.style.cssText="color:#d9705f;font-size:14px;margin-top:12px"; if(b&&b.parentNode){ b.parentNode.insertBefore(e, b.nextSibling); } }
+      e.textContent="We couldn’t submit just now — please try again, or email hello@starkefoundry.com and we’ll take it from there.";
+    }
     fetch(EP+"apply-intake?cb="+Date.now(), {method:"POST", cache:"no-store", body: JSON.stringify(data)})
       .then(function(r){ return r.ok; })
-      .then(function(ok){ ok ? notifyAndFinish() : fullFallback(); })
-      .catch(function(){ fullFallback(); });
-    setTimeout(function(){ fullFallback(); }, 9000);
+      .then(function(ok){ ok ? showThanks() : failOpen(); })
+      .catch(function(){ failOpen(); });
+    setTimeout(function(){ if(!done) failOpen(); }, 12000);
   }, true);
 })();
 </script>
