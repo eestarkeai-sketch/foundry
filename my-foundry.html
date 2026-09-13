@@ -169,6 +169,12 @@
     <div id="sessions"></div>
     <div class="sec-h">Your Program</div>
     <div id="program"></div>
+    <!-- Culmination surface: hidden by default; revealed only on an authorized 200
+         from culmination-member (feature flag on). Dark by construction. -->
+    <div id="culmination-wrap" class="hide">
+      <div class="sec-h">Your Culmination</div>
+      <div id="culmination"></div>
+    </div>
     <div class="sec-h">Messages with your coach</div>
     <div id="thread" class="thread"></div>
     <div class="mrow"><input id="minput" placeholder="Message your coach&hellip;" autocomplete="off" /><button id="msend">Send</button></div>
@@ -273,7 +279,63 @@
       show("dash");
       loadProgram();
       setupRating(f);
+      loadCulmination();
     }catch(e){ document.getElementById("noseatEmail").textContent = (session.user&&session.user.email)||""; show("noseat"); }
+  }
+
+  // ===== Your Culmination (C2) — uses the real magic-link session bearer =====
+  function cmShouldReveal(status){ return status===200; }  // server flag is authoritative
+  async function loadCulmination(){
+    var wrap=document.getElementById("culmination-wrap"), host=document.getElementById("culmination");
+    if(!wrap||!host) return;
+    function dark(){ wrap.classList.add("hide"); host.innerHTML=""; }
+    dark(); // hidden until an authorized 200 says otherwise
+    var s=await sb.auth.getSession(); var t=s.data.session&&s.data.session.access_token;
+    if(!t){ return; }
+    try{
+      var res=await fetch(URL_+"/functions/v1/culmination-member",{ method:"POST", headers:{ Authorization:"Bearer "+t, "Content-Type":"application/json" }, body: JSON.stringify({action:"get"}) });
+      if(!cmShouldReveal(res.status)){ dark(); return; }  // 404 disabled / no seat / error -> stay dark
+      var j=await res.json();
+      host.innerHTML = culminationHtml(j);
+      wrap.classList.remove("hide");
+      bindCmRsvp();
+    }catch(e){ dark(); }
+  }
+  function bindCmRsvp(){
+    var rc=document.getElementById("cmConfirm"), rd=document.getElementById("cmDefer");
+    if(rc) rc.addEventListener("click", function(){ cmRsvp("confirm"); });
+    if(rd) rd.addEventListener("click", function(){ cmRsvp("defer"); });
+  }
+  function culminationHtml(j){
+    var p=j.my_participation;
+    // Progress header: current stage/week (the founder's real progression truth,
+    // reused, not re-fetched), phase, and eligibility/invitation state.
+    var elig = p ? esc(p.lifecycle_status) : "not yet invited";
+    var prog = '<div class="wk-read" style="margin-bottom:8px">Your chamber: '+esc(j.stage||"—")+
+      '  &middot;  Week '+esc(j.week||"—")+
+      (j.culmination_phase?('  &middot;  Phase: '+esc(String(j.culmination_phase).replace(/_/g," "))):'')+
+      '  &middot;  Eligibility: '+elig+'</div>';
+    if(!j.next_culmination){ return prog + '<div class="empty">No Culmination is scheduled for your chamber yet.</div>'; }
+    var n=j.next_culmination;
+    var when_=(n.starts_on||"")+(n.ends_on?(" – "+n.ends_on):"");
+    var where_=[n.venue_name,n.venue_location].filter(Boolean).join(", ")||"to be announced";
+    var gate=j.gate_status?esc(String(j.gate_status).replace(/_/g," ")):"pending";
+    var els=(j.program_elements||[]).map(function(e){ return '<li>'+(e.starts_at?(when(e.starts_at)+" — "):"")+esc(e.title)+(e.location?(" ("+esc(e.location)+")"):"")+'</li>'; }).join("");
+    var canRsvp = p && ["invited","eligible","deferred","confirmed"].indexOf(p.lifecycle_status)>=0;
+    return prog + '<div class="wk" style="background:var(--panel2)">'+
+      '<div class="wk-top"><div class="wk-t">'+esc(n.title)+'</div><span class="chip">'+esc(n.status||"")+'</span></div>'+
+      '<div class="wk-body">'+
+      '<div class="wk-read">When: '+esc(when_)+'  &middot;  Where: '+esc(where_)+'</div>'+
+      '<div class="wk-done">Attended: '+(j.attended?"yes":"no")+'  &middot;  Completed: '+(j.completed?"yes":"no")+'  &middot;  Final gate: '+gate+'</div>'+
+      (j.prep_requirements?('<div class="wk-prompt">Prepare: '+esc(j.prep_requirements)+'</div>'):'')+
+      (els?('<div class="wk-bring">Your schedule:<ul>'+els+'</ul></div>'):'')+
+      (canRsvp?('<div style="margin-top:10px"><button id="cmConfirm" style="width:auto;padding:9px 16px">Confirm attendance</button> <button id="cmDefer" class="ghost" style="width:auto;padding:9px 16px">Defer</button></div>'):'')+
+      '</div></div>';
+  }
+  async function cmRsvp(kind){
+    var s=await sb.auth.getSession(); var t=s.data.session&&s.data.session.access_token; if(!t) return;
+    var res=await fetch(URL_+"/functions/v1/culmination-member",{ method:"POST", headers:{ Authorization:"Bearer "+t, "Content-Type":"application/json" }, body: JSON.stringify({action:"rsvp",rsvp:kind}) });
+    if(res.ok){ var j=await res.json(); document.getElementById("culmination").innerHTML=culminationHtml(j); bindCmRsvp(); }
   }
 
   function weekHtml(w){

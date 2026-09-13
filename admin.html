@@ -123,6 +123,7 @@
       <div class="tab" data-t="support">Support</div>
       <div class="tab" data-t="curriculum">Curriculum</div>
       <div class="tab" data-t="ship">Ship</div>
+      <div class="tab" data-t="culminations">Culminations</div>
     </div>
     <div id="view"></div>
     <div class="foot">Operating desk on the Supabase backend. Admit &amp; place opens an awaiting-payment seat; payment turns it active.</div>
@@ -198,6 +199,7 @@
     else if(TAB==="deliverables"){ v.innerHTML = '<div class="empty">Loading deliverables…</div>'; loadOps("deliverables"); }
     else if(TAB==="support"){ v.innerHTML = '<div class="empty">Loading support…</div>'; loadOps("support"); }
     else if(TAB==="payments") v.innerHTML = renderPayments(fq(DATA.payments));
+    else if(TAB==="culminations"){ v.innerHTML = '<div class="empty">Loading culminations…</div>'; loadCulminations(); }
   }
 
   function loadCurriculum(){
@@ -373,6 +375,180 @@
     return '<div class="empty">—</div>';
   }
   function goTab(name){ Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(o){ o.classList.toggle("on", o.getAttribute("data-t")===name); }); TAB=name; render(); }
+
+  // ===== Culminations (C1) — full Desk interface. Reuses token, BASE, esc,
+  //       stPill, stPill_stage, STAGES, DATA.coaches. No new auth mechanism. =====
+  var CADMIN = BASE + "culmination-admin";
+  var CM_CUR = null;        // opened culmination id
+  var CM_LIST = [];         // last culmination list (for edit prefill / header)
+  var cmBound = false;      // one-time delegation guard (script scope, not a global)
+
+  function cmCall(action, extra){
+    return fetch(CADMIN, { method:"POST", headers:{ "x-admin-token": token, "Content-Type":"application/json" },
+      body: JSON.stringify(Object.assign({ action:action }, extra||{})) })
+      .then(function(r){ return r.json().then(function(j){ return { s:r.status, j:j }; }); });
+  }
+  function cmVal(id){ var e=document.getElementById(id); return e?(e.value||"").trim():""; }
+  function cmNum(id){ var v=cmVal(id); return v===""?null:Number(v); }
+  function cmChecked(id){ var e=document.getElementById(id); return !!(e&&e.checked); }
+  function byClass(k){ return function(p){ return p.participant_class===k; }; }
+  function coachOpts(sel){ return (DATA&&DATA.coaches?DATA.coaches:[]).map(function(c){ return '<option value="'+c.id+'"'+(sel===c.id?' selected':'')+'>'+esc(c.name||c.email||c.id)+(c.gate_authority?" *":"")+'</option>'; }).join(''); }
+
+  function loadCulminations(){
+    if(!cmBound){ cmBound=true; document.getElementById("view").addEventListener("click", onCmClick); }
+    cmCall("culmination.list").then(function(res){
+      var v=document.getElementById("view");
+      if(res.s===404 && res.j && res.j.error==="culmination_disabled"){ v.innerHTML='<div class="card"><div class="nm">Culminations not enabled</div><div class="meta" style="margin-top:6px">Set <code>settings.culmination_enabled = true</code> to activate. Ships dark.</div></div>'; return; }
+      if(res.s!==200){ v.innerHTML='<div class="empty">'+esc((res.j&&res.j.error)||("error "+res.s))+'</div>'; return; }
+      CM_LIST = res.j.culminations||[];
+      v.innerHTML = cmListHtml(CM_LIST) + '<div id="cmDef"></div><div id="cmDetail"></div>';
+      if(CM_CUR){ openCulmination(CM_CUR); }
+    });
+  }
+  function cmListHtml(list){
+    var rows = !list.length ? '<div class="empty">No culminations yet.</div>' :
+      '<table><thead><tr><th>Stage</th><th>Title</th><th>Dates</th><th>Status</th><th></th></tr></thead><tbody>'+
+      list.map(function(c){ return '<tr><td>'+stPill_stage(c.stage)+'</td><td>'+esc(c.title)+'</td><td class="meta">'+esc((c.starts_on||"")+(c.ends_on?(" – "+c.ends_on):""))+'</td><td>'+stPill(c.status)+'</td>'+
+        '<td><button data-cm="open" data-cid="'+c.id+'">Open</button> <button data-cm="editform" data-cid="'+c.id+'">Edit</button></td></tr>'; }).join('')+'</tbody></table>';
+    return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div class="meta">Culminations</div><button data-cm="newform">New Culmination</button></div>'+rows;
+  }
+  function cmDefForm(c){
+    c=c||{}; var S=["draft","scheduled","registration_open","in_progress","completed","cancelled"];
+    function opt(arr,cur){ return arr.map(function(x){return '<option'+(cur===x?' selected':'')+'>'+x+'</option>';}).join(''); }
+    function tl(v){ return v?String(v).slice(0,16):''; }
+    return '<div class="card" style="margin-top:12px"><div class="nm">'+(c.id?'Edit Culmination':'New Culmination')+'</div>'+
+      '<input type="hidden" id="cfId" value="'+(c.id||'')+'" />'+
+      '<div class="rgrid" style="margin-top:8px">'+
+      '<div><label>Title</label><input id="cfTitle" value="'+esc(c.title||'')+'" /></div>'+
+      '<div><label>Stage</label><select id="cfStage">'+STAGES.map(function(s){return '<option'+(c.stage===s?' selected':'')+'>'+s+'</option>';}).join('')+'</select></div>'+
+      '<div><label>Status</label><select id="cfStatus">'+opt(S,c.status)+'</select></div>'+
+      '<div><label>Start date</label><input id="cfStart" type="date" value="'+(c.starts_on||'')+'" /></div>'+
+      '<div><label>End date</label><input id="cfEnd" type="date" value="'+(c.ends_on||'')+'" /></div>'+
+      '<div><label>Timezone</label><input id="cfTz" value="'+esc(c.timezone||'')+'" placeholder="America/Los_Angeles" /></div>'+
+      '<div><label>Venue name</label><input id="cfVenue" value="'+esc(c.venue_name||'')+'" /></div>'+
+      '<div><label>Venue location</label><input id="cfLoc" value="'+esc(c.venue_location||'')+'" /></div>'+
+      '<div><label>Registration opens</label><input id="cfRegO" type="datetime-local" value="'+tl(c.registration_opens_at)+'" /></div>'+
+      '<div><label>Registration closes</label><input id="cfRegC" type="datetime-local" value="'+tl(c.registration_closes_at)+'" /></div>'+
+      '<div><label>Member capacity</label><input id="cfMemCap" type="number" min="0" value="'+(c.member_capacity!=null?c.member_capacity:'')+'" /></div>'+
+      '<div><label>Guest capacity</label><input id="cfGuestCap" type="number" min="0" value="'+(c.guest_capacity!=null?c.guest_capacity:'')+'" /></div>'+
+      '<div><label>Investor/partner capacity</label><input id="cfInvCap" type="number" min="0" value="'+(c.investor_partner_capacity!=null?c.investor_partner_capacity:'')+'" /></div>'+
+      '</div>'+
+      '<label style="margin-top:10px;display:block"><input type="checkbox" id="cfForum"'+(c.sovereign_forum_enabled?' checked':'')+' /> Sovereign Forum (Sovereign stage only)</label>'+
+      '<label style="margin-top:8px">Preparation requirements</label><textarea id="cfPrep">'+esc(c.prep_requirements||'')+'</textarea>'+
+      '<div style="margin-top:10px"><button data-cm="savedef">Save</button> <button data-cm="canceldef" class="ghost">Cancel</button></div></div>';
+  }
+  function findCul(cid){ for(var i=0;i<CM_LIST.length;i++){ if(CM_LIST[i].id===cid) return CM_LIST[i]; } return {}; }
+
+  function openCulmination(cid){
+    CM_CUR=cid; var cul=findCul(cid);
+    Promise.all([ cmCall("participant.list",{culmination_id:cid}), cmCall("element.list",{culmination_id:cid}),
+      cmCall("guest_app.list",{culmination_id:cid}), cmCall("report.summary",{culmination_id:cid}) ]).then(function(a){
+      var parts=(a[0].j&&a[0].j.participants)||[], els=(a[1].j&&a[1].j.elements)||[], apps=(a[2].j&&a[2].j.applications)||[], sum=(a[3].j&&a[3].j.summary)||{};
+      var members=parts.filter(byClass("member")), mentors=parts.filter(byClass("mentor"));
+      var others=parts.filter(function(p){ return ["staff","guest","investor","partner","sponsor_rep"].indexOf(p.participant_class)>=0; });
+      Promise.all(members.map(function(m){ return cmCall("gate_review.list",{culmination_id:cid,founder_id:m.founder_id}).then(function(r){ return { fid:m.founder_id, reviews:(r.j&&r.j.reviews)||[] }; }); })).then(function(revs){
+        var revMap={}; revs.forEach(function(x){ revMap[x.fid]=x.reviews; });
+        document.getElementById("cmDetail").innerHTML = cmDetailHtml(cul, sum, members, mentors, others, els, apps, revMap);
+      });
+    });
+  }
+  function memberRow(p, reviews){
+    var rl = !reviews.length ? '<span class="meta">no reviews</span>' :
+      reviews.map(function(r){ return '<div class="meta">'+esc(r.recommendation)+' &middot; '+esc(r.evaluator_coach_id)+(r.note?(" &middot; "+esc(r.note)):"")+'</div>'; }).join('');
+    var fid=p.founder_id;
+    return '<div class="card" style="margin-top:8px"><div class="nm">Founder '+esc(fid)+' <span class="meta">('+esc(p.lifecycle_status)+')</span></div>'+
+      '<div class="rgrid" style="margin-top:6px">'+
+      '<div><label>Attendance</label><div>'+(p.attended?"attended":"not attended")+' <button data-cm="checkin" data-pid="'+p.id+'">Check in</button></div></div>'+
+      '<div><label>Completion</label><div>'+(p.completed_at?"completed":"not completed")+' <button data-cm="complete" data-pid="'+p.id+'">Complete</button></div></div>'+
+      '</div>'+
+      '<label style="margin-top:8px">Mentor gate reviews</label><div>'+rl+'</div>'+
+      '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">'+
+        '<select id="rev_'+fid+'">'+coachOpts()+'</select>'+
+        '<select id="reco_'+fid+'"><option value="advance">advance</option><option value="hold">hold</option><option value="not_ready">not_ready</option></select>'+
+        '<input id="note_'+fid+'" placeholder="note" style="flex:1" />'+
+        '<button data-cm="review" data-fid="'+fid+'">Submit review</button>'+
+      '</div>'+
+      '<label style="margin-top:8px">Final institutional gate</label>'+
+      '<div><button data-cm="pass" data-fid="'+fid+'">Finalize: Pass</button> <button data-cm="fail" data-fid="'+fid+'">Finalize: Fail</button></div>'+
+      '<label style="margin-top:8px">Logistics</label>'+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+        '<input id="lgRoom_'+p.id+'" placeholder="room" /><input id="lgDiet_'+p.id+'" placeholder="dietary" />'+
+        '<input id="lgArr_'+p.id+'" placeholder="arrival" /><input id="lgDep_'+p.id+'" placeholder="departure" />'+
+        '<button data-cm="logistics" data-pid="'+p.id+'">Save logistics</button>'+
+      '</div></div>';
+  }
+  function cmDetailHtml(cul, sum, members, mentors, others, els, apps, revMap){
+    var h='<div class="card" style="margin-top:16px"><div class="nm">'+esc(cul.title||"Culmination")+'</div>'+
+      '<div class="meta">'+esc(cul.stage||"")+' &middot; '+esc(cul.status||"")+' &middot; '+esc((cul.starts_on||"")+(cul.ends_on?(" – "+cul.ends_on):""))+' &middot; '+esc(cul.venue_name||"venue TBA")+'</div>'+
+      '<div class="meta" style="margin-top:4px">Members '+(sum.members||0)+' &middot; Guests '+(sum.guests||0)+' &middot; Attended '+(sum.attended||0)+' &middot; Completed '+(sum.completed||0)+'</div></div>';
+    // Members + gate workflow
+    h+='<h3 style="margin-top:14px">Members &amp; gate workflow</h3>';
+    h+='<div style="display:flex;gap:6px;margin-bottom:6px"><input id="addMemberFid" placeholder="founder id" style="flex:1" /><button data-cm="addMember">Add member</button></div>';
+    h+= members.length ? members.map(function(m){ return memberRow(m, revMap[m.founder_id]||[]); }).join('') : '<div class="empty">No members yet.</div>';
+    // Mentors
+    h+='<h3 style="margin-top:14px">Mentors (The Bench)</h3>';
+    h+='<div style="display:flex;gap:6px;margin-bottom:6px"><select id="addMentorCid">'+coachOpts()+'</select><button data-cm="addMentor">Add mentor</button></div>';
+    h+= mentors.length ? '<table><tbody>'+mentors.map(function(m){ return '<tr><td>'+esc(m.coach_id)+'</td><td class="meta">'+esc(m.lifecycle_status)+'</td></tr>'; }).join('')+'</tbody></table>' : '<div class="empty">No mentors yet.</div>';
+    // Staff / external
+    h+='<h3 style="margin-top:14px">Staff &amp; external participants</h3>';
+    h+='<div style="display:flex;gap:6px;margin-bottom:6px"><input id="extName" placeholder="name" /><input id="extEmail" placeholder="email" />'+
+       '<select id="extKind"><option value="staff">staff</option><option value="guest">guest</option><option value="investor">investor</option><option value="partner">partner</option><option value="sponsor_rep">sponsor_rep</option></select>'+
+       '<button data-cm="addExternal">Add</button></div>';
+    h+= others.length ? '<table><tbody>'+others.map(function(m){ return '<tr><td>'+esc(m.participant_class)+'</td><td class="meta">'+esc(m.person_id)+'</td></tr>'; }).join('')+'</tbody></table>' : '<div class="empty">None yet.</div>';
+    // Program elements
+    h+='<h3 style="margin-top:14px">Program elements</h3>';
+    h+='<div class="rgrid" style="margin-bottom:6px"><div><input id="elTitle" placeholder="title" /></div>'+
+       '<div><input id="elKind" placeholder="kind" /></div>'+
+       '<div><input id="elStart" type="datetime-local" /></div>'+
+       '<div><input id="elEnd" type="datetime-local" /></div>'+
+       '<div><input id="elLoc" placeholder="location" /></div>'+
+       '<div><select id="elAccess"><option>member_only</option><option>shared</option><option>guest_accessible</option><option>invitation_only</option><option>investor_partner_facing</option></select></div></div>'+
+       '<button data-cm="elemAdd" style="margin-bottom:8px">Add element</button>';
+    h+= els.length ? '<table><thead><tr><th>Title</th><th>When</th><th>Where</th><th>Access</th><th>Invite</th></tr></thead><tbody>'+els.map(function(e){ return '<tr><td>'+esc(e.title)+'</td><td class="meta">'+esc(e.starts_at?when(e.starts_at):"")+'</td><td class="meta">'+esc(e.location||"")+'</td><td>'+esc(e.access_class)+'</td><td>'+
+      (e.access_class==="invitation_only"?('<input id="grPid_'+e.id+'" placeholder="participant id" style="width:120px" /> <button data-cm="elemGrant" data-eid="'+e.id+'">Grant</button>'):'<span class="meta">n/a</span>')+'</td></tr>'; }).join('')+'</tbody></table>' : '<div class="empty">No elements yet.</div>';
+    // Guest applications (review of dark foundation records)
+    h+='<h3 style="margin-top:14px">Guest applications</h3>';
+    h+= apps.length ? '<table><thead><tr><th>Person</th><th>Status</th><th></th></tr></thead><tbody>'+apps.map(function(g){ return '<tr><td class="meta">'+esc(g.person_id)+'</td><td>'+esc(g.screening_status)+'</td><td>'+
+      '<button data-cm="guestReview" data-appid="'+g.id+'" data-status="screened">Screen</button> '+
+      '<button data-cm="guestReview" data-appid="'+g.id+'" data-status="approved">Approve</button> '+
+      '<button data-cm="guestReview" data-appid="'+g.id+'" data-status="declined">Decline</button></td></tr>'; }).join('')+'</tbody></table>' : '<div class="empty">No guest applications.</div>';
+    return h;
+  }
+  function reopenCm(){ if(CM_CUR){ openCulmination(CM_CUR); } }
+
+  function onCmClick(e){
+    var b=e.target&&e.target.closest?e.target.closest("[data-cm]"):null; if(!b) return;
+    var act=b.getAttribute("data-cm");
+    if(act==="newform"){ document.getElementById("cmDef").innerHTML=cmDefForm({}); return; }
+    if(act==="editform"){ document.getElementById("cmDef").innerHTML=cmDefForm(findCul(b.getAttribute("data-cid"))); return; }
+    if(act==="canceldef"){ document.getElementById("cmDef").innerHTML=""; return; }
+    if(act==="savedef"){
+      var c={ id:cmVal("cfId")||undefined, title:cmVal("cfTitle"), stage:cmVal("cfStage"), status:cmVal("cfStatus"),
+        starts_on:cmVal("cfStart")||null, ends_on:cmVal("cfEnd")||null, timezone:cmVal("cfTz")||null,
+        venue_name:cmVal("cfVenue")||null, venue_location:cmVal("cfLoc")||null,
+        registration_opens_at:cmVal("cfRegO")||null, registration_closes_at:cmVal("cfRegC")||null,
+        member_capacity:cmNum("cfMemCap"), guest_capacity:cmNum("cfGuestCap"), investor_partner_capacity:cmNum("cfInvCap"),
+        sovereign_forum_enabled:cmChecked("cfForum"), prep_requirements:cmVal("cfPrep")||null };
+      if(!c.id) delete c.id;
+      if(!c.title){ msg("Title required"); return; }
+      cmCall("culmination.upsert",{culmination:c}).then(function(r){ if(r.s!==200){ msg((r.j&&r.j.error)||"rejected"); return; } document.getElementById("cmDef").innerHTML=""; loadCulminations(); });
+      return;
+    }
+    if(act==="open"){ openCulmination(b.getAttribute("data-cid")); return; }
+    if(act==="addMember"){ var fid=cmVal("addMemberFid"); if(!fid){ msg("founder id required"); return; } cmCall("participant.add",{participant:{culmination_id:CM_CUR,participant_class:"member",founder_id:fid}}).then(function(r){ if(r.s!==200) msg((r.j&&r.j.error)||"rejected"); reopenCm(); }); return; }
+    if(act==="addMentor"){ var cid=cmVal("addMentorCid"); if(!cid){ msg("select a coach"); return; } cmCall("participant.add",{participant:{culmination_id:CM_CUR,participant_class:"mentor",coach_id:cid}}).then(function(r){ if(r.s!==200) msg((r.j&&r.j.error)||"rejected"); reopenCm(); }); return; }
+    if(act==="addExternal"){ var nm=cmVal("extName"), em=cmVal("extEmail"), kd=cmVal("extKind");
+      cmCall("person.create",{person:{full_name:nm,email:em,kind:kd}}).then(function(r){ if(r.s!==200){ msg((r.j&&r.j.error)||"rejected"); return; }
+        var pcls=(kd==="staff")?"staff":kd; cmCall("participant.add",{participant:{culmination_id:CM_CUR,participant_class:pcls,person_id:r.j.person.id}}).then(function(r2){ if(r2.s!==200) msg((r2.j&&r2.j.error)||"rejected"); reopenCm(); }); }); return; }
+    if(act==="checkin"){ cmCall("participant.checkin",{participant_id:b.getAttribute("data-pid")}).then(reopenCm); return; }
+    if(act==="complete"){ cmCall("participant.complete",{participant_id:b.getAttribute("data-pid")}).then(reopenCm); return; }
+    if(act==="review"){ var f=b.getAttribute("data-fid"); cmCall("gate_review.add",{review:{culmination_id:CM_CUR,founder_id:f,evaluator_coach_id:cmVal("rev_"+f),recommendation:cmVal("reco_"+f),note:cmVal("note_"+f)||null}}).then(function(r){ if(r.s!==200) msg((r.j&&r.j.error)||"review rejected"); reopenCm(); }); return; }
+    if(act==="pass"||act==="fail"){ cmCall("final_gate.set",{final_gate:{culmination_id:CM_CUR,founder_id:b.getAttribute("data-fid"),outcome:(act==="pass"?"gate_passed":"gate_failed")}}).then(function(r){ if(r.s!==200) msg((r.j&&r.j.error)||"gate rejected"); reopenCm(); }); return; }
+    if(act==="logistics"){ var pid=b.getAttribute("data-pid"); cmCall("logistics.upsert",{logistics:{participant_id:pid,room_need:cmVal("lgRoom_"+pid)||null,dietary:cmVal("lgDiet_"+pid)||null,arrival:cmVal("lgArr_"+pid)||null,departure:cmVal("lgDep_"+pid)||null}}).then(function(r){ if(r.s!==200) msg((r.j&&r.j.error)||"rejected"); else msg("logistics saved", true); }); return; }
+    if(act==="elemAdd"){ cmCall("element.upsert",{element:{culmination_id:CM_CUR,title:cmVal("elTitle"),kind:cmVal("elKind")||null,starts_at:cmVal("elStart")||null,ends_at:cmVal("elEnd")||null,location:cmVal("elLoc")||null,access_class:cmVal("elAccess")}}).then(function(r){ if(r.s!==200) msg((r.j&&r.j.error)||"rejected"); reopenCm(); }); return; }
+    if(act==="elemGrant"){ var eid=b.getAttribute("data-eid"); cmCall("element.grant",{program_element_id:eid,participant_id:cmVal("grPid_"+eid)}).then(function(r){ if(r.s!==200) msg((r.j&&r.j.error)||"rejected"); else msg("granted", true); }); return; }
+    if(act==="guestReview"){ cmCall("guest_app.review",{application_id:b.getAttribute("data-appid"),screening_status:b.getAttribute("data-status")}).then(function(r){ if(r.s!==200) msg((r.j&&r.j.error)||"rejected"); reopenCm(); }); return; }
+  }
 
   // event delegation for action buttons
   document.getElementById("view").addEventListener("click", function(e){
