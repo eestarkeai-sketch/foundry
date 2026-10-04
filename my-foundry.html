@@ -247,10 +247,15 @@
         show("noseat"); return;
       }
       var f = j.founder;
-      if(f.status === "awaiting_payment" || f.status === "unpaid"){
+      if(j.instruction_access !== true){  // LWC: access is the database decision (member-data), not a status list in this page
         document.getElementById("awEmail").textContent = j.email || f.email || "";
         document.getElementById("awHello").textContent = f.name ? ("You’re admitted, " + f.name.split(" ")[0] + ".") : "You’re admitted.";
         document.getElementById("awStage").textContent = "the " + (f.stage || "Seeker");
+        if(!(f.status === "awaiting_payment" || f.status === "unpaid")){  // paused (e.g. suspended): no payment call-to-action; billing re-entry is not decided here
+          var awc = document.getElementById("awaiting"); document.getElementById("awHello").textContent = "Your Foundry instruction is paused.";
+          var pb = awc.querySelector(".paybtn"); if(pb) pb.style.display = "none";
+          var ld = awc.querySelector(".lede"); if(ld) ld.textContent = "Your access to instruction is paused. Contact the Foundry desk to resume.";
+        }
         show("awaiting"); return;
       }
       document.getElementById("dashEmail").textContent = j.email || f.email || "";

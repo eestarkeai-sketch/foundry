@@ -229,6 +229,9 @@
   }
   function saveCurriculumWeek(week, btn){
     var payload = { week: parseInt(week,10) };
+    // LWC: published curriculum accepts only governed PATCH-class corrections, each with a recorded reason
+    var rsn = window.prompt("Reason for this correction (recorded in the curriculum audit). Leave blank if nothing changed:", "");
+    if(rsn === null){ return; } if(rsn) payload.reason = rsn;
     Array.prototype.forEach.call(document.querySelectorAll('.cfin[data-cwk="'+week+'"]'), function(el){ payload[el.getAttribute("data-cf")] = el.value; });
     if(btn) btn.disabled = true;
     fetch(CURR, { method:"POST", headers:{ "x-admin-token": token, "Content-Type":"application/json" }, body: JSON.stringify(payload) })
