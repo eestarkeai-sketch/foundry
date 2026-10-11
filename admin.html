@@ -1067,7 +1067,8 @@
           '<div style="margin:6px 0">'+ownerLine+'</div>'+
           '<details><summary style="cursor:pointer;color:var(--dim);font-size:12.5px">'+(st.owner_email?'Change':'Name the owner')+'</summary><div style="display:grid;gap:6px;margin-top:8px">'+
           '<input id="psOwnN" '+INP+' placeholder="Owner name" /><input id="psOwnE" '+INP+' placeholder="Owner email (receives content-free notices)" />'+
-          '<div><button class="mini save" id="psOwnSave">Save owner</button> <span id="psOwnMsg" style="font-size:12.5px"></span></div></div></details></div>'+
+          '<div><button class="mini save" id="psOwnSave">Save owner</button> <span id="psOwnMsg" style="font-size:12.5px"></span></div></div></details>'+
+          (st.owner_email ? '<div style="margin-top:8px"><button class="mini save" id="psTest">Send a test notice to the owner</button> <span id="psTestMsg" style="font-size:12.5px"></span></div>' : '')+'</div>'+
       '</div>'+
       '<div style="margin:16px 0 8px;display:flex;gap:6px;flex-wrap:wrap">'+["open","blocking","escalated","findings","all"].map(function(f){ return '<button class="mini '+(f===FILTER?'':'save')+'" data-psf="'+f+'">'+f+'</button>'; }).join("")+'</div>'+
       (q.length ? '<div style="overflow-x:auto"><table><thead><tr><th>Ref</th><th>Founder</th><th>About</th><th>Severity</th><th>State</th><th>Finding</th><th>Updated</th><th></th></tr></thead><tbody>'+
@@ -1158,6 +1159,8 @@
     var oc = t.closest("[data-psc]"); if(oc && oc.getAttribute("data-psc")){ e.preventDefault(); openCase(oc.getAttribute("data-psc")); var h=$("psCase"); if(h) h.scrollIntoView({behavior:"smooth",block:"start"}); return; }
     if(t.id === "psClose"){ CASE = null; $("psCase").innerHTML = ""; return; }
     if(t.id === "psOwnSave"){ var j = await act({ action:"support_owner_set", owner_name:val("psOwnN"), owner_email:val("psOwnE") }, "psOwnMsg"); if(j) load(); return; }
+    if(t.id === "psTest"){ t.disabled = true; var jt = await act({ action:"support_owner_test_notice" }, "psTestMsg"); t.disabled = false;
+      if(jt){ var dt = jt.data || {}, lg = dt.log || {}; say("psTestMsg", "Mail path answered HTTP " + dt.http + (lg.status ? ("; mail log: " + lg.status + (lg.error ? (" (" + lg.error + ")") : "")) : "; no mail log row") + ". Check " + dt.to + " for a Starke Foundry email.", dt.http === 200 && lg.status === "sent"); } return; }
     if(t.id === "psSend"){ t.disabled = true; var j2 = await act({ action:"support_reply", case_id:CASE, body:val("psReply"), await_founder:!!($("psAwait")||{}).checked }, "psSendMsg"); t.disabled = false; if(j2) load(); return; }
     if(t.id === "psMove"){ var j3 = await act({ action:"support_transition", case_id:CASE, to:val("psTo"), note:val("psToNote") || null }, "psMoveMsg"); if(j3) load(); return; }
     if(t.id === "psClass"){ var j4 = await act({ action:"support_classify", case_id:CASE, category:val("psCat"), severity:val("psSev"), finding_class:val("psFind") || null, reason:val("psWhy") || null }, "psClassMsg"); if(j4) load(); return; }
