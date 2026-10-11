@@ -663,33 +663,89 @@
 </script>
 
 <script>
+// ===== Ship (T8 version-aware orders; T9 package manual fulfillment, migration 63). Every book obligation is listed
+//       with its plain-language state, the curriculum version it was selected from and its latest attributable step.
+//       Manual steps are recorded by a named operator through admin-write; the database governs every transition. =====
 (function(){
-  var ORDERS="https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/admin-orders";
+  var B="https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/";
+  var ORDERS=B+"admin-orders";
   function esc(x){return String(x==null?"":x).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"})[c];});}
+  function tok(){return window.__deskToken||"";}
+  function opName(){try{return sessionStorage.getItem("ship_operator")||"";}catch(e){return "";}}
+  function setOp(v){try{sessionStorage.setItem("ship_operator",v);}catch(e){}}
+  var NEXT={
+    pending:["ordered","delayed","exception"], queued:["ordered","delayed","exception"], needs_address:["ordered","delayed","exception"],
+    needs_asin:["ordered","delayed","exception"], needs_binding:["ordered","delayed","exception"], failed:["ordered","exception"],
+    placed:["shipped","delayed","exception"], processing:["shipped","delayed","exception"],
+    ordered:["shipped","delayed","exception"], shipped:["delivered","delayed","exception"], delayed:["ordered","shipped","delivered","exception"],
+    delivered:["exception"], exception:["ordered","queued"]
+  };
+  var LABEL={ordered:"Record ordered",shipped:"Record shipped",delivered:"Record delivered",delayed:"Mark delayed",exception:"Record exception",queued:"Reopen to queue"};
+  var CLS={pending:"#e8a33e",in_progress:"#8fb4d9",fulfilled:"#7bbf6a",delayed:"#e8a33e",exception:"#d9705f"};
+  var CLASSNAME={pending:"Pending",in_progress:"In progress",fulfilled:"Fulfilled",delayed:"Delayed",exception:"Exception"};
   function loadShip(){
     var view=document.getElementById("view"); if(!view)return;
     view.innerHTML='<div style="padding:8px 0;color:#8a807a">Loading book orders...</div>';
-    fetch(ORDERS,{headers:{"x-admin-token":(window.__deskToken||"")}})
+    fetch(ORDERS,{headers:{"x-admin-token":tok()}})
       .then(function(r){return r.json();})
       .then(function(d){
         if(!d||d.error){view.innerHTML='<div style="color:#d9705f;padding:8px 0">'+esc(d&&d.error||"error")+'</div>';return;}
-        var rows=d.orders||[], sum=d.summary||{};
-        var chips=Object.keys(sum).map(function(k){return '<span style="display:inline-block;margin:0 8px 6px 0;padding:3px 10px;border:1px solid #2a2523;border-radius:20px;font-size:12px;color:#b8afa5">'+esc(k)+': '+sum[k]+'</span>';}).join("");
-        var head='<tr style="text-align:left;color:#8a807a;font-size:12px"><th style="padding:8px 10px">Founder</th><th>Stage</th><th>Mv</th><th>Books</th><th>Status</th><th>Version</th><th>Ship to</th><th>Zinc id</th><th>When</th></tr>';
+        var rows=d.orders||[], bc=d.by_class||{};
+        var chips=["pending","in_progress","delayed","exception","fulfilled"].map(function(k){return '<span style="display:inline-block;margin:0 8px 6px 0;padding:3px 10px;border:1px solid #2a2523;border-radius:20px;font-size:12px;color:'+CLS[k]+'">'+CLASSNAME[k]+': '+(bc[k]||0)+'</span>';}).join("");
+        var opbar='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 12px"><label for="shipOp" style="font-size:12px;color:#8a807a">Operator recording steps</label><input id="shipOp" value="'+esc(opName())+'" placeholder="Your name" style="background:#151210;border:1px solid #2a2523;color:#eee;border-radius:8px;padding:7px 10px;font-size:13px;min-width:220px"><span style="font-size:12px;color:#6b625c">A queued order is not yet ordered; only a recorded delivery says delivered.</span></div>';
+        var head='<tr style="text-align:left;color:#8a807a;font-size:12px"><th style="padding:8px 10px">Founder</th><th>Stage</th><th>Mv</th><th>Books</th><th>State</th><th>Version</th><th>Ship to</th><th>Latest step</th><th></th></tr>';
         var body=rows.map(function(o){
-          var st=o.status||"";
-          var col=st==="placed"?"#7bbf6a":(st==="failed"?"#d9705f":(String(st).indexOf("needs")===0?"#e8a33e":"#b8afa5"));
           var ship=o.has_address?(esc(o.ship_city)+(o.ship_state?", "+esc(o.ship_state):"")):'<span style="color:#e8a33e">no address</span>';
-          var when=o.created_at?esc(String(o.created_at).slice(0,10)):"";
-          return '<tr style="border-top:1px solid #1d1917"><td style="padding:8px 10px">'+esc(o.founder_name||o.founder_email||"-")+'<div style="color:#6b625c;font-size:11px">'+esc(o.founder_email)+'</div></td><td>'+esc(o.stage)+'</td><td>'+esc(o.movement)+'</td><td>'+esc(o.book_count)+'</td><td style="color:'+col+'">'+esc(st)+'</td><td style="font-size:11px;color:#8a807a">'+esc(o.curriculum_version||"—")+'</td><td>'+ship+'</td><td style="font-size:11px;color:#8a807a">'+esc(o.zinc_order_id)+'</td><td style="font-size:11px;color:#8a807a">'+when+'</td></tr>';
+          var last=o.last_kind?('<div style="font-size:11px;color:#b8afa5">'+esc(o.last_kind==="manual"?(o.last_operator||""):o.last_kind)+(o.last_at?" · "+esc(String(o.last_at).slice(0,16).replace("T"," ")):"")+'</div>'+
+            (o.last_reference?'<div style="font-size:11px;color:#8a807a">Ref '+esc(o.last_reference)+'</div>':'')+(o.last_tracking?'<div style="font-size:11px;color:#8a807a">Tracking '+esc(o.last_tracking)+'</div>':'')+
+            (o.last_note?'<div style="font-size:11px;color:#8a807a">'+esc(o.last_note)+'</div>':'')):'';
+          var acts=(NEXT[o.status||"pending"]||[]).map(function(t){return '<button class="shipAct" data-o="'+esc(o.id)+'" data-to="'+t+'" style="margin:0 4px 4px 0;font-size:11.5px;padding:4px 9px;border-radius:7px;border:1px solid #2a2523;background:#1a1614;color:#ddd;cursor:pointer">'+LABEL[t]+'</button>';}).join("")+
+            '<button class="shipHist" data-o="'+esc(o.id)+'" style="font-size:11.5px;padding:4px 9px;border-radius:7px;border:1px solid #2a2523;background:transparent;color:#8a807a;cursor:pointer">History</button>';
+          return '<tr style="border-top:1px solid #1d1917;vertical-align:top"><td style="padding:8px 10px">'+esc(o.founder_name||o.founder_email||"-")+'<div style="color:#6b625c;font-size:11px">'+esc(o.founder_email)+'</div></td><td>'+esc(o.stage)+'</td><td>'+esc(o.movement)+'</td><td>'+esc(o.book_count)+'</td>'+
+            '<td><span style="color:'+(CLS[o.state_class]||"#b8afa5")+'">'+esc(o.state_label)+'</span><div style="font-size:10.5px;color:#6b625c">'+esc(o.status)+'</div></td><td style="font-size:11px;color:#8a807a">'+esc(o.curriculum_version||"—")+'</td><td>'+ship+'</td><td>'+last+'</td><td style="min-width:200px">'+acts+
+            '<div id="shipForm-'+esc(o.id)+'"></div><div id="shipHist-'+esc(o.id)+'"></div></td></tr>';
         }).join("");
-        view.innerHTML='<div style="margin:6px 0 14px">'+chips+'</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">'+head+body+'</table></div>'+(rows.length?"":'<div style="color:#8a807a;padding:10px 0">No book orders yet.</div>');
+        view.innerHTML=opbar+'<div style="margin:6px 0 14px">'+chips+'</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">'+head+body+'</table></div>'+(rows.length?"":'<div style="color:#8a807a;padding:10px 0">No book orders yet.</div>');
+        var op=document.getElementById("shipOp"); if(op) op.addEventListener("change",function(){setOp(op.value.trim());});
       })
       .catch(function(e){view.innerHTML='<div style="color:#d9705f;padding:8px 0">'+esc(e)+'</div>';});
   }
+  function form(oid,to){
+    var box=document.getElementById("shipForm-"+oid); if(!box)return;
+    var need={ordered:"Vendor and order number (required)",shipped:"Tracking number (if any)",delivered:"Note (optional)",delayed:"What is delaying it (required)",exception:"What went wrong (required)",queued:"Why it goes back to the queue (required)"}[to];
+    var I='style="width:100%;margin:4px 0;background:#151210;border:1px solid #2a2523;color:#eee;border-radius:7px;padding:6px 8px;font-size:12.5px"';
+    box.innerHTML='<div style="margin:6px 0;padding:8px;border:1px solid #2a2523;border-radius:8px"><div style="font-size:12px;color:#b8afa5;margin-bottom:4px">'+LABEL[to]+'</div>'+
+      (to==="ordered"?'<input id="sf-ref-'+oid+'" '+I+' placeholder="'+need+'">':'')+(to==="shipped"?'<input id="sf-trk-'+oid+'" '+I+' placeholder="'+need+'">':'')+
+      '<input id="sf-note-'+oid+'" '+I+' placeholder="'+(to==="ordered"||to==="shipped"?"Note (optional)":need)+'">'+
+      '<button class="shipSave" data-o="'+oid+'" data-to="'+to+'" style="margin-top:4px;font-size:12px;padding:5px 10px;border-radius:7px;border:0;background:#c9a46a;color:#111;cursor:pointer">Record</button> <span id="sf-out-'+oid+'" style="font-size:12px"></span></div>';
+  }
+  async function save(oid,to,btn){
+    var out=document.getElementById("sf-out-"+oid); var opEl=document.getElementById("shipOp"); var op=(opEl&&opEl.value||"").trim();
+    if(op.length<2){ if(out){out.style.color="#d9705f";out.textContent="Enter the operator's name above first.";} return; }
+    setOp(op);
+    function val(id){var e=document.getElementById(id);return e?e.value.trim():"";}
+    btn.disabled=true;
+    var r=await fetch(B+"admin-write",{method:"POST",headers:{"x-admin-token":tok(),"Content-Type":"application/json"},
+      body:JSON.stringify({action:"fulfillment_record",order_id:oid,to:to,operator:op,reference:val("sf-ref-"+oid)||null,tracking:val("sf-trk-"+oid)||null,note:val("sf-note-"+oid)||null})});
+    var j=await r.json().catch(function(){return {};});
+    if(!r.ok||j.error){btn.disabled=false; if(out){out.style.color="#d9705f";out.textContent=String(j.detail||j.error||r.status).replace(/_/g," ");} return;}
+    loadShip();
+  }
+  async function hist(oid){
+    var box=document.getElementById("shipHist-"+oid); if(!box)return;
+    if(box.innerHTML){box.innerHTML="";return;}
+    var r=await fetch(B+"admin-write",{method:"POST",headers:{"x-admin-token":tok(),"Content-Type":"application/json"},body:JSON.stringify({action:"fulfillment_history",order_id:oid})});
+    var j=await r.json().catch(function(){return {};});
+    var h=(j.history||[]).map(function(e){return '<div style="font-size:11px;color:#8a807a;border-top:1px solid #1d1917;padding:3px 0">'+esc(String(e.at).slice(0,16).replace("T"," "))+' · '+esc((e.from_status||"—")+" → "+e.to_status)+' · '+esc(e.kind==="manual"?e.operator_name:e.actor)+
+      (e.reference?' · ref '+esc(e.reference):'')+(e.tracking?' · tracking '+esc(e.tracking):'')+(e.note?' · '+esc(e.note):'')+'</div>';}).join("");
+    box.innerHTML='<div style="margin-top:6px">'+(h||'<div style="font-size:11px;color:#8a807a">No history.</div>')+'</div>';
+  }
   document.addEventListener("click",function(e){
-    var b=e.target&&e.target.closest?e.target.closest('[data-t="ship"]'):null;
-    if(!b)return; setTimeout(loadShip,0);
+    var t=e.target; if(!t||!t.closest)return;
+    var b=t.closest('[data-t="ship"]'); if(b){ setTimeout(loadShip,0); return; }
+    var a=t.closest(".shipAct"); if(a){ form(a.getAttribute("data-o"),a.getAttribute("data-to")); return; }
+    var sv=t.closest(".shipSave"); if(sv){ save(sv.getAttribute("data-o"),sv.getAttribute("data-to"),sv); return; }
+    var hs=t.closest(".shipHist"); if(hs){ hist(hs.getAttribute("data-o")); }
   });
 })();
 </script>
