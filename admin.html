@@ -778,9 +778,11 @@
       var d = await (await fetch(B+"admin-data", { headers:{ "x-admin-token": tok() } })).json();
       FOUNDERS = d.founders || []; COACHES = d.coaches || [];
     }catch(e){ FOUNDERS = []; }
-    var parts = await Promise.all([ w({ action:"reviewer_list" }), w({ action:"credential_copy_list" }), w({ action:"catalog_list" }), w({ action:"assessment_settings_view" }) ]);
+    var parts = await Promise.all([ w({ action:"reviewer_list" }), w({ action:"credential_copy_list" }), w({ action:"catalog_list" }), w({ action:"assessment_settings_view" }), w({ action:"pilot_status" }) ]);
     view.innerHTML =
-      '<div style="color:var(--faint);font-size:13px;max-width:72ch">Curriculum v2.0 is implemented and still a draft: no founder is on it until commissioning (T9). These controls write through governed functions only.</div>'+
+      '<div style="color:var(--faint);font-size:13px;max-width:72ch">Curriculum v2.0 is commissioned: a new activation binds to v2; founders already on v1 stay on v1. These controls write through governed functions only.</div>'+
+      sec("Billing pilot ($1 per block)", "Up to two designated founders pay $1.00 for each of the three Seeker blocks through the normal Checkout, webhook and activation path. Their next stage is never billed or claimed; access to new instruction ends at the Seeker term. Ordinary founders are not affected.")+
+      '<div id="plBox">'+pilotHtml(parts[4].j)+'</div>'+
       sec("Founder entitlement", "A v2 founder whose paid stage reaches its term without a claimed transition loses instruction (Q-1). A continuation needs a governed decision with an end date, or an explicitly authorized open-ended basis. v1 founders keep the existing status paths.")+
       '<select id="v2f" '+INP+'>'+founderOpts()+'</select><div id="v2ent" style="margin-top:10px"></div>'+
       sec("Reviewer registry", "Independent reviewers sign in personally at /review.html. Register them here after their first sign-in. A reviewer is never assigned work on a founder they coach.")+
@@ -794,6 +796,54 @@
       sec("Assessor configuration", "Read-only. With no confidence threshold, every AI unit decision escalates to a human reviewer. The external assessor stays off until privacy coverage for AI processing is in place (DQ-6).")+
       settingsHtml(parts[3].j.settings);
     if(SEL) showEntitlement(SEL);
+  }
+
+  // ---- billing pilot ----
+  function money(c){ return "$" + ((c||0)/100).toFixed(2); }
+  function pilotHtml(j){
+    if(!j || !j.ok) return '<div class="empty">Pilot status unavailable'+(j && j.error ? (': '+esc(j.error)) : '')+'.</div>';
+    var rows = j.pilot || [], p = rows[0] || {}, st = j.stripe || {};
+    var enr = rows.filter(function(r){ return r.founder_id; });
+    var webh = (st.webhooks||[]).map(function(x){ return esc(x.status)+' &middot; API '+esc(x.api_version||"account default")+(x.missing_events && x.missing_events.length ? ' &middot; <span class="pill warn">missing '+esc(x.missing_events.join(", "))+'</span>' : ' &middot; required events enabled')+(x.missing_recommended && x.missing_recommended.length ? ' &middot; <span class="pill">recommended: '+esc(x.missing_recommended.join(", "))+'</span>' : ''); }).join("<br>") || '<span class="pill warn">no Foundry webhook endpoint found</span>';
+    var priceLine = p.stripe_price_id
+      ? (esc(p.stripe_price_id)+' &middot; '+(st.pilot_price_ok ? '<span class="pill ok">verified in Stripe: $1.00 every '+esc((st.pilot_price||{}).interval_count)+' '+esc((st.pilot_price||{}).interval)+(st.pilot_price && st.pilot_price.livemode ? ' (live)' : ' (test)')+'</span>' : '<span class="pill warn">not verified</span>'))
+      : '<span class="pill warn">not prepared</span> <button class="mini save" id="plPrep">Prepare and verify the pilot price in Stripe</button>';
+    var head = '<div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.7">'+
+      '<b>'+esc(p.code||"")+'</b> &middot; '+(p.status==="open"?'<span class="pill ok">open</span>':'<span class="pill warn">'+esc(p.status||"")+'</span>')+' &middot; closes '+esc(when(p.expires_at))+
+      ' &middot; seats '+esc(p.seats_used)+' of '+esc(p.seats)+' &middot; '+money(p.unit_amount_cents)+' x '+esc(p.blocks)+' blocks (maximum '+money((p.unit_amount_cents||0)*(p.blocks||0))+' per founder)'+
+      '<br>Canonical Seeker price: '+(st.canonical ? money(st.canonical.unit_amount)+' every '+esc(st.canonical.interval_count)+' '+esc(st.canonical.interval)+(st.canonical.livemode?' (live)':' (test)') : '<span class="pill warn">unreadable'+(st.error?(': '+esc(st.error)):'')+'</span>')+
+      '<br>Pilot price: <span id="plPrepOut">'+priceLine+'</span><br>Stripe webhook: '+webh+'</div>';
+    var table = enr.length ? '<table style="margin-top:10px"><thead><tr><th>Founder</th><th>Status</th><th>Paid</th><th>Next pilot payment</th><th>Normal billing</th><th>Term</th><th>Action required</th><th></th></tr></thead><tbody>'+
+      enr.map(function(r){
+        var revoked = !!r.revoked_at;
+        var att = r.attention || [];
+        var action = att.length ? att.map(function(a){ return '<div style="margin-bottom:6px"><span class="pill warn">'+esc(String(a.kind).replace(/_/g," "))+'</span> '+esc(when(a.at))+
+              '<div style="font-size:12px">'+esc((a.detail||{}).attention||"Review in Stripe")+((a.detail||{}).subscription?(' &middot; '+esc(a.detail.subscription)):'')+((a.detail||{}).invoice?(' &middot; '+esc(a.detail.invoice)):'')+'</div>'+
+              '<input data-plnote="'+esc(a.seq)+'" '+INP+' placeholder="What was done (recorded)" style="margin-top:4px" /> <button class="mini save" data-plack="'+esc(a.seq)+'">Mark handled</button></div>'; }).join("")
+          : esc(revoked ? "None (designation revoked)" : (r.founder_status==="awaiting_payment" ? "Founder completes the $1 checkout" : (r.term_at ? "None. Pilot ended at term" : "None")));
+        return '<tr><td>'+esc(r.founder_name||"")+'<div style="color:var(--faint);font-size:11.5px">'+esc(r.founder_email||"")+'</div></td>'+
+          '<td>'+esc(r.founder_status||"")+' &middot; '+esc(r.stage||"")+' wk '+esc(r.week||"")+(r.curriculum?(' &middot; '+esc(r.curriculum)):'')+'</td>'+
+          '<td>'+esc(r.blocks_paid)+' of '+esc(p.blocks)+' blocks &middot; '+money(r.amount_paid_cents)+(r.last_paid_at?('<div style="color:var(--faint);font-size:11.5px">last '+esc(when(r.last_paid_at))+'</div>'):'')+'</td>'+
+          '<td>'+(revoked?'none':(r.next_payment_possible?'yes, $1.00 at the next block':'none'))+'</td>'+
+          '<td>'+(revoked?'n/a':'suppressed: pilot price only; next stage never billed or claimed')+'</td>'+
+          '<td>'+(r.term_at?('ended '+esc(when(r.term_at))):'at the end of block 3 (access to new instruction ends)')+'</td>'+
+          '<td>'+action+'</td>'+
+          '<td>'+(!revoked && r.founder_status==="awaiting_payment" ? '<button class="mini reject" data-plrev="'+esc(r.founder_id)+'">Revoke</button>' : '')+'</td></tr>';
+      }).join("")+'</tbody></table>' : '<div class="empty" style="padding:8px 0">No founder is designated.</div>';
+    var elig = FOUNDERS.filter(function(f){ return f.status==="awaiting_payment" && (f.stage||"Seeker")==="Seeker" && !enr.some(function(r){ return r.founder_id===f.id; }); });
+    var form = (p.status==="open" && (p.seats_used||0) < (p.seats||0)) ?
+      '<div style="margin-top:12px;display:grid;gap:8px;max-width:640px"><select id="plF" '+INP+'><option value="">Designate an admitted, unpaid Seeker founder…</option>'+
+      elig.map(function(f){ return '<option value="'+f.id+'">'+esc((f.name||"—")+" · "+(f.email||""))+'</option>'; }).join("")+'</select>'+
+      '<input id="plWhy" '+INP+' placeholder="Reason and authority (recorded)" /><div><button class="mini save" id="plDes">Designate as pilot founder</button> <span id="plMsg" style="font-size:13px"></span></div></div>' : '';
+    var foot = '<div style="margin-top:10px"><button class="mini" id="plHist">Show pilot history</button>'+(p.status==="open"?' <button class="mini reject" id="plClose">Close the pilot to new designations</button>':'')+' <span id="plFoot" style="font-size:13px"></span></div><div id="plHistOut"></div>';
+    window.__pilotHistory = j.history || [];
+    return head + table + form + foot;
+  }
+  async function pilotReload(){ var r = await w({ action:"pilot_status" }); var b = document.getElementById("plBox"); if(b) b.innerHTML = pilotHtml(r.j); }
+  async function pilotAct(payload, msgId){
+    var r = await w(payload);
+    if(r.s !== 200){ out(msgId, errText(r.j) + (r.j && r.j.detail ? (": " + r.j.detail) : "")); return false; }
+    await pilotReload(); return true;
   }
 
   // ---- entitlement ----
@@ -949,6 +999,16 @@
     }
   });
   document.addEventListener("change", function(e){ if(e.target && e.target.id === "v2f") showEntitlement(e.target.value); });
+  document.addEventListener("click", function(e){
+    var t = e.target; if(!t || !t.closest) return;
+    if(t.id === "plPrep"){ t.disabled = true; pilotAct({ action:"pilot_prepare_price" }, "plPrepOut"); return; }
+    if(t.id === "plDes"){ var f = v("plF"); if(!f){ out("plMsg", "Choose a founder."); return; } pilotAct({ action:"pilot_designate", founder_id:f, reason:v("plWhy") }, "plMsg"); return; }
+    var ak = t.closest("[data-plack]"); if(ak){ var sq = ak.getAttribute("data-plack"); var ni = document.querySelector('[data-plnote="'+sq+'"]'); pilotAct({ action:"pilot_acknowledge", seq:Number(sq), note:(ni?ni.value:"") }, "plFoot"); return; }
+    var rv = t.closest("[data-plrev]"); if(rv){ pilotAct({ action:"pilot_revoke", founder_id:rv.getAttribute("data-plrev"), reason:"Revoked at the Desk before any payment" }, "plFoot"); return; }
+    if(t.id === "plClose"){ pilotAct({ action:"pilot_close", reason:"Pilot closed to new designations at the Desk" }, "plFoot"); return; }
+    if(t.id === "plHist"){ var h = window.__pilotHistory || []; var o = document.getElementById("plHistOut"); if(!o) return;
+      o.innerHTML = h.length ? '<table style="margin-top:8px"><thead><tr><th>When</th><th>Event</th><th>By</th><th>Detail</th></tr></thead><tbody>'+h.map(function(x){ return '<tr><td>'+esc(when(x.at))+'</td><td>'+esc(String(x.kind).replace(/_/g," "))+'</td><td>'+esc(x.actor)+'</td><td style="font-size:11.5px">'+esc(JSON.stringify(x.detail))+'</td></tr>'; }).join("")+'</tbody></table>' : '<div class="empty" style="padding:6px 0">No pilot events yet.</div>'; }
+  });
 })();
 </script>
 </body>
