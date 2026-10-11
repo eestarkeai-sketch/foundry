@@ -125,6 +125,7 @@
       <div class="tab" data-t="ship">Ship</div>
       <div class="tab" data-t="culminations">Culminations</div>
       <div class="tab" data-t="v2">Curriculum v2</div>
+      <div class="tab" data-t="pilot">Pilot support</div>
     </div>
     <div id="view"></div>
     <div class="foot">Operating desk on the Supabase backend. Admit &amp; place opens an awaiting-payment seat; payment turns it active.</div>
@@ -1009,6 +1010,171 @@
     if(t.id === "plHist"){ var h = window.__pilotHistory || []; var o = document.getElementById("plHistOut"); if(!o) return;
       o.innerHTML = h.length ? '<table style="margin-top:8px"><thead><tr><th>When</th><th>Event</th><th>By</th><th>Detail</th></tr></thead><tbody>'+h.map(function(x){ return '<tr><td>'+esc(when(x.at))+'</td><td>'+esc(String(x.kind).replace(/_/g," "))+'</td><td>'+esc(x.actor)+'</td><td style="font-size:11.5px">'+esc(JSON.stringify(x.detail))+'</td></tr>'; }).join("")+'</tbody></table>' : '<div class="empty" style="padding:6px 0">No pilot events yet.</div>'; }
   });
+})();
+</script>
+<script id="desk-pilot-support">
+// ===== FOUNDRY two-founder pilot: support queue, case handling, check-ins and the experiment record (migration 65).
+//       Uses the Desk key. The Desk key is shared, so every act also names the person acting; the database records
+//       "Pilot Support (<name>)". Founders only ever see "Starke Foundry Pilot Support". =====
+(function(){
+  var B = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/";
+  var FILTER = "open", CASE = null, REC = "";
+  var LIFE = {new:"new",acknowledged:"acknowledged",investigating:"investigating",waiting_on_founder:"waiting on founder",resolved:"resolved",closed:"closed"};
+  var NEXT = {new:["acknowledged","investigating","waiting_on_founder","resolved"],acknowledged:["investigating","waiting_on_founder","resolved"],
+              investigating:["waiting_on_founder","resolved"],waiting_on_founder:["investigating","resolved"],resolved:["closed","investigating"],closed:[]};
+  var CATS = [["access","Access"],["payment","Payment"],["content","Curriculum or content"],["reading_books","Reading or book"],["submission_assessment","Submission or assessment"],
+              ["coaching","Coaching or communication"],["usability","Usability"],["feedback","Feedback or suggestion"],["privacy_security","Privacy or security"],["other","Other"]];
+  var FIND = [["blocker_defect","Blocker or safety defect (fix now)"],["operational_process","Operational process"],["usability_friction","Usability friction"],
+              ["product_feedback","Product feedback"],["feature_suggestion","Feature suggestion"],["not_a_finding","Not a finding"]];
+  function esc(x){ return String(x==null?"":x).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"})[c];}); }
+  function tok(){ return window.__deskToken || ""; }
+  function when(s){ if(!s) return ""; try{ return new Date(s).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return s; } }
+  async function w(payload){
+    var r = await fetch(B+"admin-write", { method:"POST", headers:{ "x-admin-token": tok(), "Content-Type":"application/json" }, body: JSON.stringify(payload) });
+    var j = await r.json().catch(function(){ return {}; }); return { s:r.status, j:j };
+  }
+  function $(id){ return document.getElementById(id); }
+  function val(id){ var e=$(id); return e ? (e.value||"").trim() : ""; }
+  function say(id, t, ok){ var e=$(id); if(!e) return; e.style.color = ok ? "var(--ok)" : "var(--bad)"; e.textContent = t || ""; }
+  function err(j){ return String((j && j.error) || "failed").replace(/_/g," ") + (j && j.detail ? (": " + j.detail) : ""); }
+  function opName(){ try{ return localStorage.getItem("foundry.pilotOperator") || ""; }catch(e){ return ""; } }
+  function setOp(v){ try{ localStorage.setItem("foundry.pilotOperator", v); }catch(e){} }
+  function sec(t, sub){ return '<h3 style="font-family:var(--serif);font-weight:500;font-size:18px;margin:26px 0 4px">'+t+'</h3>'+(sub?('<div style="color:var(--faint);font-size:13px;margin:0 0 12px;max-width:76ch">'+sub+'</div>'):''); }
+  var INP = 'style="width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:9px 11px;font-size:13.5px;font-family:var(--sans)"';
+  function sevPill(s, blocked){ return s==="blocking" ? '<span class="pill warn">blocking</span>' : '<span class="pill">normal</span>'+(blocked?' <span class="pill">blocked</span>':''); }
+  async function act(payload, msgId){
+    payload.operator = opName();
+    if(!payload.operator && !/^(support_queue|support_case|support_settings|pilot_record)$/.test(payload.action)){ say(msgId, "Enter your name above first. Every act is recorded under it."); return null; }
+    var r = await w(payload);
+    if(r.s !== 200){ say(msgId, err(r.j)); return null; }
+    return r.j;
+  }
+
+  async function load(){
+    var view = $("view"); if(!view) return;
+    view.innerHTML = '<div class="empty">Loading pilot support…</div>';
+    var parts = await Promise.all([ w({ action:"support_settings" }), w({ action:"support_queue", filter:FILTER }), w({ action:"pilot_status" }), w({ action:"support_queue", filter:"findings" }) ]);
+    var st = (parts[0].j && parts[0].j.data) || {}, q = (parts[1].j && parts[1].j.data) || [], ps = (parts[2].j && parts[2].j.pilot) || [], fd = (parts[3].j && parts[3].j.data) || [];
+    var enr = ps.filter(function(r){ return r.founder_id; });
+    var ownerLine = st.owner_email ? ('<b>'+esc(st.owner_name)+'</b> &middot; '+esc(st.owner_email)+' <span style="color:var(--faint);font-size:12px">set by '+esc(st.set_by)+' '+esc(when(st.set_at))+'</span>')
+                                   : '<span class="pill warn">not named</span> Reports are received, acknowledged automatically and queued here, but nobody is notified by email until an owner is named.';
+    var html =
+      sec("Pilot support", "One queue for the two pilot founders. Each report gets an automatic receipt with its reference; it stays <i>new</i> until a person replies or acknowledges it. Blocking reports (unexpected charge, cannot enter after paying, privacy or security, a record that looks wrong, or a founder blocked on access or a submission) sort first. Nothing escalates automatically: escalate only when a decision needs an authority, and say which.")+
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">'+
+        '<div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13.5px"><div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)">You are acting as</div>'+
+          '<input id="psOp" '+INP+' placeholder="Your name (recorded with every act)" value="'+esc(opName())+'" style="margin-top:6px" /></div>'+
+        '<div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13.5px"><div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)">Pilot support owner</div>'+
+          '<div style="margin:6px 0">'+ownerLine+'</div>'+
+          '<details><summary style="cursor:pointer;color:var(--dim);font-size:12.5px">'+(st.owner_email?'Change':'Name the owner')+'</summary><div style="display:grid;gap:6px;margin-top:8px">'+
+          '<input id="psOwnN" '+INP+' placeholder="Owner name" /><input id="psOwnE" '+INP+' placeholder="Owner email (receives content-free notices)" />'+
+          '<div><button class="mini save" id="psOwnSave">Save owner</button> <span id="psOwnMsg" style="font-size:12.5px"></span></div></div></details></div>'+
+      '</div>'+
+      '<div style="margin:16px 0 8px;display:flex;gap:6px;flex-wrap:wrap">'+["open","blocking","escalated","findings","all"].map(function(f){ return '<button class="mini '+(f===FILTER?'':'save')+'" data-psf="'+f+'">'+f+'</button>'; }).join("")+'</div>'+
+      (q.length ? '<div style="overflow-x:auto"><table><thead><tr><th>Ref</th><th>Founder</th><th>About</th><th>Severity</th><th>State</th><th>Finding</th><th>Updated</th><th></th></tr></thead><tbody>'+
+        q.map(function(c){ return '<tr'+(CASE===c.case_id?' style="background:var(--panel2)"':'')+'><td style="font-variant-numeric:tabular-nums"><b>'+esc(c.ref)+'</b></td><td>'+esc(c.founder_name||"")+'<div style="color:var(--faint);font-size:11.5px">'+esc(c.founder_email||"")+'</div></td>'+
+          '<td>'+esc(c.category_label)+'</td><td>'+sevPill(c.severity,c.blocked)+(c.escalated?' <span class="pill warn">escalated</span>':'')+'</td><td>'+esc(LIFE[c.lifecycle]||c.lifecycle)+
+          (c.last_from_founder && (!c.last_from_support || c.last_from_founder > c.last_from_support) && c.lifecycle!=="closed" ? ' <span class="pill warn">founder wrote</span>':'')+'</td>'+
+          '<td style="font-size:12px">'+esc((c.finding_class||"").replace(/_/g," "))+'</td><td>'+esc(when(c.updated_at))+'</td><td><button class="mini save" data-psc="'+esc(c.case_id)+'">Open</button></td></tr>'; }).join("")+'</tbody></table></div>'
+        : '<div class="empty" style="padding:8px 0">No reports in this view.</div>')+
+      '<div id="psCase"></div>'+
+      sec("Findings for post-pilot review", "Only genuine blockers and safety defects are fixed during the pilot. Everything else accumulates here, classified, for review after the pilot.")+
+      (fd.length ? '<div>'+FIND.filter(function(x){ return x[0]!=="not_a_finding"; }).map(function(x){ var n = fd.filter(function(c){ return c.finding_class===x[0]; }); return n.length ? '<div style="margin:6px 0"><b>'+esc(x[1])+'</b>: '+n.map(function(c){ return '<a href="#" data-psc="'+esc(c.case_id)+'">'+esc(c.ref)+'</a>'; }).join(", ")+'</div>' : ''; }).join("")+'</div>'
+        : '<div class="empty" style="padding:8px 0">No findings classified yet.</div>')+
+      sec("Experiment record", "One read-only view per pilot founder, drawn from the authoritative records: application, designation, payments, curriculum binding, stage and week, access, books, support, check-ins, incidents and exit. Developmental content (submissions, coaching, reviews) appears only as counts.")+
+      (enr.length ? '<select id="psRecF" '+INP+' style="max-width:520px"><option value="">Choose a pilot founder…</option>'+enr.map(function(r){ return '<option value="'+esc(r.founder_id)+'"'+(REC===r.founder_id?' selected':'')+'>'+esc((r.founder_name||"")+" · "+(r.founder_email||"")+(r.revoked_at?" · revoked":""))+'</option>'; }).join("")+'</select><div id="psRec"></div>'
+        : '<div class="empty" style="padding:8px 0">No founder is designated for the pilot.</div>');
+    view.innerHTML = html;
+    if(CASE) openCase(CASE);
+    if(REC) showRecord(REC);
+  }
+
+  async function openCase(id){
+    CASE = id; var host = $("psCase"); if(!host) return;
+    host.innerHTML = '<div class="empty" style="padding:8px 0">Loading case…</div>';
+    var r = await w({ action:"support_case", case_id:id });
+    if(r.s !== 200 || !r.j.data){ host.innerHTML = '<div style="color:var(--bad)">'+esc(err(r.j))+'</div>'; return; }
+    var d = r.j.data, c = d.case || {}, s = c.structured || {}, cx = c.context || {};
+    var thread = (d.messages||[]).map(function(m){ return '<div style="border:1px solid var(--line);border-radius:10px;padding:8px 11px;margin:6px 0;'+(m.author_kind==="founder"?'background:var(--panel2)':'')+'"><div style="font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em">'+esc(m.author_kind==="founder"?("Founder · "+m.author):m.author)+' · '+esc(when(m.at))+'</div><div style="white-space:pre-wrap;font-size:13.5px">'+esc(m.body)+'</div></div>'; }).join("");
+    var ev = (d.events||[]).map(function(e){ return '<tr><td style="font-variant-numeric:tabular-nums">'+esc(e.seq)+'</td><td>'+esc(when(e.at))+'</td><td>'+esc(String(e.kind).replace(/_/g," "))+(e.to?(' ('+esc(e.from||"")+' → '+esc(e.to)+')'):'')+'</td><td>'+esc(e.actor)+'</td><td style="font-size:11.5px">'+esc(e.detail && Object.keys(e.detail).length ? JSON.stringify(e.detail) : "")+'</td></tr>'; }).join("");
+    var closed = c.lifecycle === "closed";
+    var opts = (NEXT[c.lifecycle]||[]).map(function(x){ return '<option value="'+x+'">'+esc(LIFE[x])+'</option>'; }).join("");
+    host.innerHTML = '<div style="border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:14px">'+
+      '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b style="font-family:var(--serif);font-size:18px">'+esc(c.ref)+'</b> &middot; '+esc(c.category_label)+' &middot; '+sevPill(c.severity,c.blocked)+' &middot; '+esc(LIFE[c.lifecycle])+(c.escalated_at?' &middot; <span class="pill warn">escalated</span>':'')+'</div><button class="mini save" id="psClose">Close panel</button></div>'+
+      '<div style="font-size:13px;color:var(--dim);margin-top:6px">'+esc((d.founder||{}).name)+' · '+esc((d.founder||{}).email)+' · reported from '+esc(cx.surface||"")+' at '+esc(cx.stage||"")+' week '+esc(cx.week||"")+' ('+esc(cx.status||"")+', '+esc(cx.curriculum||"")+', '+esc(cx.pilot||"")+') · '+esc(when(c.created_at))+'</div>'+
+      (c.escalation_reason?'<div style="margin-top:6px;color:var(--gold);font-size:13px">Escalated by '+esc(c.escalated_by)+': '+esc(c.escalation_reason)+'</div>':'')+
+      (c.resolution?'<div style="margin-top:6px;color:var(--ok);font-size:13px">Resolution: '+esc(c.resolution)+'</div>':'')+
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:10px;font-size:13px">'+
+        [["Trying to",s.trying],["What happened",s.happened],["Expected",s.expected],["Error wording",s.error_text]].map(function(x){ return '<div><div style="font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.08em">'+x[0]+'</div><div style="white-space:pre-wrap">'+esc(x[1]||"—")+'</div></div>'; }).join("")+
+        (s.record_concern?'<div><span class="pill warn">founder reports a record looks wrong</span></div>':'')+'</div>'+
+      '<h4 style="margin:14px 0 4px;font-weight:600">Conversation</h4>'+thread+
+      (closed ? '<div class="empty" style="padding:8px 0">Closed. The case and its history are kept and cannot be edited.</div>' :
+        '<div style="margin-top:10px"><textarea id="psReply" '+INP+' rows="3" placeholder="Reply to the founder (sent as Starke Foundry Pilot Support; they get a content-free email saying a reply is waiting)"></textarea>'+
+        '<label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--dim);margin:6px 0"><input type="checkbox" id="psAwait"> I am asking the founder something (waiting on founder)</label>'+
+        '<button class="mini save" id="psSend">Send reply</button> <span id="psSendMsg" style="font-size:12.5px"></span></div>'+
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px">'+
+          '<div><div style="font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.08em">Move to</div><select id="psTo" '+INP+'>'+opts+'</select>'+
+            '<input id="psToNote" '+INP+' placeholder="Note (required to resolve: how it was resolved)" style="margin-top:6px" /><button class="mini save" id="psMove" style="margin-top:6px">Record</button> <span id="psMoveMsg" style="font-size:12.5px"></span></div>'+
+          '<div><div style="font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.08em">Classify</div>'+
+            '<select id="psCat" '+INP+'>'+CATS.map(function(x){ return '<option value="'+x[0]+'"'+(x[0]===c.category?' selected':'')+'>'+x[1]+'</option>'; }).join("")+'</select>'+
+            '<select id="psSev" '+INP+' style="margin-top:6px"><option value="normal"'+(c.severity==="normal"?' selected':'')+'>normal</option><option value="blocking"'+(c.severity==="blocking"?' selected':'')+'>blocking</option></select>'+
+            '<select id="psFind" '+INP+' style="margin-top:6px"><option value="">Finding class…</option>'+FIND.map(function(x){ return '<option value="'+x[0]+'"'+(x[0]===c.finding_class?' selected':'')+'>'+x[1]+'</option>'; }).join("")+'</select>'+
+            '<input id="psWhy" '+INP+' placeholder="Reason (required to change severity)" style="margin-top:6px" /><button class="mini save" id="psClass" style="margin-top:6px">Save classification</button> <span id="psClassMsg" style="font-size:12.5px"></span></div>'+
+          '<div><div style="font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.08em">Internal note</div><textarea id="psNote" '+INP+' rows="2" placeholder="Not shown to the founder"></textarea><button class="mini save" id="psNoteSave" style="margin-top:6px">Add note</button> <span id="psNoteMsg" style="font-size:12.5px"></span>'+
+            (c.escalated_at?'':'<div style="font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;margin-top:12px">Escalate</div><input id="psEsc" '+INP+' placeholder="The decision that needs an authority, and why" /><button class="mini reject" id="psEscGo" style="margin-top:6px">Escalate</button> <span id="psEscMsg" style="font-size:12.5px"></span>')+'</div>'+
+        '</div>')+
+      '<details style="margin-top:12px"><summary style="cursor:pointer;color:var(--dim);font-size:13px">History ('+(d.events||[]).length+' events)</summary><div style="overflow-x:auto"><table style="margin-top:6px"><thead><tr><th>#</th><th>When</th><th>Event</th><th>By</th><th>Detail</th></tr></thead><tbody>'+ev+'</tbody></table></div></details>'+
+      '</div>';
+  }
+
+  function kv(o){ if(!o) return '<span style="color:var(--faint)">none</span>'; return Object.keys(o).map(function(k){ var v=o[k]; return '<span style="color:var(--faint)">'+esc(k.replace(/_/g," "))+'</span> '+esc(v==null?"—":(typeof v==="object"?JSON.stringify(v):(/_at$/.test(k)?when(v):v))); }).join(" &middot; "); }
+  async function showRecord(id){
+    REC = id; var host = $("psRec"); if(!host) return; if(!id){ host.innerHTML=""; return; }
+    host.innerHTML = '<div class="empty" style="padding:8px 0">Loading record…</div>';
+    var r = await w({ action:"pilot_record", founder_id:id });
+    if(r.s !== 200 || !r.j.data){ host.innerHTML = '<div style="color:var(--bad)">'+esc(err(r.j))+'</div>'; return; }
+    var x = r.j.data, b = x.billing || {};
+    var row = function(t, h){ return '<tr><td style="white-space:nowrap;color:var(--faint);vertical-align:top">'+t+'</td><td style="font-size:13px">'+h+'</td></tr>'; };
+    var exitGiven = !!x.exit;
+    host.innerHTML = '<table style="margin-top:10px"><tbody>'+
+      row("Founder", kv(x.founder))+row("Application", kv(x.application))+row("Designation", kv(x.designation))+
+      row("Payments", kv({blocks_paid:b.blocks_paid, amount_paid:"$"+((b.amount_paid_cents||0)/100).toFixed(2), last_paid_at:b.last_paid_at, next_payment_possible:b.next_payment_possible, term_at:b.term_at, progression_held:b.progression_held}))+
+      row("Curriculum binding", (x.binding||[]).map(function(y){ return esc(y.version)+' ('+esc(y.reason)+', '+esc(when(y.at))+')'; }).join("; ")||"none")+
+      row("Books", (x.books||[]).map(function(y){ return 'movement '+esc(y.movement)+': '+esc(y.state||y.status)+(y.last_operator?(' by '+esc(y.last_operator)):''); }).join("; ")||"none yet")+
+      row("Activity (counts only)", kv(x.activity))+
+      row("Support", (x.support||[]).map(function(y){ return '<b>'+esc(y.ref)+'</b> '+esc(y.category)+' · '+esc(y.severity)+' · '+esc(LIFE[y.lifecycle]||y.lifecycle)+(y.finding_class?(' · '+esc(y.finding_class.replace(/_/g," "))):''); }).join("<br>")||"none")+
+      row("Check-ins", (x.feedback||[]).map(function(y){ return esc(y.checkpoint.replace(/_/g," "))+': '+(y.done?(y.skipped?'skipped':'given'):(y.due?'<span class="pill warn">due</span>':'not yet')); }).join(" &middot; "))+
+      row("Feedback given", (x.feedback_given||[]).filter(function(y){ return y.checkpoint!=="exit"; }).map(function(y){ return '<b>'+esc(y.checkpoint.replace(/_/g," "))+'</b> '+(y.skipped?'(skipped)':((y.rating?('rating '+esc(y.rating)+'. '):'')+(y.friction?('In the way: '+esc(y.friction)+' '):'')+(y.positive?('Worked: '+esc(y.positive)):''))); }).join("<br>")||"none")+
+      row("Incidents", (x.incidents||[]).map(function(y){ return esc(String(y.kind).replace(/_/g," "))+' '+esc(when(y.at)); }).join("<br>")||"none")+
+      row("Exit review", exitGiven ? (x.exit.skipped?'skipped':Object.keys(x.exit.answers||{}).map(function(k){ return '<b>'+esc(k.replace(/_/g," "))+'</b>: '+esc(x.exit.answers[k]); }).join("<br>")) :
+        ('not given. <input id="psExitWhy" '+INP+' placeholder="Reason to open the exit review now (for example, leaving early by agreement)" style="margin-top:6px;max-width:520px" /> <button class="mini save" id="psExitOpen" style="margin-top:6px">Open the exit review</button> <span id="psExitMsg" style="font-size:12.5px"></span>'))+
+      '</tbody></table><div style="color:var(--faint);font-size:12px;margin-top:6px">Willingness to continue or recommend is pilot feedback, not commercial validation.</div>';
+  }
+
+  document.addEventListener("click", async function(e){
+    var t = e.target; if(!t || !t.closest) return;
+    if(t.closest('[data-t="pilot"]')){ setTimeout(load, 0); return; }
+    if(!$("psOp")) return;   // only inside the Pilot tab
+    var f = t.closest("[data-psf]"); if(f){ FILTER = f.getAttribute("data-psf"); load(); return; }
+    var oc = t.closest("[data-psc]"); if(oc && oc.getAttribute("data-psc")){ e.preventDefault(); openCase(oc.getAttribute("data-psc")); var h=$("psCase"); if(h) h.scrollIntoView({behavior:"smooth",block:"start"}); return; }
+    if(t.id === "psClose"){ CASE = null; $("psCase").innerHTML = ""; return; }
+    if(t.id === "psOwnSave"){ var j = await act({ action:"support_owner_set", owner_name:val("psOwnN"), owner_email:val("psOwnE") }, "psOwnMsg"); if(j) load(); return; }
+    if(t.id === "psSend"){ t.disabled = true; var j2 = await act({ action:"support_reply", case_id:CASE, body:val("psReply"), await_founder:!!($("psAwait")||{}).checked }, "psSendMsg"); t.disabled = false; if(j2) load(); return; }
+    if(t.id === "psMove"){ var j3 = await act({ action:"support_transition", case_id:CASE, to:val("psTo"), note:val("psToNote") || null }, "psMoveMsg"); if(j3) load(); return; }
+    if(t.id === "psClass"){ var j4 = await act({ action:"support_classify", case_id:CASE, category:val("psCat"), severity:val("psSev"), finding_class:val("psFind") || null, reason:val("psWhy") || null }, "psClassMsg"); if(j4) load(); return; }
+    if(t.id === "psNoteSave"){ var j5 = await act({ action:"support_note", case_id:CASE, note:val("psNote") }, "psNoteMsg"); if(j5) openCase(CASE); return; }
+    if(t.id === "psEscGo"){ var j6 = await act({ action:"support_escalate", case_id:CASE, reason:val("psEsc") }, "psEscMsg"); if(j6) load(); return; }
+    if(t.id === "psExitOpen"){ var j7 = await act({ action:"pilot_exit_open", founder_id:REC, reason:val("psExitWhy") }, "psExitMsg"); if(j7) showRecord(REC); return; }
+  });
+  document.addEventListener("input", function(e){ if(e.target && e.target.id === "psOp") setOp(e.target.value.trim()); });
+  // the tab label shows how many pilot reports need a person (new, blocking, or the founder wrote last)
+  async function badge(){
+    if(!tok()) return;
+    var r = await w({ action:"support_queue", filter:"open" }); if(r.s !== 200) return;
+    var n = (r.j.data||[]).filter(function(c){ return c.lifecycle==="new" || (c.severity==="blocking" && c.lifecycle!=="resolved") || (c.last_from_founder && (!c.last_from_support || c.last_from_founder > c.last_from_support) && c.lifecycle!=="resolved"); }).length;
+    var tb = document.querySelector('.tab[data-t="pilot"]'); if(tb) tb.textContent = "Pilot support" + (n ? (" (" + n + ")") : "");
+  }
+  var badgeTimer = setInterval(function(){ if(tok()){ badge(); clearInterval(badgeTimer); setInterval(badge, 120000); } }, 3000);
+  document.addEventListener("change", function(e){ if(e.target && e.target.id === "psRecF") showRecord(e.target.value); });
 })();
 </script>
 </body>

@@ -244,6 +244,69 @@
     </div>
   </div>
 
+  <!-- FOUNDRY two-founder pilot (migration 65): shown only to designated pilot founders, from pilot-support; ordinary founders never see it -->
+  <div id="pilot" class="card hide">
+    <div class="k" style="font-size:11px;letter-spacing:0.3em;color:var(--ember);font-weight:700">PILOT</div>
+    <h2>Your Foundry pilot</h2>
+    <p class="lede">You are one of two founders in a controlled pilot of Starke Foundry. The pilot tests whether a founder can join, pay, learn, submit work, receive coaching and review, and get help, all without needing to know anyone at the Foundry personally. Use the Foundry as you normally would. When something is unclear or goes wrong, tell us here. That is part of the pilot.</p>
+    <div class="climb">
+      <div class="tile"><div class="lbl">Price</div><div class="val" style="font-size:18px" id="pgPrice">$1 per block</div></div>
+      <div class="tile"><div class="lbl">Paid so far</div><div class="val" style="font-size:18px" id="pgPaid">&nbsp;</div></div>
+    </div>
+
+    <div class="sec-h">Pilot Guide</div>
+    <details class="v2d" open><summary>What the pilot tests, and what we ask of you</summary><div class="v2b">The pilot tests the whole path: applying and admission, paying, entering the Foundry, the weekly units, books and readings, submitting work, coaching, review, and getting help when something goes wrong.
+
+What we ask: use the Foundry normally, at your own pace through the weekly units. Report anything that blocks you, confuses you or looks wrong. Answer the short check-ins when they appear below (about a minute each; you can skip any). At the end there is a short exit review.</div></details>
+    <details class="v2d"><summary>What it costs</summary><div class="v2b" id="pgCost">$1 for each five-week Seeker block, charged when the block begins, for at most three blocks: $3 in total. The pilot covers the Seeker stage only. There is no Builder billing in the pilot, and nothing is charged after your third block.</div></details>
+    <details class="v2d"><summary>Where your books and readings appear</summary><div class="v2b">Each unit under Your Program shows its reading. The printed books for each movement are ordered and shipped to you by the Foundry. A few later units have required readings that are not yet available in the pilot. Those units say the reading is held, and they cannot be submitted until it is available. That is expected, not a fault, but tell us if it stops you.</div></details>
+    <details class="v2d"><summary>How coaching and review work</summary><div class="v2b">Your coach's messages appear under Messages with your coach. When you submit a unit, it is reviewed and the outcome appears on that unit. Your coaching, your submissions and your reviews are never attached to a support report.</div></details>
+    <details class="v2d"><summary>Getting help, and what is urgent</summary><div class="v2b">Use Report a problem below. You get a reference number at once. Replies appear here under Your reports, and an email tells you when a reply is waiting. You can add to a report at any time.
+
+Urgent: if you were charged unexpectedly, cannot get in after paying, see something that looks like another person's information, or think a record of your progress or work is wrong, choose that category or tick the box. Urgent reports are looked at first. Never put card numbers or passwords in a report.</div></details>
+    <details class="v2d"><summary>Leaving feedback</summary><div class="v2b">Short check-ins appear below at moments that matter: admission, paying, your first time in, your first unit, reading, submission, coaching and review, and when the pilot ends. Say what got in the way and what worked. Your feedback shapes what is reviewed after the pilot; it is kept apart from your developmental record.</div></details>
+
+    <div id="pgCheckins" class="hide">
+      <div class="sec-h">Check-ins</div>
+      <div id="pgCheckinList"></div>
+    </div>
+
+    <div id="pgReportWrap">
+      <div class="sec-h">Report a problem <span style="font-size:12px;color:var(--faint);letter-spacing:0;text-transform:none">&middot; Starke Foundry Pilot Support</span></div>
+      <div class="wk wk-form" style="margin-top:0">
+        <label for="pgCat">What is it about?</label>
+        <select id="pgCat" class="rsel">
+          <option value="">Choose one</option>
+          <option value="access">Signing in or getting in</option>
+          <option value="payment">A payment or charge</option>
+          <option value="content">A unit, guide or curriculum content</option>
+          <option value="reading_books">A book or reading</option>
+          <option value="submission_assessment">A submission or review</option>
+          <option value="coaching">Coaching or messages</option>
+          <option value="usability">Hard to find or hard to use</option>
+          <option value="privacy_security">Privacy or security</option>
+          <option value="feedback">A suggestion or feedback</option>
+          <option value="other">Something else</option>
+        </select>
+        <label for="pgTrying">What were you trying to do?</label>
+        <textarea id="pgTrying" style="min-height:60px"></textarea>
+        <label for="pgHappened">What happened?</label>
+        <textarea id="pgHappened" style="min-height:70px"></textarea>
+        <label for="pgExpected">What did you expect to happen?</label>
+        <textarea id="pgExpected" style="min-height:50px"></textarea>
+        <label for="pgError">Any error wording you saw (copy it exactly)</label>
+        <textarea id="pgError" style="min-height:40px"></textarea>
+        <label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;color:var(--dim);margin-top:12px"><input type="checkbox" id="pgBlocked"> This stops me from continuing</label>
+        <label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;color:var(--dim)"><input type="checkbox" id="pgRecord"> I think a record of my progress or work is wrong</label>
+        <button id="pgSend">Send to Pilot Support</button>
+        <div id="pgMsg" class="msg" role="status"></div>
+      </div>
+    </div>
+
+    <div class="sec-h">Your reports</div>
+    <div id="pgCases"><div class="empty">No reports yet.</div></div>
+  </div>
+
   <div class="foot"><div class="m">STARKE FOUNDRY</div>Build the founder before the company.</div>
 </div>
 
@@ -684,6 +747,114 @@
         else { msg.className="msg bad"; msg.textContent=(j&&j.error)||"Could not send — try again."; }
       }catch(e){ btn.disabled=false; msg.className="msg bad"; msg.textContent="Could not send — try again."; }
     });
+  }
+  if(document.readyState!=="loading")ready();else document.addEventListener("DOMContentLoaded",ready);
+})();
+</script>
+
+<script id="foundry-pilot">
+/* FOUNDRY two-founder pilot (migration 65): Pilot Guide, Pilot Support and check-ins for designated pilot founders only.
+   pilot-support answers {pilot:false} for everyone else, and then nothing on this page changes. */
+(function(){
+  var PS="https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/pilot-support";
+  var LIFE={new:"Received",acknowledged:"Acknowledged",investigating:"Being looked into",waiting_on_founder:"Waiting on you",resolved:"Resolved",closed:"Closed"};
+  var CP={admission:"Applying and being admitted",activation:"Paying and activating",first_portal:"Your first time in the Foundry",first_unit:"Your first unit",
+          first_reading:"Your first book or reading",first_submission:"Your first submission",first_coaching:"Your first coaching",first_review:"Your first review",exit:"Pilot exit review"};
+  var EXITQ=[["confused","Where were you confused?"],["needed_help","Where did you need help?"],["could_not_complete","What could you not complete?"],
+             ["worked_unaided","What worked without any help?"],["strongest","What was the strongest part?"],["unfinished","What felt unfinished?"],
+             ["without_knowing_ethan","Could you have completed this without knowing Ethan personally?"],
+             ["continue_recommend","Would you continue, or recommend it to another founder? (Pilot feedback only, not a commitment.)"]];
+  function $(id){return document.getElementById(id);}
+  function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+  function when(s){try{return new Date(s).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});}catch(e){return s||"";}}
+  function tok(){try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(/sb-.*-auth-token/.test(k)){var v=JSON.parse(localStorage.getItem(k));return (v&&(v.access_token||(v.currentSession&&v.currentSession.access_token)))||null;}}}catch(e){}return null;}
+  async function call(body){var t=tok();if(!t)return {s:0,j:{}};try{var r=await fetch(PS,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+t},body:JSON.stringify(body)});return {s:r.status,j:await r.json().catch(function(){return {};})};}catch(e){return {s:0,j:{}};}}
+  function surface(){var v=["dash","awaiting"].filter(function(x){var e=$(x);return e&&!e.classList.contains("hide");})[0];return "portal:"+(v||"page");}
+  function errText(j){var e=(j&&j.error)||"";return e==="support_rate_limited"?"You have sent several reports in the last hour. Please add to an existing report below.":
+    e==="support_description_required"?"Say what you were doing or what happened.":e==="support_case_closed"?"That report is closed. Please start a new report.":
+    e==="feedback_already_given"?"Thank you, this check-in is already recorded.":"Could not send. Please try again.";}
+
+  function renderCases(cases){
+    var box=$("pgCases"); if(!cases||!cases.length){box.innerHTML='<div class="empty">No reports yet.</div>';return;}
+    box.innerHTML=cases.map(function(c){
+      var msgs=(c.messages||[]).map(function(m){var me=m.author_kind==="founder";return '<div class="bub '+(me?"me":"them")+'"><div class="who2">'+esc(me?"You":m.author)+' &middot; '+esc(when(m.at))+'</div>'+esc(m.body).replace(/\n/g,"<br>")+'</div>';}).join("");
+      var closed=c.lifecycle==="closed";
+      return '<div class="wk" data-case="'+esc(c.case_id)+'"><div class="wk-top"><div class="wk-t">'+esc(c.ref)+' &middot; '+esc(c.category_label)+'</div><span class="chip'+(c.lifecycle==="waiting_on_founder"?" current":closed||c.lifecycle==="resolved"?" complete":"")+'">'+esc(LIFE[c.lifecycle]||c.lifecycle)+'</span></div>'
+        +(c.resolution?'<div class="wk-note">Resolution: '+esc(c.resolution)+'</div>':'')
+        +'<div class="thread" style="max-height:300px">'+msgs+'</div>'
+        +(closed?'<div class="wk-done">This report is closed. If the problem returns, start a new report.</div>'
+               :'<div class="mrow"><input class="pgReply" aria-label="Add to '+esc(c.ref)+'" placeholder="Add to this report&hellip;" autocomplete="off"><button class="pgReplyBtn">Send</button></div><div class="msg pgReplyMsg"></div>')
+        +'</div>';
+    }).join("");
+    box.querySelectorAll(".pgReplyBtn").forEach(function(b){b.addEventListener("click",async function(){
+      var w=b.closest("[data-case]"),inp=w.querySelector(".pgReply"),m=w.querySelector(".pgReplyMsg");var v=(inp.value||"").trim();if(!v)return;
+      b.disabled=true;var r=await call({action:"reply",case_id:w.getAttribute("data-case"),body:v});b.disabled=false;
+      if(r.s===200&&r.j&&r.j.ok){inp.value="";load();}else{m.className="msg pgReplyMsg bad";m.textContent=errText(r.j);}
+    });});
+  }
+
+  function renderCheckins(list){
+    var open=(list||[]).filter(function(x){return x.due&&!x.done;});
+    $("pgCheckins").classList.toggle("hide",!open.length);
+    $("pgCheckinList").innerHTML=open.map(function(x){
+      var exit=x.checkpoint==="exit";
+      var opts='<option value="">How did it go? (optional)</option>'+[5,4,3,2,1].map(function(n){return '<option value="'+n+'">'+n+(n===5?" (very well)":n===1?" (badly)":"")+'</option>';}).join("");
+      var body=exit?EXITQ.map(function(q){return '<label for="pgx_'+q[0]+'">'+esc(q[1])+'</label><textarea id="pgx_'+q[0]+'" data-q="'+q[0]+'" style="min-height:44px"></textarea>';}).join("")
+        :'<label for="pgr_'+x.checkpoint+'">Rating</label><select id="pgr_'+x.checkpoint+'" class="rsel pgRating">'+opts+'</select>'
+         +'<label for="pgf_'+x.checkpoint+'">What got in the way?</label><textarea id="pgf_'+x.checkpoint+'" class="pgFriction" style="min-height:44px"></textarea>'
+         +'<label for="pgp_'+x.checkpoint+'">What worked?</label><textarea id="pgp_'+x.checkpoint+'" class="pgPositive" style="min-height:44px"></textarea>';
+      return '<div class="wk wk-form" data-cp="'+x.checkpoint+'"><div class="wk-t">'+esc(CP[x.checkpoint]||x.checkpoint)+'</div>'+body
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pgFb">Send</button><button class="ghost pgSkip" style="margin-top:14px">Skip</button></div><div class="msg pgFbMsg"></div></div>';
+    }).join("");
+    $("pgCheckinList").querySelectorAll("[data-cp]").forEach(function(w){
+      var cp=w.getAttribute("data-cp");
+      async function send(skip){
+        var payload={action:"feedback",checkpoint:cp,skipped:skip};
+        if(!skip){
+          if(cp==="exit"){payload.answers={};w.querySelectorAll("[data-q]").forEach(function(t){if(t.value.trim())payload.answers[t.getAttribute("data-q")]=t.value.trim();});}
+          else{var rv=w.querySelector(".pgRating").value;payload.rating=rv?parseInt(rv,10):null;payload.friction=w.querySelector(".pgFriction").value.trim();payload.positive=w.querySelector(".pgPositive").value.trim();}
+        }
+        w.querySelectorAll("button").forEach(function(b){b.disabled=true;});
+        var r=await call(payload);
+        if(r.s===200&&r.j&&r.j.ok){load();}else{w.querySelectorAll("button").forEach(function(b){b.disabled=false;});var m=w.querySelector(".pgFbMsg");m.className="msg pgFbMsg bad";m.textContent=errText(r.j);}
+      }
+      w.querySelector(".pgFb").addEventListener("click",function(){send(false);});
+      w.querySelector(".pgSkip").addEventListener("click",function(){send(true);});
+    });
+  }
+
+  var shown=false;
+  async function load(){
+    var r=await call({action:"me"});
+    if(r.s===200&&r.j&&r.j.pilot===false) return "not_pilot";   // an ordinary founder: stop asking
+    if(r.s!==200||!r.j||r.j.pilot!==true) return false;
+    var v=r.j.view||{};
+    var unit=(v.unit_amount_cents||100)/100, max=v.blocks_max||3;
+    $("pgPrice").textContent="$"+unit+" per block, "+max+" at most";
+    $("pgPaid").textContent=(v.blocks_paid||0)+" of "+max+" blocks ($"+((v.amount_paid_cents||0)/100)+")";
+    $("pgReportWrap").classList.toggle("hide",v.revoked===true);
+    var sb=$("supportBox"); if(sb&&v.revoked!==true){sb.classList.add("hide"); var h=sb.previousElementSibling; if(h&&h.classList.contains("sec-h"))h.classList.add("hide");}
+    // the activation bar speaks for ordinary pricing; for a pilot founder it states the pilot price
+    var bar=document.querySelector("#foundry-activate span"); if(bar) bar.textContent="Pilot price: $"+unit+" per five-week Seeker block, "+max+" blocks at most ($"+(unit*max)+" in total). No Builder billing in the pilot.";
+    renderCheckins(r.j.feedback); renderCases(r.j.cases);
+    $("pilot").classList.remove("hide"); shown=true; return true;
+  }
+
+  function ready(){
+    $("pgSend").addEventListener("click",async function(){
+      var m=$("pgMsg"),b=$("pgSend"),cat=$("pgCat").value;
+      if(!cat){m.className="msg bad";m.textContent="Choose what it is about.";return;}
+      var body={action:"report",category:cat,trying:$("pgTrying").value.trim(),happened:$("pgHappened").value.trim(),expected:$("pgExpected").value.trim(),
+                error_text:$("pgError").value.trim(),blocked:$("pgBlocked").checked,record_concern:$("pgRecord").checked,surface:surface()};
+      if(body.trying.length<3&&body.happened.length<3){m.className="msg bad";m.textContent="Say what you were doing or what happened.";return;}
+      b.disabled=true;m.className="msg";m.textContent="Sending…";
+      var r=await call(body); b.disabled=false;
+      if(r.s===200&&r.j&&r.j.ok){
+        m.className="msg ok";m.textContent="Received. Your reference is "+r.j.ref+(r.j.severity==="blocking"?". It is treated as urgent.":".")+" Replies will appear under Your reports.";
+        ["pgTrying","pgHappened","pgExpected","pgError"].forEach(function(id){$(id).value="";});$("pgBlocked").checked=false;$("pgRecord").checked=false;$("pgCat").value="";load();
+      }else{m.className="msg bad";m.textContent=errText(r.j);}
+    });
+    var tries=0; (async function poll(){ if(shown) return; if(tok()&&(await load())) return; if(++tries<20) setTimeout(poll,1500); })();
   }
   if(document.readyState!=="loading")ready();else document.addEventListener("DOMContentLoaded",ready);
 })();
