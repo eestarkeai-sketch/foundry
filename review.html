@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Reviewer &middot; Starke Foundry</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/png" href="/shield_mark.png">
+<style>
+  :root{
+    --bg:#0d0b0a; --panel:#161311; --panel2:#1d1917; --line:#2a2523;
+    --ink:#f3ede6; --dim:#b8afa5; --faint:#8a807a;
+    --ember:#e8763a; --ember2:#f0a35e; --ok:#7bbf6a; --gold:#c9a24a; --bad:#d9705f;
+    --serif:'Fraunces',Georgia,serif; --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(1100px 560px at 50% -12%, rgba(232,118,58,0.09), transparent 60%); min-height:100vh}
+  a{color:var(--ember2); text-decoration:none}
+  .wrap{max-width:860px; margin:0 auto; padding:52px 16px 90px}
+  .brand{text-align:center; margin-bottom:32px}
+  .brand .k{font-size:11px; letter-spacing:0.36em; color:var(--ember); font-weight:700}
+  .brand h1{font-family:var(--serif); font-weight:600; font-size:28px; letter-spacing:0.18em; margin:4px 0 0}
+  .brand h1 span{color:var(--ember)}
+  .card{background:linear-gradient(180deg,var(--panel),#131010); border:1px solid var(--line); border-radius:18px; padding:26px}
+  h2{font-family:var(--serif); font-weight:400; font-size:26px; margin:0 0 8px; text-wrap:balance}
+  h3{font-family:var(--serif); font-weight:500; font-size:19px; margin:0 0 6px}
+  p.lede{color:var(--dim); font-size:15px; margin:0 0 20px; max-width:65ch}
+  label{display:block; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--faint); margin:12px 0 6px}
+  input,textarea,select{width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--ink); border-radius:10px; padding:10px 12px; font-family:var(--sans); font-size:14.5px}
+  textarea{min-height:80px; resize:vertical}
+  input:focus,textarea:focus,select:focus{outline:none; border-color:var(--ember)}
+  button{background:linear-gradient(180deg,var(--ember2),var(--ember)); color:#1a120c; font-weight:600; border:none; border-radius:10px; padding:10px 16px; font-size:14px; cursor:pointer; font-family:var(--sans)}
+  button.ghost{background:transparent; color:var(--dim); border:1px solid var(--line); padding:8px 14px; font-size:13.5px}
+  button:disabled{opacity:.55; cursor:default}
+  button:focus-visible, a:focus-visible{outline:2px solid var(--ember2); outline-offset:2px}
+  .msg{margin-top:12px; font-size:14px; min-height:18px} .msg.bad{color:var(--bad)} .msg.ok{color:var(--ok)}
+  .hide{display:none}
+  .top{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; flex-wrap:wrap}
+  .who{color:var(--faint); font-size:13px} .who b{color:var(--dim)}
+  .q{display:grid; gap:8px; margin-top:8px}
+  .qi{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:var(--panel2); flex-wrap:wrap}
+  .qi .t{font-weight:600} .qi .m{color:var(--faint); font-size:12.5px; font-variant-numeric:tabular-nums}
+  .pill{display:inline-block; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; padding:2px 9px; border-radius:999px; border:1px solid var(--line); color:var(--dim)}
+  .pill.esc{border-color:#4a3a1f; color:var(--gold)} .pill.gate{border-color:#3a2f23; color:var(--ember2)} .pill.no{border-color:#5a2a22; color:var(--bad)}
+  .sec{font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--faint); margin:22px 0 8px}
+  .box{background:var(--bg); border:1px solid var(--line); border-radius:11px; padding:12px 14px; font-size:14px; color:var(--dim); white-space:pre-wrap; overflow-x:auto; line-height:1.55}
+  details.d{border:1px solid var(--line); border-radius:11px; padding:8px 12px; margin:6px 0; background:var(--bg)}
+  details.d summary{cursor:pointer; color:var(--dim); font-size:13.5px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px}
+  .ck{display:flex; gap:8px; align-items:center; text-transform:none; letter-spacing:0; font-size:14px; color:var(--dim); margin:6px 0}
+  .ck input{width:auto}
+  .note{color:var(--faint); font-size:12.5px; margin-top:6px; max-width:65ch}
+  .rule{border-top:1px solid var(--line); margin:22px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" style="text-decoration:none;color:inherit;display:inline-block"><div class="brand"><div class="k">STARKE</div><h1>FO<span>U</span>NDRY</h1></div></a>
+
+  <div id="loading" class="card"><p class="lede" style="margin:0">Opening the review desk&hellip;</p></div>
+
+  <div id="signin" class="card hide">
+    <h2>Reviewer sign-in.</h2>
+    <p class="lede">Sign in with your own email. Each reviewer signs in personally; decisions are recorded under your name.</p>
+    <label for="email">Email</label>
+    <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+    <button id="send" style="margin-top:14px;width:100%">Send my sign-in link</button>
+    <div id="signinMsg" class="msg"></div>
+  </div>
+
+  <div id="sent" class="card hide">
+    <h2>Check your email.</h2>
+    <p class="lede">We sent a sign-in link to <b id="sentTo"></b>. Open it on this device.</p>
+    <button class="ghost" id="backToSignin">Use a different email</button>
+  </div>
+
+  <div id="notrev" class="card hide">
+    <div class="top"><div class="who">Signed in as <b id="nrEmail"></b></div><button class="ghost" id="signout1">Sign out</button></div>
+    <h2>Not on the reviewer registry.</h2>
+    <p class="lede">You&rsquo;re signed in, but this account isn&rsquo;t an active Foundry reviewer. The Foundry desk registers reviewers after their first sign-in.</p>
+  </div>
+
+  <div id="dash" class="card hide">
+    <div class="top"><div class="who">Reviewer &middot; <b id="dashEmail"></b></div><button class="ghost" id="signout2">Sign out</button></div>
+    <h2>Review queue</h2>
+    <p class="lede">Escalated units, gates awaiting a decision and stop-or-pivot confirmations. You never review a founder you coach; those items are marked and locked.</p>
+    <div id="queue" class="q"></div>
+    <div id="qMsg" class="msg"></div>
+
+    <div id="item" class="hide">
+      <div class="rule"></div>
+      <div class="top"><h3 id="itTitle"></h3><button class="ghost" id="closeItem">Back to the queue</button></div>
+      <div id="itMeta" class="note"></div>
+      <div class="sec">Rubric</div><div id="itRubric"></div>
+      <div class="sec">Standards</div><div id="itStandards"></div>
+      <div class="sec" id="itSubH">Submission (pinned revision)</div><div id="itSub"></div>
+      <div class="sec" id="itUnitsH">Mastered units</div><div id="itUnits"></div>
+      <div class="sec">Designated messages</div><div id="itMsgs"></div>
+      <div class="sec">Your decision</div>
+      <div id="itForm"></div>
+      <div id="itMsg" class="msg"></div>
+    </div>
+
+    <div class="rule"></div>
+    <details class="d"><summary>Governed corrections</summary>
+      <p class="note">Reopen a unit for reassessment, or correct a mistaken gate decision. Both keep the prior record and require a reason. A gate already used for a credential or a claimed stage transition cannot be corrected.</p>
+      <label for="corrId">Assessment id</label><input id="corrId" placeholder="assessment id" />
+      <label for="corrReason">Reason</label><textarea id="corrReason" placeholder="What was mistaken, and on what evidence"></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="ghost" id="reopenUnit">Reopen unit</button><button class="ghost" id="correctGate">Correct gate</button></div>
+      <div id="corrMsg" class="msg"></div>
+    </details>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  var URL_ = "https://dxkmdjdkwmarifzelakr.supabase.co";
+  var KEY  = "sb_publishable_cgxjr49Fp01dLdEvycazwQ_D1s6eqKH";
+  var REVIEW = URL_ + "/functions/v1/assessment-review";
+  var REDIRECT = "https://starkefoundry.com/review.html";
+  var sb = window.supabase.createClient(URL_, KEY, { auth: { flowType:"implicit", detectSessionInUrl:true, persistSession:true, autoRefreshToken:true } });
+  var ITEMS = [], CUR = null, BUN = null;
+
+  function $(id){ return document.getElementById(id); }
+  function show(id){ ["loading","signin","sent","notrev","dash"].forEach(function(x){ $(x).classList.toggle("hide", x!==id); }); }
+  function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  function when(s){ if(!s) return ""; try{ return new Date(s).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return s; } }
+  function say(id, t, cls){ var e=$(id); e.className="msg"+(cls?(" "+cls):""); e.textContent=t||""; }
+  async function api(payload){
+    var r = await sb.auth.getSession(); var t = r.data.session && r.data.session.access_token;
+    if(!t) return { s:401, j:{ error:"session_expired" } };
+    var res = await fetch(REVIEW, { method:"POST", headers:{ Authorization:"Bearer "+t, "Content-Type":"application/json" }, body: JSON.stringify(payload) });
+    var j = await res.json().catch(function(){ return {}; });
+    return { s:res.status, j:j };
+  }
+  var LABEL = { escalated:"Escalated", under_review:"Proposal to review", pending:"Gate open", satisfied:"Confirm not opened" };
+  function kindOf(it){ return it.target_type==="developmental_gate" ? "gate" : (it.status==="satisfied" ? "confirm" : "unit"); }
+
+  async function loadQueue(session){
+    show("loading");
+    var out = await api({ action:"queue" });
+    if(out.s === 403 || out.s === 401){ $("nrEmail").textContent = (session.user&&session.user.email)||""; show("notrev"); return; }
+    $("dashEmail").textContent = (session.user&&session.user.email)||"";
+    ITEMS = out.j.items || [];
+    renderQueue(); show("dash");
+  }
+  function renderQueue(){
+    var q = $("queue");
+    if(!ITEMS.length){ q.innerHTML = '<div class="note">Nothing waiting for review.</div>'; return; }
+    q.innerHTML = ITEMS.map(function(it, i){
+      var k = kindOf(it);
+      var pill = it.independent ? ('<span class="pill '+(k==="gate"?"gate":"esc")+'">'+esc(LABEL[it.status]||it.status)+'</span>') : '<span class="pill no">Your coachee &middot; locked</span>';
+      return '<div class="qi"><div><div class="t">'+esc(it.unit||"")+' &middot; '+esc(it.founder_name||"Founder")+'</div>'+
+        '<div class="m">'+(k==="gate"?"Stage gate":"Unit")+' &middot; week '+esc(it.global_week)+' &middot; '+when(it.created_at)+'</div></div>'+
+        '<div style="display:flex;gap:10px;align-items:center">'+pill+(it.independent?('<button data-open="'+i+'">Open</button>'):'')+'</div></div>';
+    }).join("");
+  }
+  $("queue").addEventListener("click", function(e){ var b=e.target.closest&&e.target.closest("button[data-open]"); if(b) openItem(ITEMS[+b.getAttribute("data-open")]); });
+
+  async function openItem(it){
+    CUR = it; BUN = null; say("itMsg","");
+    var out = await api({ action:"bundle", assessment_id: it.assessment_id });
+    if(out.s !== 200){ say("qMsg", "Could not open: "+(out.j.error||out.s), "bad"); return; }
+    BUN = out.j; var b = BUN.bundle || {};
+    var a = b.assessment || {};
+    $("itTitle").textContent = (a.unit||"") + (a.target_type==="developmental_gate" ? " · stage gate" : "") + " · " + (it.founder_name||"");
+    $("itMeta").textContent = "Stage " + (a.stage||"") + " · week " + (a.global_week||"") + (a.gate_kind?(" · "+a.gate_kind.replace(/_/g," ")):"") + " · evidence hash " + String(BUN.bundle_sha256||"").slice(0,12);
+    $("itRubric").innerHTML = b.rubric ? '<details class="d" open><summary>'+esc(b.rubric.code)+' &middot; v'+esc(b.rubric.artifact_version)+'</summary><div class="box">'+esc(b.rubric.body)+'</div></details>' : '<div class="note">No rubric pinned.</div>';
+    $("itStandards").innerHTML = (b.standards||[]).map(function(s){ return '<details class="d"><summary>'+esc(s.code)+' &middot; '+esc(s.kind.replace(/_/g," "))+'</summary><div class="box">'+esc(s.body)+'</div></details>'; }).join("") || '<div class="note">None.</div>';
+    var sub = b.submission;
+    $("itSubH").classList.toggle("hide", !sub); $("itSub").classList.toggle("hide", !sub);
+    $("itSub").innerHTML = sub ? '<div class="box">'+esc(sub.body||"")+(sub.link?("\n"+esc(sub.link)):"")+'</div><div class="note">Revision '+esc(sub.revision_no)+' &middot; '+when(sub.captured_at)+'</div>' : "";
+    var units = b.mastered_units;
+    $("itUnitsH").classList.toggle("hide", !units); $("itUnits").classList.toggle("hide", !units);
+    $("itUnits").innerHTML = (units||[]).map(function(u){ return '<details class="d"><summary>'+esc(u.unit)+' &middot; week '+esc(u.global_week)+'</summary><div class="box">'+esc(u.body||"")+(u.link?("\n"+esc(u.link)):"")+'</div></details>'; }).join("");
+    $("itMsgs").innerHTML = (b.designated_messages||[]).map(function(m){ return '<div class="box" style="margin:6px 0"><span class="pill">'+esc(m.designation.replace(/_/g," "))+'</span> '+esc(m.unit||"")+' &middot; '+esc(m.author_role)+' &middot; '+when(m.sent_at)+'\n'+esc(m.body)+'</div>'; }).join("") || '<div class="note">No designated messages.</div>';
+    $("itForm").innerHTML = formFor(it, a);
+    $("item").classList.remove("hide");
+    $("item").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function dimsHtml(){
+    var h = '<div class="grid">';
+    for(var i=1;i<=6;i++){ h += '<label class="ck"><input type="checkbox" id="d'+i+'" /> D'+i+' met</label>'; }
+    return h + '</div><label for="dimEv">Evidence for each dimension</label><textarea id="dimEv" placeholder="D1: … D2: …"></textarea>';
+  }
+  function velocityHtml(){
+    var f = [["rate_of_iteration","Rate of iteration"],["quality_of_iteration","Quality of iteration"],["agency","Agency"],["coachability","Coachability"],["information_density_earned_insight","Earned insight"]];
+    return '<div class="sec">Velocity (stewardship gate)</div><div class="grid">'+f.map(function(x){ return '<div><label for="v_'+x[0]+'">'+x[1]+'</label><input id="v_'+x[0]+'" type="number" min="0" max="4" step="1" /></div>'; }).join("")+
+      '<div><label for="v_cdp">Charge difficulty proposed</label><input id="v_cdp" type="number" min="1" max="4" /></div>'+
+      '<div><label for="v_cdc">Charge difficulty confirmed</label><input id="v_cdc" type="number" min="1" max="4" /></div></div>'+
+      '<div class="note">A satisfied stewardship gate needs all five scores and a raw total at or above the pinned bar.</div>';
+  }
+  function formFor(it, a){
+    var k = kindOf(it);
+    if(k === "confirm"){
+      return '<p class="note">The founder&rsquo;s synthesis called a stop or pivot, so the stage gate is not opened. Confirm all three to record it.</p>'+
+        '<label class="ck"><input type="checkbox" id="c1" /> The stop or pivot is evidenced</label>'+
+        '<label class="ck"><input type="checkbox" id="c2" /> The synthesis meets its standard</label>'+
+        '<label class="ck"><input type="checkbox" id="c3" /> The gate is correctly not opened</label>'+
+        '<label for="cNotes">Notes</label><textarea id="cNotes"></textarea><button id="submitDecision" style="margin-top:12px">Record confirmation</button>';
+    }
+    var h = '<label for="dStatus">Outcome</label><select id="dStatus"><option value="satisfied">Satisfied</option><option value="revision_required">Revision required</option></select>';
+    if(k === "gate"){
+      h += dimsHtml();
+      if(a.gate_kind === "evidence_of_direction"){ h += '<label for="dDir">Direction outcome</label><select id="dDir"><option value="">—</option><option>continue</option><option>redirect</option><option>stop</option></select>'; }
+      if(a.gate_kind === "evidence_of_stewardship"){ h += velocityHtml(); }
+    } else {
+      h += '<label for="crit">Criteria findings</label><textarea id="crit" placeholder="Which criteria are met, on what evidence"></textarea>';
+      if(a.unit === "BD-15"){ h += '<label for="syn">Synthesis call</label><select id="syn"><option value="">—</option><option>persevere</option><option>pivot</option><option>stop</option></select>'; }
+      if(a.unit === "SV-15"){ h += '<label for="syn">Synthesis call</label><select id="syn"><option value="">—</option><option value="stewardship_case">stewardship case</option><option>pivot</option><option>stop</option></select>'; }
+    }
+    h += '<label for="gaps">Evidence gaps (required for a revision)</label><textarea id="gaps"></textarea>';
+    h += '<label for="why">Reason (kept in the record)</label><input id="why" />';
+    h += '<button id="submitDecision" style="margin-top:12px">Record decision</button>';
+    if(it.status === "escalated" && k === "unit"){
+      h += '<details class="d" style="margin-top:16px"><summary>Admit an early, undesignated message into evidence</summary>'+
+        '<p class="note">Only on an escalated unit, with a reason. The message id comes from the Foundry desk message log.</p>'+
+        '<label for="admId">Message id</label><input id="admId" /><label for="admWhy">Reason</label><input id="admWhy" />'+
+        '<button class="ghost" id="admitMsg" style="margin-top:10px">Admit message</button></details>';
+    }
+    return h;
+  }
+  function val(id){ var e=$(id); return e ? (e.value||"").trim() : ""; }
+  function chk(id){ var e=$(id); return !!(e && e.checked); }
+  function num(id){ var v=val(id); return v===""?null:Number(v); }
+
+  $("itForm").addEventListener("click", async function(e){
+    var b = e.target.closest && e.target.closest("button"); if(!b || !CUR || !BUN) return;
+    var a = (BUN.bundle||{}).assessment || {}, k = kindOf(CUR), p;
+    if(b.id === "admitMsg"){
+      b.disabled = true; var r0 = await api({ action:"admit_message", assessment_id: CUR.assessment_id, message_id: val("admId"), reason: val("admWhy") }); b.disabled = false;
+      if(r0.s !== 200){ say("itMsg", "Not admitted: "+(r0.j.error||r0.s), "bad"); return; }
+      say("itMsg", "Message admitted. Reopen the item to see the refreshed evidence.", "ok"); return;
+    }
+    if(b.id !== "submitDecision") return;
+    if(k === "confirm"){
+      p = { action:"confirm_not_opened", assessment_id: CUR.assessment_id, stop_or_pivot_evidenced: chk("c1"), synthesis_standard_met: chk("c2"), gate_correctly_not_opened: chk("c3"), notes: { text: val("cNotes") } };
+    } else if(k === "gate"){
+      var dims = {}, ev = {}; for(var i=1;i<=6;i++){ dims["d"+i] = chk("d"+i); }
+      p = { action:"decide_gate", assessment_id: CUR.assessment_id, status: val("dStatus"), dimensions: dims, dimension_evidence: { text: val("dimEv") },
+            evidence_gaps: val("gaps") || null, reason: val("why") || null, bundle_sha256: BUN.bundle_sha256 };
+      if(a.gate_kind === "evidence_of_direction" && val("dDir")) p.direction_outcome = val("dDir");
+      if(a.gate_kind === "evidence_of_stewardship" && num("v_rate_of_iteration") !== null){
+        p.velocity = { rate_of_iteration:num("v_rate_of_iteration"), quality_of_iteration:num("v_quality_of_iteration"), agency:num("v_agency"), coachability:num("v_coachability"),
+          information_density_earned_insight:num("v_information_density_earned_insight"), charge_difficulty_proposed:num("v_cdp"), charge_difficulty_confirmed:num("v_cdc") };
+      }
+    } else {
+      p = { action:"decide_unit", assessment_id: CUR.assessment_id, status: val("dStatus"), criteria: { findings: val("crit") }, evidence_gaps: val("gaps") || null,
+            reason: val("why") || null, bundle_sha256: BUN.bundle_sha256 };
+      if(val("syn")) p.synthesis_call = val("syn");
+    }
+    b.disabled = true; var out = await api(p); b.disabled = false;
+    if(out.s !== 200){ say("itMsg", "Not recorded: "+(out.j.error||out.s).toString().replace(/_/g," "), "bad"); return; }
+    say("itMsg", "Recorded.", "ok");
+    $("item").classList.add("hide"); CUR = null;
+    var s = (await sb.auth.getSession()).data.session; if(s) loadQueue(s);
+  });
+  $("closeItem").addEventListener("click", function(){ $("item").classList.add("hide"); CUR = null; });
+
+  async function correction(action){
+    var id = val("corrId"), why = val("corrReason");
+    if(!id || why.length < 8){ say("corrMsg", "Give the assessment id and a reason of at least 8 characters.", "bad"); return; }
+    var out = await api({ action: action, assessment_id: id, reason: why });
+    if(out.s !== 200){ say("corrMsg", "Not recorded: "+String(out.j.error||out.s).replace(/_/g," "), "bad"); return; }
+    say("corrMsg", "Recorded. The new assessment is pending.", "ok");
+  }
+  $("reopenUnit").addEventListener("click", function(){ correction("reopen_unit"); });
+  $("correctGate").addEventListener("click", function(){ correction("correct_gate"); });
+
+  $("send").addEventListener("click", async function(){
+    var email=val("email");
+    if(!email){ say("signinMsg","Enter your email first.","bad"); return; }
+    this.disabled=true; say("signinMsg","Sending…");
+    var out=await sb.auth.signInWithOtp({ email:email, options:{ emailRedirectTo:REDIRECT, shouldCreateUser:true } });
+    this.disabled=false;
+    if(out.error){ say("signinMsg", out.error.message||"Could not send.", "bad"); return; }
+    $("sentTo").textContent=email; show("sent");
+  });
+  $("email").addEventListener("keydown", function(e){ if(e.key==="Enter") $("send").click(); });
+  $("backToSignin").addEventListener("click", function(){ show("signin"); });
+  $("signout1").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
+  $("signout2").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
+  sb.auth.onAuthStateChange(function(ev, session){ if(session && ev === "SIGNED_IN") loadQueue(session); else if(ev === "SIGNED_OUT") show("signin"); });
+  (async function(){ var r=await sb.auth.getSession(); if(r.data.session) loadQueue(r.data.session); else show("signin"); })();
+})();
+</script>
+</body>
+</html>

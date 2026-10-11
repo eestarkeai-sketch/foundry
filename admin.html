@@ -124,6 +124,7 @@
       <div class="tab" data-t="curriculum">Curriculum</div>
       <div class="tab" data-t="ship">Ship</div>
       <div class="tab" data-t="culminations">Culminations</div>
+      <div class="tab" data-t="v2">Curriculum v2</div>
     </div>
     <div id="view"></div>
     <div class="foot">Operating desk on the Supabase backend. Admit &amp; place opens an awaiting-payment seat; payment turns it active.</div>
@@ -674,13 +675,13 @@
         if(!d||d.error){view.innerHTML='<div style="color:#d9705f;padding:8px 0">'+esc(d&&d.error||"error")+'</div>';return;}
         var rows=d.orders||[], sum=d.summary||{};
         var chips=Object.keys(sum).map(function(k){return '<span style="display:inline-block;margin:0 8px 6px 0;padding:3px 10px;border:1px solid #2a2523;border-radius:20px;font-size:12px;color:#b8afa5">'+esc(k)+': '+sum[k]+'</span>';}).join("");
-        var head='<tr style="text-align:left;color:#8a807a;font-size:12px"><th style="padding:8px 10px">Founder</th><th>Stage</th><th>Mv</th><th>Books</th><th>Status</th><th>Ship to</th><th>Zinc id</th><th>When</th></tr>';
+        var head='<tr style="text-align:left;color:#8a807a;font-size:12px"><th style="padding:8px 10px">Founder</th><th>Stage</th><th>Mv</th><th>Books</th><th>Status</th><th>Version</th><th>Ship to</th><th>Zinc id</th><th>When</th></tr>';
         var body=rows.map(function(o){
           var st=o.status||"";
           var col=st==="placed"?"#7bbf6a":(st==="failed"?"#d9705f":(String(st).indexOf("needs")===0?"#e8a33e":"#b8afa5"));
           var ship=o.has_address?(esc(o.ship_city)+(o.ship_state?", "+esc(o.ship_state):"")):'<span style="color:#e8a33e">no address</span>';
           var when=o.created_at?esc(String(o.created_at).slice(0,10)):"";
-          return '<tr style="border-top:1px solid #1d1917"><td style="padding:8px 10px">'+esc(o.founder_name||o.founder_email||"-")+'<div style="color:#6b625c;font-size:11px">'+esc(o.founder_email)+'</div></td><td>'+esc(o.stage)+'</td><td>'+esc(o.movement)+'</td><td>'+esc(o.book_count)+'</td><td style="color:'+col+'">'+esc(st)+'</td><td>'+ship+'</td><td style="font-size:11px;color:#8a807a">'+esc(o.zinc_order_id)+'</td><td style="font-size:11px;color:#8a807a">'+when+'</td></tr>';
+          return '<tr style="border-top:1px solid #1d1917"><td style="padding:8px 10px">'+esc(o.founder_name||o.founder_email||"-")+'<div style="color:#6b625c;font-size:11px">'+esc(o.founder_email)+'</div></td><td>'+esc(o.stage)+'</td><td>'+esc(o.movement)+'</td><td>'+esc(o.book_count)+'</td><td style="color:'+col+'">'+esc(st)+'</td><td style="font-size:11px;color:#8a807a">'+esc(o.curriculum_version||"—")+'</td><td>'+ship+'</td><td style="font-size:11px;color:#8a807a">'+esc(o.zinc_order_id)+'</td><td style="font-size:11px;color:#8a807a">'+when+'</td></tr>';
         }).join("");
         view.innerHTML='<div style="margin:6px 0 14px">'+chips+'</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">'+head+body+'</table></div>'+(rows.length?"":'<div style="color:#8a807a;padding:10px 0">No book orders yet.</div>');
       })
@@ -690,6 +691,208 @@
     var b=e.target&&e.target.closest?e.target.closest('[data-t="ship"]'):null;
     if(!b)return; setTimeout(loadShip,0);
   });
+})();
+</script>
+<script>
+// ===== Curriculum v2.0 Desk (T3, T6, T7, T8): entitlement, reviewer registry, developmental erasure, credential copy,
+//       v2 book catalog and the assessor configuration. Every write goes through admin-write's governed actions;
+//       the actor recorded is derived on the server. Reuses the Desk token; no new auth mechanism. =====
+(function(){
+  var B = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/";
+  var FOUNDERS = [], COACHES = [], SEL = "";
+  function esc(x){ return String(x==null?"":x).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"})[c];}); }
+  function tok(){ return window.__deskToken || ""; }
+  function when(s){ if(!s) return ""; try{ return new Date(s).toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return s; } }
+  async function w(payload){
+    var r = await fetch(B+"admin-write", { method:"POST", headers:{ "x-admin-token": tok(), "Content-Type":"application/json" }, body: JSON.stringify(payload) });
+    var j = await r.json().catch(function(){ return {}; }); return { s:r.status, j:j };
+  }
+  function v(id){ var e=document.getElementById(id); return e ? (e.value||"").trim() : ""; }
+  function ck(id){ var e=document.getElementById(id); return !!(e && e.checked); }
+  function out(id, t, ok){ var e=document.getElementById(id); if(!e) return; e.style.color = ok ? "var(--ok)" : "var(--bad)"; e.textContent = t || ""; }
+  function errText(j){ return String((j && (j.error || j.detail)) || "failed").replace(/_/g," "); }
+  function sec(t, sub){ return '<h3 style="font-family:var(--serif);font-weight:500;font-size:18px;margin:26px 0 4px">'+t+'</h3>'+(sub?('<div style="color:var(--faint);font-size:13px;margin:0 0 12px;max-width:72ch">'+sub+'</div>'):''); }
+  function founderOpts(){ return '<option value="">Choose a founder…</option>' + FOUNDERS.map(function(f){ return '<option value="'+f.id+'"'+(SEL===f.id?' selected':'')+'>'+esc((f.name||"—")+" · "+(f.email||"")+" · "+(f.stage||"")+" · "+(f.status||""))+'</option>'; }).join(""); }
+  var INP = 'style="width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:9px 11px;font-size:13.5px"';
+
+  async function load(){
+    var view = document.getElementById("view"); if(!view) return;
+    view.innerHTML = '<div class="empty">Loading Curriculum v2…</div>';
+    try{
+      var d = await (await fetch(B+"admin-data", { headers:{ "x-admin-token": tok() } })).json();
+      FOUNDERS = d.founders || []; COACHES = d.coaches || [];
+    }catch(e){ FOUNDERS = []; }
+    var parts = await Promise.all([ w({ action:"reviewer_list" }), w({ action:"credential_copy_list" }), w({ action:"catalog_list" }), w({ action:"assessment_settings_view" }) ]);
+    view.innerHTML =
+      '<div style="color:var(--faint);font-size:13px;max-width:72ch">Curriculum v2.0 is implemented and still a draft: no founder is on it until commissioning (T9). These controls write through governed functions only.</div>'+
+      sec("Founder entitlement", "A v2 founder whose paid stage reaches its term without a claimed transition loses instruction (Q-1). A continuation needs a governed decision with an end date, or an explicitly authorized open-ended basis. v1 founders keep the existing status paths.")+
+      '<select id="v2f" '+INP+'>'+founderOpts()+'</select><div id="v2ent" style="margin-top:10px"></div>'+
+      sec("Reviewer registry", "Independent reviewers sign in personally at /review.html. Register them here after their first sign-in. A reviewer is never assigned work on a founder they coach.")+
+      reviewersHtml(parts[0].j.reviewers || [])+
+      sec("Developmental erasure", "De-identifies a founder&rsquo;s submissions, revisions, designated messages and assessment narratives in place. Mastery states and the audit trail remain. This cannot be undone.")+
+      erasureHtml()+
+      sec("Credential copy (v2)", "Approved wording for v2 stage credentials: Direction (Seeker), Enterprise (Builder), Stewardship (Sovereign). A v2 credential cannot issue without it. Claims such as investor-grade, full arc or final gate are refused.")+
+      copyHtml(parts[1].j.copy || [])+
+      sec("Book catalog (v2)", "v2 founders receive only v2 catalog rows; v1 rows are not writable here. Entries need a real title, not an ASIN placeholder.")+
+      catalogHtml(parts[2].j)+
+      sec("Assessor configuration", "Read-only. With no confidence threshold, every AI unit decision escalates to a human reviewer. The external assessor stays off until privacy coverage for AI processing is in place (DQ-6).")+
+      settingsHtml(parts[3].j.settings);
+    if(SEL) showEntitlement(SEL);
+  }
+
+  // ---- entitlement ----
+  async function showEntitlement(id){
+    SEL = id; var host = document.getElementById("v2ent"); if(!host) return;
+    if(!id){ host.innerHTML = ""; return; }
+    host.innerHTML = '<div class="empty" style="padding:8px 0">Loading…</div>';
+    var r = await w({ action:"entitlement_view", founder_id:id });
+    if(r.s !== 200){ host.innerHTML = '<div style="color:var(--bad)">'+esc(errText(r.j))+'</div>'; return; }
+    var e = r.j.entitlement || {}, h = r.j.history || [];
+    var gen = e.effective_generation || 1;
+    var html = '<table><thead><tr><th>Status</th><th>Curriculum</th><th>Instruction</th><th>Latest basis</th><th>Until</th></tr></thead><tbody><tr>'+
+      '<td>'+esc(e.status||"")+'</td><td>v'+esc(gen)+'</td><td>'+(e.instruction_access?'<span class="pill ok">open</span>':'<span class="pill warn">closed</span>')+'</td>'+
+      '<td>'+esc((e.basis||"—").replace(/_/g," "))+'</td><td>'+(e.open_ended?"open-ended":esc(when(e.until)||"—"))+(e.entitlement_lapsed?' <span class="pill warn">lapsed</span>':'')+'</td></tr></tbody></table>';
+    if(h.length){ html += '<div style="margin-top:10px;overflow-x:auto"><table><thead><tr><th>#</th><th>Move</th><th>Basis</th><th>Reason</th><th>Until</th><th>By</th><th>When</th></tr></thead><tbody>'+
+      h.map(function(x){ return '<tr><td style="font-variant-numeric:tabular-nums">'+esc(x.seq)+'</td><td>'+esc(x.from_status)+' → '+esc(x.to_status)+'</td><td>'+esc(x.basis.replace(/_/g," "))+'</td><td>'+esc(x.reason)+'</td><td>'+(x.open_ended?"open-ended":esc(when(x.until)))+'</td><td>'+esc(x.decided_by)+'</td><td>'+esc(when(x.decided_at))+'</td></tr>'; }).join("")+'</tbody></table></div>'; }
+    if(gen >= 2){
+      html += '<div style="margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">'+
+        '<div><label style="font-size:11px;color:var(--faint)">Grant status</label><select id="entTo" '+INP+'><option>active</option></select></div>'+
+        '<div><label style="font-size:11px;color:var(--faint)">Until</label><input id="entUntil" type="date" '+INP+' /></div>'+
+        '<div style="display:flex;align-items:end"><label style="display:flex;gap:8px;align-items:center;color:var(--dim);font-size:13px"><input id="entOpen" type="checkbox" /> Open-ended (explicitly authorized)</label></div></div>'+
+        '<label style="font-size:11px;color:var(--faint);display:block;margin-top:8px">Reason (recorded)</label><input id="entWhy" '+INP+' placeholder="Why this founder continues, and on whose authority" />'+
+        '<button class="mini" id="entSave" style="margin-top:10px">Record governed continuation</button> <span id="entMsg" style="font-size:13px"></span>';
+    } else {
+      html += '<div style="color:var(--faint);font-size:13px;margin-top:8px">This founder is on Curriculum v1; status changes use Founders → Placement as before.</div>';
+    }
+    host.innerHTML = html;
+  }
+  async function saveEntitlement(){
+    var until = v("entUntil"), open = ck("entOpen");
+    var p = { action:"set_entitlement", founder_id: SEL, to_status: v("entTo") || "active", reason: v("entWhy"), open_ended: open };
+    if(until) p.until = new Date(until + "T23:59:59Z").toISOString();
+    var r = await w(p);
+    if(r.s !== 200){ out("entMsg", errText(r.j)); return; }
+    showEntitlement(SEL);
+  }
+
+  // ---- reviewers ----
+  function reviewersHtml(list){
+    var coachOpts = '<option value="">— not a coach —</option>' + COACHES.map(function(c){ return '<option value="'+c.id+'">'+esc(c.name||c.email)+'</option>'; }).join("");
+    var t = list.length ? '<div style="overflow-x:auto"><table><thead><tr><th>Reviewer</th><th>Email</th><th>Gates</th><th>Escalations</th><th>Velocity</th><th>Active</th><th>Since</th></tr></thead><tbody>'+
+      list.map(function(r){ var y=function(b){ return b?'<span class="pill ok">yes</span>':'<span class="pill">no</span>'; };
+        return '<tr><td>'+esc(r.display_name)+'</td><td class="em">'+esc(r.email)+'</td><td>'+y(r.can_review_gates)+'</td><td>'+y(r.can_review_escalations)+'</td><td>'+y(r.can_score_velocity)+'</td><td>'+y(r.active)+'</td><td>'+esc(when(r.created_at))+'</td></tr>'; }).join("")+'</tbody></table></div>'
+      : '<div class="empty" style="padding:6px 0">No reviewers registered yet (DQ-4).</div>';
+    return t + '<div style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">'+
+      '<input id="rvEmail" '+INP+' placeholder="Reviewer email (after first sign-in)" /><input id="rvName" '+INP+' placeholder="Display name" />'+
+      '<select id="rvCoach" '+INP+'>'+coachOpts+'</select></div>'+
+      '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;color:var(--dim);font-size:13px">'+
+      '<label><input type="checkbox" id="rvGates" /> Gates</label><label><input type="checkbox" id="rvEsc" checked /> Escalations</label>'+
+      '<label><input type="checkbox" id="rvVel" /> Velocity</label><label><input type="checkbox" id="rvActive" checked /> Active</label></div>'+
+      '<button class="mini" id="rvSave" style="margin-top:10px">Register or update reviewer</button> <span id="rvMsg" style="font-size:13px"></span>';
+  }
+  async function saveReviewer(){
+    var r = await w({ action:"reviewer_upsert", email: v("rvEmail"), display_name: v("rvName"), coach_id: v("rvCoach") || null,
+      can_review_gates: ck("rvGates"), can_review_escalations: ck("rvEsc"), can_score_velocity: ck("rvVel"), active: ck("rvActive") });
+    if(r.s !== 200){ out("rvMsg", errText(r.j) + (r.j.hint ? (" — " + r.j.hint) : "")); return; }
+    load();
+  }
+
+  // ---- erasure ----
+  function erasureHtml(){
+    return '<select id="erF" '+INP+'>'+founderOpts()+'</select>'+
+      '<input id="erWhy" '+INP+' style="margin-top:8px" placeholder="Reason and authority (recorded)" />'+
+      '<input id="erConfirm" '+INP+' style="margin-top:8px" placeholder="Type ERASE to confirm" />'+
+      '<button class="mini reject" id="erGo" style="margin-top:10px">Erase developmental content</button> <button class="mini save" id="erLog" style="margin-top:10px">Show erasure log</button> <span id="erMsg" style="font-size:13px"></span><div id="erOut"></div>';
+  }
+  async function doErase(){
+    var id = v("erF");
+    if(!id){ out("erMsg", "Choose a founder."); return; }
+    if(v("erConfirm") !== "ERASE"){ out("erMsg", "Type ERASE to confirm."); return; }
+    var r = await w({ action:"erase_developmental_content", founder_id:id, confirm_founder_id:id, reason: v("erWhy") });
+    if(r.s !== 200){ out("erMsg", errText(r.j)); return; }
+    out("erMsg", "Erased: " + Object.keys(r.j.result.counts||{}).map(function(k){ return k.replace(/_/g," ")+" "+r.j.result.counts[k]; }).join(", "), true);
+    document.getElementById("erConfirm").value = "";
+  }
+  async function showErasures(){
+    var id = v("erF"); if(!id){ out("erMsg", "Choose a founder."); return; }
+    var r = await w({ action:"erasure_log", founder_id:id });
+    var rows = r.j.erasures || [];
+    document.getElementById("erOut").innerHTML = rows.length ? '<table style="margin-top:8px"><thead><tr><th>When</th><th>By</th><th>Reason</th><th>Counts</th></tr></thead><tbody>'+
+      rows.map(function(x){ return '<tr><td>'+esc(when(x.erased_at))+'</td><td>'+esc(x.authorized_by)+'</td><td>'+esc(x.reason)+'</td><td>'+esc(JSON.stringify(x.counts))+'</td></tr>'; }).join("")+'</tbody></table>'
+      : '<div class="empty" style="padding:6px 0">No erasures recorded for this founder.</div>';
+  }
+
+  // ---- credential copy ----
+  function copyHtml(list){
+    var by = {}; list.forEach(function(c){ by[c.stage] = c; });
+    var LBL = { Seeker:"Direction", Builder:"Enterprise", Sovereign:"Stewardship" };
+    return '<div style="display:grid;gap:10px">'+["Seeker","Builder","Sovereign"].map(function(s){ var c = by[s] || {};
+      return '<div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px">'+
+        '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>'+LBL[s]+' &middot; '+s+'</b><span style="color:var(--faint);font-size:12px">'+(c.approved_at?("Approved "+esc(when(c.approved_at))+" by "+esc(c.approved_by)):'<span class="pill warn">not approved</span>')+'</span></div>'+
+        '<input id="cpH_'+s+'" '+INP+' style="margin-top:8px" placeholder="Headline" value="'+esc(c.headline||"")+'" />'+
+        '<textarea id="cpB_'+s+'" '+INP+' style="margin-top:8px;min-height:70px" placeholder="Certificate wording (outcome-neutral)">'+esc(c.body||"")+'</textarea>'+
+        '<button class="mini" data-cp="'+s+'" style="margin-top:8px">Approve '+LBL[s]+' wording</button> <span id="cpM_'+s+'" style="font-size:13px"></span></div>'; }).join("")+'</div>';
+  }
+  async function saveCopy(stage){
+    var r = await w({ action:"credential_copy_set", stage: stage, headline: v("cpH_"+stage), body: v("cpB_"+stage) });
+    if(r.s !== 200){ out("cpM_"+stage, errText(r.j) + (r.j.hint ? (" — " + r.j.hint) : "")); return; }
+    out("cpM_"+stage, "Approved.", true);
+  }
+
+  // ---- v2 catalog ----
+  function catalogHtml(j){
+    var rows = (j && j.entries) || [];
+    var t = rows.length ? '<div style="overflow-x:auto"><table><thead><tr><th>Stage</th><th>Mv</th><th>Title</th><th>ASIN</th><th>Published</th><th>Active</th><th></th></tr></thead><tbody>'+
+      rows.map(function(c){ return '<tr><td>'+esc(c.stage)+'</td><td>'+esc(c.movement)+'</td><td>'+esc(c.title)+'</td><td style="font-size:12px">'+esc(c.asin||"")+'</td><td>'+(c.published?"yes":"no")+'</td><td>'+(c.active?"yes":"no")+'</td>'+
+        '<td><button class="mini save" data-cedit="'+c.id+'" data-st="'+esc(c.stage)+'" data-mv="'+esc(c.movement)+'" data-ti="'+esc(c.title)+'" data-as="'+esc(c.asin||"")+'" data-pu="'+(c.published?1:0)+'" data-ac="'+(c.active?1:0)+'">Edit</button> <button class="mini save" data-chist="'+c.id+'">History</button></td></tr>'; }).join("")+'</tbody></table></div>'
+      : '<div class="empty" style="padding:6px 0">No v2 catalog entries yet (DQ-5: first real book selections).</div>';
+    return t + '<div style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">'+
+      '<select id="ctSt" '+INP+'><option>Seeker</option><option>Builder</option><option>Sovereign</option></select>'+
+      '<select id="ctMv" '+INP+'><option>1</option><option>2</option><option>3</option></select>'+
+      '<input id="ctTi" '+INP+' placeholder="Title" /><input id="ctAs" '+INP+' placeholder="ASIN" /></div>'+
+      '<div style="display:flex;gap:16px;margin-top:8px;color:var(--dim);font-size:13px"><label><input type="checkbox" id="ctPu" /> Published</label><label><input type="checkbox" id="ctAc" checked /> Active</label></div>'+
+      '<input id="ctWhy" '+INP+' style="margin-top:8px" placeholder="Reason (recorded)" /><input id="ctId" type="hidden" />'+
+      '<button class="mini" id="ctSave" style="margin-top:10px">Save catalog entry</button> <span id="ctMsg" style="font-size:13px"></span><div id="ctHist"></div>';
+  }
+  async function saveCatalog(){
+    var r = await w({ action:"catalog_author", catalog_id: v("ctId") || null, stage: v("ctSt"), movement: parseInt(v("ctMv"),10), title: v("ctTi"), asin: v("ctAs") || null,
+      published: ck("ctPu"), active: ck("ctAc"), reason: v("ctWhy") });
+    if(r.s !== 200){ out("ctMsg", errText(r.j)); return; }
+    load();
+  }
+  async function catalogHistory(id){
+    var r = await w({ action:"catalog_history", catalog_id:id });
+    var h = r.j.history || [];
+    document.getElementById("ctHist").innerHTML = '<table style="margin-top:8px"><thead><tr><th>When</th><th>Action</th><th>By</th><th>Reason</th></tr></thead><tbody>'+
+      h.map(function(x){ return '<tr><td>'+esc(when(x.authored_at))+'</td><td>'+esc(x.action)+'</td><td>'+esc(x.authored_by)+'</td><td>'+esc(x.reason)+'</td></tr>'; }).join("")+'</tbody></table>';
+  }
+
+  function settingsHtml(s){
+    s = s || {};
+    return '<table><thead><tr><th>AI confidence threshold</th><th>Reassess after satisfied</th><th>Set by</th><th>When</th></tr></thead><tbody><tr>'+
+      '<td>'+(s.ai_confidence_threshold==null?'<span class="pill warn">none — all escalate</span>':esc(s.ai_confidence_threshold))+'</td><td>'+(s.reassess_after_satisfied?"yes":"no")+'</td><td style="font-size:12px">'+esc(s.updated_by||"")+'</td><td>'+esc(when(s.updated_at))+'</td></tr></tbody></table>';
+  }
+
+  document.addEventListener("click", function(e){
+    var t = e.target && e.target.closest ? e.target.closest('[data-t="v2"]') : null;
+    if(t){ setTimeout(load, 0); return; }
+    var b = e.target && e.target.closest ? e.target.closest("#entSave,#rvSave,#erGo,#erLog,#ctSave,button[data-cp],button[data-cedit],button[data-chist]") : null;
+    if(!b) return;
+    if(b.id==="entSave") saveEntitlement();
+    else if(b.id==="rvSave") saveReviewer();
+    else if(b.id==="erGo") doErase();
+    else if(b.id==="erLog") showErasures();
+    else if(b.id==="ctSave") saveCatalog();
+    else if(b.hasAttribute("data-cp")) saveCopy(b.getAttribute("data-cp"));
+    else if(b.hasAttribute("data-chist")) catalogHistory(b.getAttribute("data-chist"));
+    else if(b.hasAttribute("data-cedit")){
+      document.getElementById("ctId").value = b.getAttribute("data-cedit"); document.getElementById("ctSt").value = b.getAttribute("data-st");
+      document.getElementById("ctMv").value = b.getAttribute("data-mv"); document.getElementById("ctTi").value = b.getAttribute("data-ti");
+      document.getElementById("ctAs").value = b.getAttribute("data-as"); document.getElementById("ctPu").checked = b.getAttribute("data-pu")==="1";
+      document.getElementById("ctAc").checked = b.getAttribute("data-ac")==="1"; document.getElementById("ctTi").focus();
+    }
+  });
+  document.addEventListener("change", function(e){ if(e.target && e.target.id === "v2f") showEntitlement(e.target.value); });
 })();
 </script>
 </body>

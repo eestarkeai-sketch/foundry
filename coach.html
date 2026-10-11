@@ -73,6 +73,12 @@
   .prog .badge{font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; padding:2px 9px; border-radius:999px; border:1px solid #3a2f23; color:var(--gold)}
   .sess .held{color:var(--ok); font-size:11px; letter-spacing:0.06em; text-transform:uppercase}
   button.mini{padding:5px 11px; font-size:12px; margin-top:4px}
+  /* Curriculum v2: designation badges, acknowledgment, coach guides */
+  .badge{display:inline-block; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; padding:1px 8px; border-radius:999px; border:1px solid #4a3a1f; color:var(--gold); margin-left:6px}
+  details.v2g{margin:6px 0; border:1px solid var(--line); border-radius:10px; padding:7px 11px}
+  details.v2g summary{cursor:pointer; color:var(--dim); font-size:12.5px}
+  details.v2g .v2b{white-space:pre-wrap; font-size:13px; color:var(--dim); margin-top:8px; line-height:1.5}
+  .v2note{color:var(--faint); font-size:12.5px; margin:4px 0 8px}
   .draftflag{background:#2a2011; border:1px solid #4a3a1f; color:var(--gold); border-radius:10px; padding:11px 14px; font-size:12.5px; line-height:1.55; margin:0 0 16px}
   .agreement{max-height:300px; overflow:auto; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:16px 18px; font-size:13.5px; line-height:1.6; color:var(--dim); margin:0 0 16px}
   .agreement h4{font-family:var(--serif); color:var(--ink); font-size:15px; margin:16px 0 6px} .agreement h4:first-child{margin-top:0}
@@ -208,10 +214,22 @@
         (s.status==='held' ? '<div class="held">Held &check;</div>' : (s.id?('<button class="mini" data-held="'+s.id+'">Mark held</button>'):''))+
         '</div>';
     }).join("") : '<div class="empty">No sessions yet.</div>';
+    var V2 = (DATA.v2 && DATA.v2[f.id]) || null, DES = {}, ACKED = {};
+    if(V2){ (V2.designations||[]).forEach(function(d){ DES[d.message_id] = d; if(d.role==="acknowledgment" && d.acknowledges_message_id) ACKED[d.acknowledges_message_id] = true; }); }
     var thread = msgs.length ? msgs.map(function(m){
       var mine = m.role==="coach";
-      return '<div class="bub '+(mine?"me":"them")+'"><div class="who2">'+esc(m.from_name||m.role||"")+'</div>'+esc(m.body||"")+'</div>';
+      var d = DES[m.id], badge = "", ack = "";
+      if(d){ badge = '<span class="badge">'+(d.role==="preregistration"?"Pre-registered":(d.role==="acknowledgment"?"Acknowledgment":(d.role==="witness_statement"?"Witness statement":"Designated")))+(d.global_week?(" &middot; week "+esc(d.global_week)):"")+'</span>'; }
+      if(d && d.role==="preregistration" && !ACKED[m.id]){ ack = '<div><button class="mini" data-ack="'+m.id+'" data-fid="'+f.id+'" title="Send the text in the message box as your acknowledgment of this pre-registration">Acknowledge with my message</button></div>'; }
+      return '<div class="bub '+(mine?"me":"them")+'"><div class="who2">'+esc(m.from_name||m.role||"")+badge+'</div>'+esc(m.body||"")+ack+'</div>';
     }).join("") : '<div class="empty">No messages yet.</div>';
+    var guides = "";
+    if(V2){
+      var arts = (V2.artifacts||[]).filter(function(a){ return a.kind==="coach_guide" || a.kind==="transition_guide"; });
+      guides = '<div class="sub">Curriculum v2 &middot; coach guides</div>'+
+        '<div class="v2note">Acknowledge a pre-registration before the work happens. Designated messages are evidence and can&rsquo;t be edited. Mastery and gate decisions are made by independent reviewers, not in this view.</div>'+
+        (arts.length ? arts.map(function(a){ return '<details class="v2g"><summary>'+esc(a.code||"")+' &middot; '+esc(a.title||"")+'</summary><div class="v2b">'+esc(a.body||"")+'</div></details>'; }).join("") : '<div class="empty">No coach guides published for this version.</div>');
+    }
     return '<div class="fcard">'+
       '<div class="frow"><div><div class="fnm">'+esc(f.name||"—")+'</div><div class="fem">'+esc(f.email||"")+'</div></div>'+
       '<div><span class="pill stage">'+esc(f.stage||"—")+'</span> '+stPill(f.status)+' &middot; Week '+(f.week||1)+'</div></div>'+
@@ -228,6 +246,7 @@
         '<label style="margin-top:8px">Note</label><input class="s-note" data-id="'+f.id+'" placeholder="What this session is for" />'+
         '<button style="margin-top:10px" data-sched="'+f.id+'">Schedule session</button>'+
       '</details>'+
+      guides+
       '<div class="sub">Messages</div>'+
       '<div class="thread">'+thread+'</div>'+
       '<div class="mrow"><input class="minput" data-msg="'+f.id+'" placeholder="Message '+esc((f.name||"founder").split(" ")[0])+'…" /><button data-send="'+f.id+'">Send</button></div>'+
@@ -345,7 +364,7 @@
   }
 
   document.getElementById("founders").addEventListener("click", async function(e){
-    var b = e.target && e.target.closest ? e.target.closest("button[data-sched],button[data-send],button[data-held]") : null;
+    var b = e.target && e.target.closest ? e.target.closest("button[data-sched],button[data-send],button[data-held],button[data-ack]") : null;
     if(!b) return;
     if(b.hasAttribute("data-sched")){
       var id=b.getAttribute("data-sched");
@@ -366,6 +385,14 @@
       var j2=await post(SEND, { founder_id:fid, body:text }); b.disabled=false;
       if(j2.error){ deskMsg("Could not send: "+j2.error, true); return; }
       if(inp) inp.value=""; await reload();
+    } else if(b.hasAttribute("data-ack")){
+      var afid=b.getAttribute("data-fid"), mid=b.getAttribute("data-ack"), ainp=document.querySelector('.minput[data-msg="'+afid+'"]');
+      var atext=ainp?ainp.value.trim():"";
+      if(!atext){ deskMsg("Write your acknowledgment in the message box first, then press Acknowledge.", true); if(ainp) ainp.focus(); return; }
+      b.disabled=true;
+      var ja=await post(SEND, { founder_id:afid, body:atext, designation:{ role:"acknowledgment", acknowledges_message_id: mid } }); b.disabled=false;
+      if(ja.error){ deskMsg("Could not acknowledge: "+ja.error, true); return; }
+      if(ainp) ainp.value=""; deskMsg("Acknowledgment sent."); await reload();
     } else if(b.hasAttribute("data-held")){
       var sid=b.getAttribute("data-held");
       b.disabled=true;

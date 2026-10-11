@@ -112,6 +112,9 @@
   // The register. Each entry: {id, name, stage, date}. Loaded live from the public-registry function.
   var HOLDERS = [];
   var REG_URL = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/public-registry";
+  function esc(x){ return String(x==null?"":x).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"})[c];}); }
+  // Curriculum v2 stage credentials carry an outcome label (Direction, Enterprise, Stewardship); v1 shows the stage as before.
+  function summit(h){ return (h.generation||1) >= 2 ? (esc(h.label)+' &middot; '+esc(h.stage)) : esc(h.stage); }
 
   function render(){
     var wrap = document.getElementById("tablewrap");
@@ -123,7 +126,7 @@
       return;
     }
     var rows = HOLDERS.map(function(h){
-      return '<tr><td class="id">'+h.id+'</td><td>'+h.name+'</td><td><span class="stg">'+h.stage+'</span></td><td>'+h.date+'</td></tr>';
+      return '<tr><td class="id">'+esc(h.id)+'</td><td>'+esc(h.name)+'</td><td><span class="stg">'+summit(h)+'</span></td><td>'+esc(h.date)+'</td></tr>';
     }).join("");
     wrap.innerHTML = '<table><thead><tr><th>Credential ID</th><th>Founder</th><th>Summit</th><th>Conferred</th></tr></thead><tbody>'+rows+'</tbody></table>';
   }
@@ -135,10 +138,12 @@
     var hit = HOLDERS.filter(function(h){ return h.id.toUpperCase()===q; })[0];
     if(hit){
       out.className="vout ok";
-      out.innerHTML = "Genuine. <b>"+hit.name+"</b> cleared the "+hit.stage+" and was certified on "+hit.date+".";
+      out.innerHTML = (hit.generation||1) >= 2
+        ? "Genuine. <b>"+esc(hit.name)+"</b> holds the "+esc(hit.label)+" credential for the "+esc(hit.stage)+" stage, conferred "+esc(hit.date)+"."
+        : "Genuine. <b>"+esc(hit.name)+"</b> cleared the "+esc(hit.stage)+" and was certified on "+esc(hit.date)+".";
     } else {
       out.className="vout no";
-      out.innerHTML = "No certificate with the ID <b>"+q+"</b> is on the registry. If you were handed one bearing this ID, treat it with suspicion.";
+      out.innerHTML = "No certificate with the ID <b>"+esc(q)+"</b> is on the registry. If you were handed one bearing this ID, treat it with suspicion.";
     }
   }
 

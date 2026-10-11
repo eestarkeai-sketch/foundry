@@ -89,6 +89,20 @@
   .wk-form input[type=url]{width:100%; background:var(--bg); border:1px solid var(--line); color:var(--ink); border-radius:11px; padding:12px 14px; font-family:var(--sans); font-size:15px}
   .wk-form textarea:focus, .wk-form input[type=url]:focus{outline:none; border-color:var(--ember)}
   .wk-form button{width:auto; padding:11px 20px}
+  /* Curriculum v2: participation and mastery are separate states; guides and templates; designation badges */
+  .chips2{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end}
+  .chip.mastered{border-color:#2f4a2a; color:var(--ok)}
+  .chip.review{border-color:#4a3a1f; color:var(--gold)}
+  .chip.revise{border-color:#5a2a22; color:var(--bad)}
+  .wk-unit{font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--faint); margin-right:6px}
+  details.v2d{margin:8px 0; border:1px solid var(--line); border-radius:11px; padding:8px 12px; background:var(--bg)}
+  details.v2d summary{cursor:pointer; color:var(--dim); font-size:13px}
+  details.v2d .v2b{white-space:pre-wrap; font-size:13.5px; color:var(--dim); margin-top:8px; line-height:1.55}
+  .badge{display:inline-block; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; padding:1px 8px; border-radius:999px; border:1px solid #4a3a1f; color:var(--gold); margin-left:6px}
+  .desrow{display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap}
+  .desrow select{background:var(--bg); border:1px solid var(--line); color:var(--ink); border-radius:9px; padding:8px 10px; font-size:13.5px; max-width:100%}
+  .desrow .hint{color:var(--faint); font-size:12.5px; flex:1; min-width:200px}
+  .desrow.hide{display:none}
   .wk-err{color:var(--bad); font-size:13.5px; margin-top:8px}
   .rgrid{display:flex; gap:12px; flex-wrap:wrap; margin-top:8px}
   .rgrid>div{flex:1; min-width:150px}
@@ -178,6 +192,8 @@
     <div class="sec-h">Messages with your coach</div>
     <div id="thread" class="thread"></div>
     <div class="mrow"><input id="minput" placeholder="Message your coach&hellip;" autocomplete="off" /><button id="msend">Send</button></div>
+    <div id="desRow" class="desrow hide"><select id="desWeek" aria-label="Pre-register this message for a unit"><option value="">Send as an ordinary message</option></select>
+      <span class="hint">Pre-registering records this message as your plan for a unit before you do the work. Your coach can acknowledge it. A pre-registered message can&rsquo;t be edited later.</span></div>
     <div id="mMsg" class="msg"></div>
 
     <div class="sec-h">Rate your coach <span style="font-size:12px;color:var(--faint);letter-spacing:0;text-transform:none">&middot; private to the Foundry</span></div>
@@ -237,6 +253,7 @@
   function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
   function when(s){ if(!s) return ""; try{ return new Date(s).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return s; } }
 
+  var GEN = 1, DES = {};
   async function loadDash(session){
     show("loading");
     try{
@@ -250,11 +267,15 @@
       if(j.instruction_access !== true){  // LWC: access is the database decision (member-data), not a status list in this page
         document.getElementById("awEmail").textContent = j.email || f.email || "";
         document.getElementById("awHello").textContent = f.name ? ("You’re admitted, " + f.name.split(" ")[0] + ".") : "You’re admitted.";
-        document.getElementById("awStage").textContent = "the " + (f.stage || "Seeker");
+        var awSt = document.getElementById("awStage"); if(awSt) awSt.textContent = "the " + (f.stage || "Seeker");  // null after the paused copy replaced the lede (second load)
         if(!(f.status === "awaiting_payment" || f.status === "unpaid")){  // paused (e.g. suspended): no payment call-to-action; billing re-entry is not decided here
           var awc = document.getElementById("awaiting"); document.getElementById("awHello").textContent = "Your Foundry instruction is paused.";
           var pb = awc.querySelector(".paybtn"); if(pb) pb.style.display = "none";
           var ld = awc.querySelector(".lede"); if(ld) ld.textContent = "Your access to instruction is paused. Contact the Foundry desk to resume.";
+          if(f.status === "entitlement_ended"){  // Curriculum v2 (Q-1): the paid stage term ended before the next stage began
+            document.getElementById("awHello").textContent = "Your stage term has ended.";
+            if(ld) ld.textContent = "Your work, submissions and progress are kept. Instruction resumes when your next stage begins, or if the Foundry desk extends your access.";
+          }
         }
         show("awaiting"); return;
       }
@@ -277,9 +298,13 @@
           '</div>';
       }).join(""); }
       var msgs = j.messages || [];
+      GEN = j.curriculum_generation || 1; DES = {};
+      (j.designations || []).forEach(function(d){ DES[d.message_id] = d; });
+      document.getElementById("desRow").classList.toggle("hide", GEN < 2);
       document.getElementById("thread").innerHTML = msgs.length ? msgs.map(function(m){
         var mine = m.role==="founder";
-        return '<div class="bub '+(mine?"me":"them")+'"><div class="who2">'+esc(m.from_name||m.role||"")+'</div>'+esc(m.body||"")+'</div>';
+        var d = DES[m.id], badge = d ? '<span class="badge">'+(d.role==="preregistration"?"Pre-registered":(d.role==="acknowledgment"?"Acknowledged":"Designated"))+(d.global_week?(" &middot; week "+esc(d.global_week)):"")+'</span>' : '';
+        return '<div class="bub '+(mine?"me":"them")+'"><div class="who2">'+esc(m.from_name||m.role||"")+badge+'</div>'+esc(m.body||"")+'</div>';
       }).join("") : '<div style="color:var(--faint);font-size:14px;padding:8px 0">No messages yet. Say hello to your coach.</div>';
       show("dash");
       loadProgram();
@@ -343,6 +368,58 @@
     if(res.ok){ var j=await res.json(); document.getElementById("culmination").innerHTML=culminationHtml(j); bindCmRsvp(); }
   }
 
+  // ===== Curriculum v2 (T4): the bound version's units. Participation (submitted) and mastery (assessed by the
+  //       Foundry) are shown separately; a submission never claims mastery. Founder guides and templates only. =====
+  var MASTERY = { mastered:["Mastered","mastered"], in_review:["In review","review"], revision_required:["Revision required","revise"], not_assessed:["Not assessed",""] };
+  function renderProgramV2(j){
+    var host = document.getElementById("program");
+    host.innerHTML = j.weeks.map(function(w){ return weekHtmlV2(w); }).join("");
+    j.weeks.forEach(function(w){
+      var btn = document.getElementById("wkSubmit"+w.week);
+      if(btn){ btn.addEventListener("click", function(){ submitDeliverable(w.week); }); }
+    });
+    var sel = document.getElementById("desWeek");
+    if(sel){
+      var keep = sel.value;
+      sel.innerHTML = '<option value="">Send as an ordinary message</option>' + j.weeks.filter(function(w){ return w.unlocked; }).map(function(w){
+        return '<option value="'+esc(w.week)+'">Pre-register for '+esc(w.unit||("week "+w.week))+' &mdash; '+esc(w.theme||"")+'</option>'; }).join("");
+      sel.value = keep;
+    }
+  }
+  function weekHtmlV2(w){
+    var wk = w.week, m = MASTERY[w.mastery] || MASTERY.not_assessed;
+    var chips = !w.unlocked ? '<span class="chip">Locked</span>' :
+      '<span class="chip '+(w.submitted?"complete":"current")+'">'+(w.submitted?"Submitted":"Not submitted")+'</span>'+
+      '<span class="chip '+m[1]+'">'+m[0]+'</span>';
+    var head = '<div class="wk '+(w.unlocked?"":"locked")+'">'+
+      '<div class="wk-top"><div class="wk-t"><span class="wk-unit">'+esc(w.unit||"")+'</span>Week '+esc(w.stage_week||wk)+' &mdash; '+esc(w.theme||"")+'</div>'+
+      '<div class="chips2">'+chips+'</div></div>';
+    if(!w.unlocked){ return head + '<div class="wk-lock">Locked &mdash; unlocks as your program reaches this week.</div></div>'; }
+    var body = '<div class="wk-body">';
+    if(w.your_reading || w.market_reading){ body += '<div class="wk-read">This week you read: '+esc(w.your_reading||"")+(w.market_reading?('  &middot;  Market: '+esc(w.market_reading)):'')+'</div>'; }
+    if(w.deliverable_prompt){ body += '<div class="wk-prompt">'+esc(w.deliverable_prompt)+'</div>'; }
+    if(w.done_looks_like){ body += '<div class="wk-done">What done looks like: '+esc(w.done_looks_like)+'</div>'; }
+    if(w.brings_to_session){ body += '<div class="wk-bring">Bring to your session: '+esc(w.brings_to_session)+'</div>'; }
+    if(w.guide && w.guide.body){ body += '<details class="v2d"><summary>Unit guide'+(w.guide.title?(' &middot; '+esc(w.guide.title)):'')+'</summary><div class="v2b">'+esc(w.guide.body)+'</div></details>'; }
+    (w.templates||[]).forEach(function(t){ body += '<details class="v2d"><summary>Template &middot; '+esc(t.title||t.code||"")+'</summary><div class="v2b">'+esc(t.body||"")+'</div></details>'; });
+    if(w.mastery === "revision_required"){ body += '<div class="wk-note">Revision requested. Strengthen the evidence and re-submit.</div>'; }
+    if(w.mastery === "in_review"){ body += '<div class="wk-done">Your submission is being assessed. Mastery is recorded by the Foundry, not by submitting.</div>'; }
+    var sub = w.submission;
+    if(sub){
+      body += '<div class="wk-sub">'+esc(sub.body||"")+(sub.link?("\n"+esc(sub.link)):"")+'</div>';
+      body += '<div class="wk-done">Submitted'+(sub.submitted_at?(" &middot; "+when(sub.submitted_at)):"")+'</div>';
+    }
+    var pv = sub ? esc(sub.body||"") : "", lv = sub ? esc(sub.link||"") : "";
+    if(w.mastery !== "mastered"){
+      body += '<div class="wk-form"><label>Your deliverable</label>';
+      body += '<textarea id="wkBody'+wk+'" placeholder="Write your deliverable&hellip;">'+pv+'</textarea>';
+      body += '<label>Or a link</label><input id="wkLink'+wk+'" type="url" placeholder="https://&hellip;" value="'+lv+'" />';
+      body += '<button id="wkSubmit'+wk+'">'+(w.submitted?"Submit a revision":"Submit deliverable")+'</button>';
+      body += '<div class="wk-err" id="wkErr'+wk+'"></div></div>';
+    }
+    return head + body + '</div></div>';
+  }
+
   function weekHtml(w){
     var wk = w.week;
     var theme = esc(w.theme||"");
@@ -380,6 +457,7 @@
 
   function renderProgram(j){
     var host = document.getElementById("program");
+    if((j.curriculum_generation||1) >= 2){ renderProgramV2(j); return; }
     host.innerHTML = j.weeks.map(function(w){ return weekHtml(w); }).join("");
     j.weeks.forEach(function(w){
       var btn = document.getElementById("wkSubmit"+w.week);
@@ -491,10 +569,13 @@
     if(!t){ mm.className="msg bad"; mm.textContent="Session expired — refresh."; return; }
     btn.disabled=true;
     try{
-      var res=await fetch(SEND, { method:"POST", headers:{ Authorization:"Bearer "+t, "Content-Type":"application/json" }, body: JSON.stringify({ body:text }) });
+      var payload = { body:text };
+      var dsel = document.getElementById("desWeek");
+      if(GEN >= 2 && dsel && dsel.value){ payload.designation = { role:"preregistration", week: parseInt(dsel.value,10) }; }
+      var res=await fetch(SEND, { method:"POST", headers:{ Authorization:"Bearer "+t, "Content-Type":"application/json" }, body: JSON.stringify(payload) });
       var j=await res.json();
       if(j.error){ mm.className="msg bad"; mm.textContent=j.error; btn.disabled=false; return; }
-      inp.value=""; mm.textContent=""; btn.disabled=false;
+      inp.value=""; mm.textContent=""; btn.disabled=false; if(dsel) dsel.value="";
       var s=(await sb.auth.getSession()).data.session; if(s) loadDash(s);
     }catch(e){ mm.className="msg bad"; mm.textContent="Could not send."; btn.disabled=false; }
   }
