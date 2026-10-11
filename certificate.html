@@ -216,6 +216,48 @@
 </div></footer>
 <script>(function(){var t=document.getElementById('sfxToggle'),l=document.getElementById('sfxLinks');if(!t||!l)return;t.addEventListener('click',function(){var o=l.classList.toggle('open');t.classList.toggle('open',o);t.setAttribute('aria-expanded',o?'true':'false');});Array.prototype.forEach.call(l.querySelectorAll('a'),function(a){a.addEventListener('click',function(){l.classList.remove('open');t.classList.remove('open');t.setAttribute('aria-expanded','false');});});})();</script>
 
-<script>(function(){var id=(new URLSearchParams(location.search).get("id")||"").trim();var set=function(el,v){var n=document.getElementById(el); if(n) n.textContent=v;};var vEl=document.getElementById("c_verify");set("c_stage","The Full Arc"); set("c_name","\u2014"); set("c_date","\u2014");if(!id){ if(vEl) vEl.textContent="No certificate id provided \u2014 nothing to verify."; return; }if(vEl) vEl.textContent="Verifying against the Starke Foundry registry\u2026";fetch("https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/public-registry?id="+encodeURIComponent(id)).then(function(r){return r.json();}).then(function(d){var m=d&&d.match;if(m){ if(m.name) set("c_name",m.name); if(m.date) set("c_date",m.date); set("c_id",id);if((m.generation||1)>=2){var bd=document.getElementById("c_body");if(bd){var st=document.createElement("div");st.className="stage";st.id="c_stage";st.textContent=m.label||m.stage;var ss=document.createElement("div");ss.className="stagesub";ss.id="c_stagesub";ss.textContent="Stage credential \u00b7 The "+m.stage+" stage";bd.textContent=m.body||"";bd.appendChild(st);bd.appendChild(ss);}var kk=document.querySelector(".kicker");if(kk&&m.headline)kk.textContent=m.headline;}if(vEl) vEl.textContent="Verified \u2713 \u2014 this credential is recorded in the Starke Foundry registry.";} else { set("c_name","\u2014"); set("c_date","\u2014");if(vEl) vEl.textContent="This certificate could not be verified in the registry."; }}).catch(function(){ set("c_name","\u2014"); set("c_date","\u2014"); if(vEl) vEl.textContent="Verification is temporarily unavailable. Try again shortly."; });})();</script>
+<script>
+// Verification and rendering from the registry only. Values in the link (name, stage, date) never reach the page:
+// with an id, nothing is shown as a credential until the registry confirms it.
+// v1 (ruled 10 Oct 2026): Seeker and Builder credentials carry level-specific wording; Sovereign keeps the full-arc text.
+// v2 (Curriculum v2.0): the approved credential name and certifying statement (DQ-3), verbatim from the registry.
+(function(){
+  var id=(new URLSearchParams(location.search).get("id")||"").trim();
+  var set=function(el,v){var n=document.getElementById(el); if(n) n.textContent=v;};
+  var vEl=document.getElementById("c_verify"), bd=document.getElementById("c_body"), kk=document.querySelector(".kicker"), ld=document.querySelector(".lead");
+  set("c_name","—"); set("c_date","—");
+  if(!id){ set("c_stage","The Full Arc"); if(vEl) vEl.textContent="No certificate id provided — nothing to verify."; return; }
+  if(bd) bd.style.visibility="hidden";
+  function render(text, label, sub){
+    if(!bd) return; bd.textContent=text;
+    var st=document.createElement("div"); st.className="stage"; st.id="c_stage"; st.textContent=label;
+    var ss=document.createElement("div"); ss.className="stagesub"; ss.id="c_stagesub"; ss.textContent=sub;
+    bd.appendChild(st); bd.appendChild(ss);
+  }
+  function v1Stage(stage){
+    if(/^sovereign$/i.test(stage)){ set("c_stage","The Full Arc"); return; }
+    var S=/^builder$/i.test(stage)?"Builder":"Seeker";
+    render("entered the Starke Foundry, completed the "+S+" stage, and cleared the "+S+" gate. The gate is the standard, and clearing it is the whole of finishing the stage. This founder was measured against their own slope, on evidence, at every gate of the stage.",
+      "The "+S+" Stage", "Stage credential · The "+S+" stage");
+  }
+  if(vEl) vEl.textContent="Verifying against the Starke Foundry registry…";
+  fetch("https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/public-registry?id="+encodeURIComponent(id)).then(function(r){return r.json();}).then(function(d){
+    var m=d&&d.match;
+    if(m){
+      if(m.name) set("c_name",m.name); if(m.date) set("c_date",m.date); set("c_id",m.id||id);
+      if((m.generation||1)>=2){
+        if(kk&&m.headline) kk.textContent=m.headline;
+        if(ld&&m.lead) ld.textContent=m.lead;
+        render(m.rest||"", m.label||m.stage, "Stage credential · The "+m.stage+" stage");
+      } else { v1Stage(m.stage||""); }
+      if(bd) bd.style.visibility="visible";
+      if(vEl) vEl.textContent="Verified ✓ — this credential is recorded in the Starke Foundry registry.";
+    } else {
+      set("c_name","—"); set("c_date","—");
+      if(vEl) vEl.textContent="This certificate could not be verified in the registry.";
+    }
+  }).catch(function(){ set("c_name","—"); set("c_date","—"); if(vEl) vEl.textContent="Verification is temporarily unavailable. Try again shortly."; });
+})();
+</script>
 </body>
 </html>

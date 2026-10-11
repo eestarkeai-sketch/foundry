@@ -45,6 +45,7 @@
   .sec{margin:40px 0 60px}
   .sec .sh{font-family:var(--serif);font-size:22px;margin-bottom:4px}
   .sec .ss{color:var(--faint);font-size:14px;margin-bottom:18px}
+  #tablewrap{overflow-x:auto}
   table{width:100%;border-collapse:collapse}
   th,td{text-align:left;padding:13px 12px;border-bottom:1px solid var(--line);font-size:14.5px}
   th{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--faint);font-weight:600}
@@ -114,7 +115,8 @@
   var REG_URL = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/public-registry";
   function esc(x){ return String(x==null?"":x).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"})[c];}); }
   // Curriculum v2 stage credentials carry an outcome label (Direction, Enterprise, Stewardship); v1 shows the stage as before.
-  function summit(h){ return (h.generation||1) >= 2 ? (esc(h.label)+' &middot; '+esc(h.stage)) : esc(h.stage); }
+  // C1: the approved credential name (for example "Foundry Seeker \u2014 Direction") when the registry carries it.
+  function summit(h){ return (h.generation||1) >= 2 ? (h.headline ? esc(h.headline) : (esc(h.label)+' &middot; '+esc(h.stage))) : esc(h.stage); }
 
   function render(){
     var wrap = document.getElementById("tablewrap");
@@ -139,7 +141,7 @@
     if(hit){
       out.className="vout ok";
       out.innerHTML = (hit.generation||1) >= 2
-        ? "Genuine. <b>"+esc(hit.name)+"</b> holds the "+esc(hit.label)+" credential for the "+esc(hit.stage)+" stage, conferred "+esc(hit.date)+"."
+        ? "Genuine. <b>"+esc(hit.name)+"</b> holds "+(hit.headline ? esc(hit.headline) : ("the "+esc(hit.label)+" credential for the "+esc(hit.stage)+" stage"))+", conferred "+esc(hit.date)+"."+(hit.body ? '<div style="margin-top:8px;font-size:14px;line-height:1.55">'+esc(hit.body)+'</div>' : "")
         : "Genuine. <b>"+esc(hit.name)+"</b> cleared the "+esc(hit.stage)+" and was certified on "+esc(hit.date)+".";
     } else {
       out.className="vout no";
