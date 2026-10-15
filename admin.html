@@ -679,7 +679,8 @@
     needs_asin:["ordered","delayed","exception"], needs_binding:["ordered","delayed","exception"], failed:["ordered","exception"],
     placed:["shipped","delayed","exception"], processing:["shipped","delayed","exception"],
     ordered:["shipped","delayed","exception"], shipped:["delivered","delayed","exception"], delayed:["ordered","shipped","delivered","exception"],
-    delivered:["exception"], exception:["ordered","queued"]
+    delivered:["exception"], exception:["ordered","queued"],
+    needs_preference:["ordered","delayed","exception"], in_fulfillment:["exception"], complete:["exception"]
   };
   var LABEL={ordered:"Record ordered",shipped:"Record shipped",delivered:"Record delivered",delayed:"Mark delayed",exception:"Record exception",queued:"Reopen to queue"};
   var CLS={pending:"#e8a33e",in_progress:"#8fb4d9",fulfilled:"#7bbf6a",delayed:"#e8a33e",exception:"#d9705f"};
@@ -702,14 +703,95 @@
             (o.last_note?'<div style="font-size:11px;color:#8a807a">'+esc(o.last_note)+'</div>':'')):'';
           var acts=(NEXT[o.status||"pending"]||[]).map(function(t){return '<button class="shipAct" data-o="'+esc(o.id)+'" data-to="'+t+'" style="margin:0 4px 4px 0;font-size:11.5px;padding:4px 9px;border-radius:7px;border:1px solid #2a2523;background:#1a1614;color:#ddd;cursor:pointer">'+LABEL[t]+'</button>';}).join("")+
             '<button class="shipHist" data-o="'+esc(o.id)+'" style="font-size:11.5px;padding:4px 9px;border-radius:7px;border:1px solid #2a2523;background:transparent;color:#8a807a;cursor:pointer">History</button>';
-          return '<tr style="border-top:1px solid #1d1917;vertical-align:top"><td style="padding:8px 10px">'+esc(o.founder_name||o.founder_email||"-")+'<div style="color:#6b625c;font-size:11px">'+esc(o.founder_email)+'</div></td><td>'+esc(o.stage)+'</td><td>'+esc(o.movement)+'</td><td>'+esc(o.book_count)+'</td>'+
+          return '<tr style="border-top:1px solid #1d1917;vertical-align:top"><td style="padding:8px 10px">'+esc(o.founder_name||o.founder_email||"-")+'<div style="color:#6b625c;font-size:11px">'+esc(o.founder_email)+'</div></td><td>'+esc(o.stage)+'</td><td>'+esc(o.movement)+'</td><td>'+esc(o.book_count)+lineSummary(o)+'</td>'+
             '<td><span style="color:'+(CLS[o.state_class]||"#b8afa5")+'">'+esc(o.state_label)+'</span><div style="font-size:10.5px;color:#6b625c">'+esc(o.status)+'</div></td><td style="font-size:11px;color:#8a807a">'+esc(o.curriculum_version||"—")+'</td><td>'+ship+'</td><td>'+last+'</td><td style="min-width:200px">'+acts+
             '<div id="shipForm-'+esc(o.id)+'"></div><div id="shipHist-'+esc(o.id)+'"></div></td></tr>';
         }).join("");
-        view.innerHTML=opbar+'<div style="margin:6px 0 14px">'+chips+'</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">'+head+body+'</table></div>'+(rows.length?"":'<div style="color:#8a807a;padding:10px 0">No book orders yet.</div>');
+        view.innerHTML=opbar+'<div style="margin:6px 0 14px">'+chips+'</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">'+head+body+'</table></div>'+(rows.length?"":'<div style="color:#8a807a;padding:10px 0">No book orders yet.</div>')+'<div id="shipTitles"></div>';
+        loadTitles(rows);
         var op=document.getElementById("shipOp"); if(op) op.addEventListener("change",function(){setOp(op.value.trim());});
       })
       .catch(function(e){view.innerHTML='<div style="color:#d9705f;padding:8px 0">'+esc(e)+'</div>';});
+  }
+  // ===== P66 (migration 66): titles, format preferences, AudiobooksNow codes, Zinc =====
+  var LSTATE={planned:"Planned",awaiting_code:"Waiting for a code",issued:"Code issued",awaiting_dispatch:"Waiting for Ethan to send",dispatched:"Sent by Ethan",
+    submitted:"With Zinc",ordered:"Ordered",shipped:"Shipped",delivered:"Delivered",failed:"Failed",cancelled:"Cancelled"};
+  var LCOL={planned:"#e8a33e",awaiting_code:"#e8a33e",awaiting_dispatch:"#e8a33e",submitted:"#8fb4d9",ordered:"#8fb4d9",shipped:"#8fb4d9",issued:"#7bbf6a",dispatched:"#7bbf6a",delivered:"#7bbf6a",failed:"#d9705f",cancelled:"#6b625c"};
+  var LNEXT=function(l){
+    var a=[];
+    if(l.route==="author"&&l.status==="awaiting_dispatch") a.push("dispatched");
+    if(l.format==="audiobook"&&l.status==="awaiting_code") a.push("print_instead");
+    if(l.route==="zinc"&&l.status==="failed") a.push("requeue");
+    // a title with Zinc is followed automatically; by hand only when it never reached Zinc or failed there
+    if(l.format!=="audiobook"&&["planned","failed"].indexOf(l.status)>=0) a.push("ordered");
+    if(l.route!=="zinc"&&l.format!=="audiobook"&&["ordered","dispatched"].indexOf(l.status)>=0) a.push("shipped");
+    if(l.route!=="zinc"&&l.format!=="audiobook"&&["shipped","dispatched","ordered"].indexOf(l.status)>=0) a.push("delivered");
+    if(["delivered","issued","cancelled"].indexOf(l.status)<0) a.push("cancelled");
+    return a;
+  };
+  var LLABEL={dispatched:"Record sent",print_instead:"Send print instead",requeue:"Buy again (Zinc)",ordered:"Record bought by hand",shipped:"Record shipped",delivered:"Record delivered",cancelled:"Cancel title"};
+  var LNEED={dispatched:["tracking","Tracking number (optional)"],print_instead:["note","Why no audiobook (required)"],ordered:["reference","Vendor and order number (required)"],
+    shipped:["tracking","Tracking number (optional)"],cancelled:["note","Why it is cancelled (required)"]};
+  var BOOK=null;
+  function money(c){return c==null?"":"$"+(c/100).toFixed(2);}
+  function lineSummary(o){
+    var ls=o.line_states||{}, k=Object.keys(ls); var out="";
+    if(k.length) out='<div style="font-size:10.5px;color:#6b625c">'+k.map(function(x){return esc(ls[x]+" "+(LSTATE[x]||x).toLowerCase());}).join(" · ")+'</div>';
+    if(o.status==="needs_preference"&&o.founder_id) out+='<div style="margin-top:4px"><button class="bkPref" data-f="'+esc(o.founder_id)+'" data-v="print" style="font-size:11px;padding:3px 8px;border-radius:7px;border:1px solid #2a2523;background:#1a1614;color:#ddd;cursor:pointer;margin:0 4px 4px 0">Set print</button><button class="bkPref" data-f="'+esc(o.founder_id)+'" data-v="audiobook" style="font-size:11px;padding:3px 8px;border-radius:7px;border:1px solid #2a2523;background:#1a1614;color:#ddd;cursor:pointer">Set audiobook</button></div>';
+    if(o.line_states&&o.line_states.planned) out+='<div><button class="bkPlace" data-o="'+esc(o.id)+'" style="font-size:11px;padding:3px 8px;border-radius:7px;border:1px solid #2a2523;background:#1a1614;color:#ddd;cursor:pointer;margin-top:4px">Buy planned print now</button></div>';
+    return out;
+  }
+  async function aw(body){var r=await fetch(B+"admin-write",{method:"POST",headers:{"x-admin-token":tok(),"Content-Type":"application/json"},body:JSON.stringify(body)});var j=await r.json().catch(function(){return {};});return {ok:r.ok&&!j.error,j:j,s:r.status};}
+  function opOrWarn(out){var opEl=document.getElementById("shipOp");var op=(opEl&&opEl.value||"").trim();if(op.length<2){if(out){out.style.color="#d9705f";out.textContent="Enter the operator's name above first.";}return null;}setOp(op);return op;}
+  async function loadTitles(rows){
+    var box=document.getElementById("shipTitles"); if(!box) return;
+    box.innerHTML='<div style="color:#8a807a;padding:10px 0">Loading titles...</div>';
+    var r=await aw({action:"book_overview"}); if(!r.ok){box.innerHTML='<div style="color:#d9705f;padding:8px 0">Titles: '+esc(r.j.error||r.s)+'</div>';return;}
+    BOOK=r.j; var d=r.j;
+    var zinc='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:22px 0 8px"><div style="font-size:15px;color:#eee">Titles</div>'+
+      '<span style="font-size:12px;color:'+(d.zinc_configured?"#7bbf6a":"#e8a33e")+'">Zinc '+(d.zinc_configured?"connected":"not connected: print titles wait")+'</span>'+
+      '<span style="font-size:12px;color:'+(d.zinc_webhook_configured?"#7bbf6a":"#8a807a")+'">'+(d.zinc_webhook_configured?"Zinc updates arrive automatically":"Zinc updates: use Check Zinc now")+'</span>'+
+      '<button id="bkSync" style="font-size:11.5px;padding:4px 10px;border-radius:7px;border:1px solid #2a2523;background:#1a1614;color:#ddd;cursor:pointer">Check Zinc now</button><span id="bkSyncOut" style="font-size:12px;color:#8a807a"></span></div>';
+    var th='<tr style="text-align:left;color:#8a807a;font-size:12px"><th style="padding:6px 10px">Founder</th><th>Mv</th><th>Title</th><th>Format</th><th>State</th><th>Bought as</th><th>Vendor / tracking</th><th>Latest step</th><th></th></tr>';
+    var tb=(d.lines||[]).map(function(l){
+      var dec=l.condition_policy?(esc(l.condition_policy)+" "+money(l.chosen_total_cents)+(l.offer_used_cents!=null||l.offer_new_cents!=null?'<div style="font-size:10.5px;color:#6b625c">used '+money(l.offer_used_cents)+' · new '+money(l.offer_new_cents)+'</div>':'')):"";
+      var ven=(l.zinc_order_id?'<div style="font-size:11px">Zinc '+esc(String(l.zinc_order_id).slice(0,8))+'</div>':'')+(l.merchant_order_id?'<div style="font-size:11px;color:#8a807a">Amazon '+esc(l.merchant_order_id)+'</div>':'')+
+        (l.manual_reference?'<div style="font-size:11px;color:#8a807a">'+esc(l.manual_reference)+'</div>':'')+(l.code_hint?'<div style="font-size:11px;color:#8a807a">Code '+esc(l.code_hint)+'</div>':'')+
+        (l.tracking_url?'<a href="'+esc(l.tracking_url)+'" target="_blank" rel="noopener" style="font-size:11px">'+esc(l.tracking_carrier||"Track")+' '+esc(l.tracking_number||"")+'</a>':(l.tracking_number?'<div style="font-size:11px;color:#8a807a">'+esc(l.tracking_number)+'</div>':''));
+      var last=(l.last_kind?'<div style="font-size:11px;color:#b8afa5">'+esc(l.last_kind==="manual"?(l.last_operator||""):l.last_kind)+(l.last_at?" · "+esc(String(l.last_at).slice(0,16).replace("T"," ")):"")+'</div>':'')+
+        (l.last_error?'<div style="font-size:11px;color:#d9705f">'+esc(l.last_error)+'</div>':(l.last_note?'<div style="font-size:11px;color:#8a807a">'+esc(l.last_note)+'</div>':''));
+      var acts=LNEXT(l).map(function(t){return '<button class="bkAct" data-l="'+esc(l.line_id)+'" data-o="'+esc(l.order_id)+'" data-to="'+t+'" style="margin:0 4px 4px 0;font-size:11px;padding:3px 8px;border-radius:7px;border:1px solid #2a2523;background:#1a1614;color:#ddd;cursor:pointer">'+LLABEL[t]+'</button>';}).join("");
+      return '<tr style="border-top:1px solid #1d1917;vertical-align:top"><td style="padding:6px 10px">'+esc(l.founder_name||l.founder_email)+'<div style="font-size:10.5px;color:#6b625c">prefers '+esc(l.preference||"—")+'</div></td><td>'+esc(l.stage).slice(0,1)+esc(l.movement)+'</td><td>'+esc(l.title)+'</td><td>'+esc(l.format==="author_copy"?"Ethan's copy":l.format)+'</td>'+
+        '<td><span style="color:'+(LCOL[l.status]||"#b8afa5")+'">'+esc(LSTATE[l.status]||l.status)+'</span>'+(l.attempts>1?'<div style="font-size:10.5px;color:#6b625c">attempt '+esc(l.attempts)+'</div>':'')+'</td><td>'+dec+'</td><td>'+ven+'</td><td>'+last+'</td><td style="min-width:180px">'+acts+'<div id="bkForm-'+esc(l.line_id)+'"></div></td></tr>';
+    }).join("");
+    var titles='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px">'+th+tb+'</table></div>'+((d.lines||[]).length?"":'<div style="color:#8a807a;padding:8px 0">No titles planned yet. Titles appear once a founder has chosen print or audiobook.</div>');
+    var I='style="background:#151210;border:1px solid #2a2523;color:#eee;border-radius:7px;padding:6px 8px;font-size:12.5px"';
+    var stock=(d.stock||[]);
+    var st='<div style="font-size:15px;color:#eee;margin:22px 0 6px">AudiobooksNow codes</div><div style="font-size:12px;color:#8a807a;margin-bottom:8px">Buy Gift IDs at AudiobooksNow (choose Do Not Email so the codes come to you), then enter them here. A waiting title gets its code at once and the founder is told to look in their portal.</div>'+
+      '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px"><tr style="text-align:left;color:#8a807a;font-size:12px"><th style="padding:6px 10px">Title</th><th>Waiting</th><th>In stock</th><th>Issued</th></tr>'+
+      stock.map(function(x){return '<tr style="border-top:1px solid #1d1917"><td style="padding:6px 10px">'+esc(x.title)+'</td><td style="color:'+(x.waiting>x.available?"#e8a33e":"#b8afa5")+'">'+esc(x.waiting)+'</td><td>'+esc(x.available)+'</td><td>'+esc(x.issued)+'</td></tr>';}).join("")+'</table></div>'+
+      '<div style="margin:10px 0;padding:10px;border:1px solid #2a2523;border-radius:8px;display:grid;gap:6px;max-width:560px"><label for="bkAsin" style="font-size:12px;color:#8a807a">Title</label><select id="bkAsin" '+I+'>'+
+      stock.map(function(x){return '<option value="'+esc(x.asin)+'">'+esc(x.title)+(x.waiting?" ("+x.waiting+" waiting)":"")+'</option>';}).join("")+'</select>'+
+      '<label for="bkCodes" style="font-size:12px;color:#8a807a">Gift IDs, one per line</label><textarea id="bkCodes" '+I+' rows="3"></textarea>'+
+      '<label for="bkCost" style="font-size:12px;color:#8a807a">Price paid per code in dollars (optional)</label><input id="bkCost" '+I+' inputmode="decimal">'+
+      '<label for="bkNote" style="font-size:12px;color:#8a807a">Note, such as the AudiobooksNow order number (optional)</label><input id="bkNote" '+I+'>'+
+      '<div><button id="bkAdd" style="font-size:12px;padding:5px 12px;border-radius:7px;border:0;background:#c9a46a;color:#111;cursor:pointer">Add codes</button> <span id="bkAddOut" style="font-size:12px"></span></div></div>';
+    box.innerHTML=zinc+titles+st;
+  }
+  function lineForm(lid,oid,to){
+    var box=document.getElementById("bkForm-"+lid); if(!box)return;
+    var need=LNEED[to]; var I='style="width:100%;margin:4px 0;background:#151210;border:1px solid #2a2523;color:#eee;border-radius:7px;padding:6px 8px;font-size:12px"';
+    box.innerHTML='<div style="margin:6px 0;padding:8px;border:1px solid #2a2523;border-radius:8px"><div style="font-size:12px;color:#b8afa5;margin-bottom:4px">'+LLABEL[to]+'</div>'+
+      (need?'<input id="bk-in-'+lid+'" data-k="'+need[0]+'" '+I+' placeholder="'+need[1]+'">':'')+
+      '<button class="bkSave" data-l="'+lid+'" data-o="'+oid+'" data-to="'+to+'" style="margin-top:4px;font-size:12px;padding:5px 10px;border-radius:7px;border:0;background:#c9a46a;color:#111;cursor:pointer">Record</button> <span id="bk-out-'+lid+'" style="font-size:12px"></span></div>';
+  }
+  async function lineSave(lid,oid,to,btn){
+    var out=document.getElementById("bk-out-"+lid); var op=opOrWarn(out); if(!op) return;
+    var inp=document.getElementById("bk-in-"+lid); var body={action:"book_line_record",line_id:lid,order_id:oid,to:to,operator:op};
+    if(inp&&inp.value.trim()) body[inp.getAttribute("data-k")]=inp.value.trim();
+    btn.disabled=true; var r=await aw(body);
+    if(!r.ok){btn.disabled=false; if(out){out.style.color="#d9705f";out.textContent=String(r.j.detail||r.j.error||r.s).replace(/_/g," ");} return;}
+    loadShip();
   }
   function form(oid,to){
     var box=document.getElementById("shipForm-"+oid); if(!box)return;
@@ -746,8 +828,23 @@
     var b=t.closest('[data-t="ship"]'); if(b){ setTimeout(loadShip,0); return; }
     var a=t.closest(".shipAct"); if(a){ form(a.getAttribute("data-o"),a.getAttribute("data-to")); return; }
     var sv=t.closest(".shipSave"); if(sv){ save(sv.getAttribute("data-o"),sv.getAttribute("data-to"),sv); return; }
-    var hs=t.closest(".shipHist"); if(hs){ hist(hs.getAttribute("data-o")); }
+    var hs=t.closest(".shipHist"); if(hs){ hist(hs.getAttribute("data-o")); return; }
+    var ba=t.closest(".bkAct"); if(ba){ lineForm(ba.getAttribute("data-l"),ba.getAttribute("data-o"),ba.getAttribute("data-to")); return; }
+    var bs=t.closest(".bkSave"); if(bs){ lineSave(bs.getAttribute("data-l"),bs.getAttribute("data-o"),bs.getAttribute("data-to"),bs); return; }
+    if(t.id==="bkSync"){ (async function(){ var o=document.getElementById("bkSyncOut"); t.disabled=true; if(o)o.textContent="Checking..."; var r=await aw({action:"book_sync"}); t.disabled=false;
+      if(o) o.textContent=r.ok?("Checked "+((r.j.results||[]).length)+" Zinc order(s)."):String(r.j.error||r.s); setTimeout(loadShip,600); })(); return; }
+    if(t.id==="bkAdd"){ (async function(){ var o=document.getElementById("bkAddOut"); var op=opOrWarn(o); if(!op) return;
+      var cost=(document.getElementById("bkCost").value||"").trim(); t.disabled=true;
+      var r=await aw({action:"audio_codes_add",asin:document.getElementById("bkAsin").value,codes:document.getElementById("bkCodes").value,cost_cents:cost?Math.round(parseFloat(cost)*100):null,note:document.getElementById("bkNote").value||null,operator:op});
+      t.disabled=false;
+      if(!r.ok){o.style.color="#d9705f";o.textContent=String(r.j.detail||r.j.error||r.s).replace(/_/g," ");return;}
+      o.style.color="#7bbf6a";o.textContent="Added "+r.j.data.added+"; issued "+(r.j.data.issued||[]).length+" now."; setTimeout(loadShip,900); })(); return; }
+    var bp=t.closest(".bkPref"); if(bp){ (async function(){ var op=opOrWarn(null); if(!op){alertless("Enter the operator's name above first.");return;} bp.disabled=true;
+      var r=await aw({action:"book_pref_set",founder_id:bp.getAttribute("data-f"),format:bp.getAttribute("data-v"),operator:op}); bp.disabled=false; if(!r.ok){alertless(String(r.j.detail||r.j.error));return;} loadShip(); })(); return; }
+    var bl=t.closest(".bkPlace"); if(bl){ (async function(){ bl.disabled=true; var r=await aw({action:"book_place",order_id:bl.getAttribute("data-o")}); bl.disabled=false;
+      alertless(r.ok?("Zinc: "+((r.j.print&&r.j.print.status)||"done").replace(/_/g," ")):String(r.j.error||r.s)); setTimeout(loadShip,600); })(); return; }
   });
+  function alertless(msg){var o=document.getElementById("bkSyncOut"); if(o){o.textContent=msg;o.scrollIntoView({block:"nearest"});}}
 })();
 </script>
 <script>
