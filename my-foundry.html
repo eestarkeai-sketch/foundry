@@ -38,6 +38,17 @@
   .msg{margin-top:16px; font-size:14px; min-height:20px}
   .msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
   .hide{display:none}
+  /* P67: withdraw an unpaid admission */
+  .wd{margin-top:18px; text-align:center}
+  button.wdlink{background:none; border:none; width:auto; margin:0; padding:4px 2px; color:var(--faint); font-weight:400; font-size:13.5px; text-decoration:underline; text-underline-offset:3px; cursor:pointer}
+  button.wdlink:hover{color:var(--dim)}
+  .wdpanel{text-align:left; margin-top:12px; border:1px solid var(--line); border-radius:12px; padding:16px 18px; background:var(--panel2)}
+  .wdpanel p{color:var(--dim); font-size:14.5px; margin:0 0 12px}
+  .wdpanel textarea{width:100%; box-sizing:border-box; background:var(--bg); border:1px solid var(--line); color:var(--ink); border-radius:11px; padding:11px 13px; font-family:var(--sans); font-size:14.5px; min-height:72px; resize:vertical}
+  .wdpanel textarea:focus{outline:none; border-color:var(--ember)}
+  .wdacts{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px}
+  .wdacts button{width:auto; margin:0}
+  button.wdgo{background:transparent; color:var(--bad); border:1px solid var(--bad); padding:10px 16px; font-size:14px}
 
   .top{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px}
   .who{color:var(--faint); font-size:13px}
@@ -191,6 +202,17 @@
     <h2 id="awHello">You&rsquo;re admitted.</h2>
     <p class="lede">Your place is held in <b id="awStage">the Seeker</b> chamber. Access opens the moment your first five-week block is paid &mdash; it begins there.</p>
     <a class="paybtn" href="/" onclick="var b=document.getElementById('foundry-activate-btn'); if(b){b.click();} return false;">Pay your block &amp; open the Foundry &#8250;</a>
+    <!-- P67 (migration 67): the founder can withdraw an admission that has never been paid -->
+    <div class="wd hide" id="wdWrap">
+      <button type="button" class="wdlink" id="wdOpen">Withdraw my admission</button>
+      <div class="wdpanel hide" id="wdPanel">
+        <p>Withdrawing gives up your place in the Foundry. Nothing will be charged, and any checkout you opened is closed. If you change your mind later, <a href="mailto:hello@starkefoundry.com">reach Ethan</a>.</p>
+        <label for="wdWhy">Anything you would like us to know (optional)</label>
+        <textarea id="wdWhy" maxlength="500"></textarea>
+        <div class="wdacts"><button type="button" class="wdgo" id="wdConfirm">Withdraw my admission</button><button type="button" class="ghost" id="wdKeep">Keep my place</button></div>
+        <div class="msg" id="wdMsg" role="status"></div>
+      </div>
+    </div>
   </div>
 
   <!-- dashboard -->
@@ -379,7 +401,16 @@ Urgent: if you were charged unexpectedly, cannot get in after paying, see someth
         document.getElementById("awEmail").textContent = j.email || f.email || "";
         document.getElementById("awHello").textContent = f.name ? ("You’re admitted, " + f.name.split(" ")[0] + ".") : "You’re admitted.";
         var awSt = document.getElementById("awStage"); if(awSt) awSt.textContent = "the " + (f.stage || "Seeker");  // null after the paused copy replaced the lede (second load)
-        if(!(f.status === "awaiting_payment" || f.status === "unpaid")){  // paused (e.g. suspended): no payment call-to-action; billing re-entry is not decided here
+        var unpaid = (f.status === "awaiting_payment" || f.status === "unpaid");
+        document.getElementById("wdWrap").classList.toggle("hide", !unpaid);   // P67: only an unpaid admission can be withdrawn
+        document.getElementById("wdPanel").classList.add("hide");
+        if(f.status === "withdrawn"){  // P67: withdrawn by the founder or the Foundry; nothing can be paid until the Desk reinstates it
+          var awc0 = document.getElementById("awaiting"); var pb0 = awc0.querySelector(".paybtn"); if(pb0) pb0.style.display = "none";
+          document.getElementById("awHello").textContent = "Your admission is withdrawn.";
+          var ld0 = awc0.querySelector(".lede"); if(ld0) ld0.innerHTML = "Your place in the Foundry is no longer held, and nothing will be charged. If you would like to come back, <a href=\"mailto:hello@starkefoundry.com\">reach Ethan</a>.";
+          show("awaiting"); return;
+        }
+        if(!unpaid){  // paused (e.g. suspended): no payment call-to-action; billing re-entry is not decided here
           var awc = document.getElementById("awaiting"); document.getElementById("awHello").textContent = "Your Foundry instruction is paused.";
           var pb = awc.querySelector(".paybtn"); if(pb) pb.style.display = "none";
           var ld = awc.querySelector(".lede"); if(ld) ld.textContent = "Your access to instruction is paused. Contact the Foundry desk to resume.";
@@ -710,6 +741,27 @@ Urgent: if you were charged unexpectedly, cannot get in after paying, see someth
   document.getElementById("backToSignin").addEventListener("click", function(){ show("signin"); });
   document.getElementById("signout1").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
   document.getElementById("signout3").addEventListener("click", async function(){ await sb.auth.signOut(); show("signin"); });
+  // P67: withdraw my admission (create-checkout-session refuses anything that has been paid)
+  document.getElementById("wdOpen").addEventListener("click", function(){ document.getElementById("wdPanel").classList.toggle("hide"); document.getElementById("wdMsg").textContent = ""; });
+  document.getElementById("wdKeep").addEventListener("click", function(){ document.getElementById("wdPanel").classList.add("hide"); });
+  document.getElementById("wdConfirm").addEventListener("click", async function(){
+    var btn = this, m = document.getElementById("wdMsg");
+    var r = await sb.auth.getSession(); var session = r.data.session; var t = session && session.access_token;
+    if(!t){ m.className = "msg bad"; m.textContent = "Your session has expired. Refresh the page and sign in again."; return; }
+    btn.disabled = true; m.className = "msg"; m.textContent = "Withdrawing...";
+    try{
+      var res = await fetch(URL_ + "/functions/v1/create-checkout-session", { method:"POST", headers:{ Authorization:"Bearer "+t, "Content-Type":"application/json" },
+        body: JSON.stringify({ withdraw: true, reason: (document.getElementById("wdWhy").value || "").trim() }) });
+      var j = await res.json().catch(function(){ return {}; });
+      if(!res.ok || !j.ok){
+        btn.disabled = false; m.className = "msg bad";
+        m.textContent = j.error === "admission_not_withdrawable" ? "Your first block has been paid, so your admission can no longer be withdrawn here. Reach Ethan." : "Could not withdraw. Try again, or reach Ethan.";
+        return;
+      }
+      btn.disabled = false; var bar = document.getElementById("foundry-activate"); if(bar) bar.style.display = "none";
+      loadDash(session);
+    }catch(e){ btn.disabled = false; m.className = "msg bad"; m.textContent = "Could not withdraw. Try again, or reach Ethan."; }
+  });
   async function sendMsg(){
     var inp=document.getElementById("minput"), mm=document.getElementById("mMsg"), btn=document.getElementById("msend");
     var text=(inp.value||"").trim(); if(!text) return;
@@ -751,7 +803,7 @@ Urgent: if you were charged unexpectedly, cannot get in after paying, see someth
     var btn=document.getElementById("foundry-activate-btn");
     if(!bar||!btn)return;
     btn.addEventListener("click",async function(){btn.disabled=true;btn.textContent="Redirecting...";var res=await call({});if(res&&res.j&&res.j.url){window.location=res.j.url;}else{btn.disabled=false;btn.textContent="Activate & add card";}});
-    setTimeout(async function(){var res=await call({probe:true});if(res&&res.s===200&&res.j&&res.j.probe&&!res.j.subscribed){bar.style.display="block";}},1400);
+    setTimeout(async function(){var res=await call({probe:true});if(res&&res.s===200&&res.j&&res.j.probe&&!res.j.subscribed&&!res.j.withdrawn){bar.style.display="block";}},1400);
   }
   if(document.readyState!=="loading")ready();else document.addEventListener("DOMContentLoaded",ready);
 })();

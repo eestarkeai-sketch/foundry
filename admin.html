@@ -192,7 +192,7 @@
     var v = document.getElementById("view");
     if(TAB==="overview") v.innerHTML = renderOverview();
     else if(TAB==="apps") v.innerHTML = renderApps(fq(DATA.applications));
-    else if(TAB==="founders") v.innerHTML = renderFounders(fq(DATA.founders), DATA.coaches||[]);
+    else if(TAB==="founders"){ v.innerHTML = renderFounders(fq(DATA.founders), DATA.coaches||[]) + '<div id="admHist"></div>'; loadAdmissionRecord(); }
     else if(TAB==="coaches") v.innerHTML = renderCoaches(fq(DATA.coach_applications), fq(DATA.coaches));
     else if(TAB==="curriculum"){ v.innerHTML = '<div class="empty">Loading curriculum…</div>'; loadCurriculum(); }
     else if(TAB==="incentives"){ v.innerHTML = '<div class="empty">Loading incentives…</div>'; loadIncentives(); }
@@ -265,6 +265,69 @@
         appActions(x)+'</div>';
     }).join("");
   }
+  // ---- P67: admission withdrawal (an admission never paid) and reinstatement, by a named operator with a reason ----
+  function admOp(){ try{ return sessionStorage.getItem("ship_operator")||""; }catch(e){ return ""; } }
+  function admSetOp(v){ try{ sessionStorage.setItem("ship_operator", v); }catch(e){} }
+  function openAdmissionForm(id, kind, btn){
+    var old = document.querySelector("tr.admform"); if(old) old.parentNode.removeChild(old);
+    var tr = btn.closest("tr"); if(!tr) return;
+    var f = (DATA.founders||[]).filter(function(x){ return x.id===id; })[0] || {};
+    var who = esc(f.name||f.email||"this founder");
+    var head = kind==="withdraw"
+      ? '<b>Withdraw '+who+'&rsquo;s admission.</b> Their place is released, any open checkout is closed and nothing can be charged. You can reinstate it later.'
+      : '<b>Reinstate '+who+'&rsquo;s admission.</b> They return to awaiting payment and can pay again. A pilot seat is not restored.';
+    var row = document.createElement("tr"); row.className = "admform";
+    row.innerHTML = '<td colspan="7"><div style="display:grid;gap:8px;max-width:640px;padding:6px 0">'+
+      '<div style="font-size:13.5px">'+head+'</div>'+
+      '<input id="admOp" '+ADM_INP+' placeholder="Your name (recorded)" value="'+esc(admOp())+'" />'+
+      '<input id="admWhy" '+ADM_INP+' placeholder="Reason (recorded, at least 8 characters)" />'+
+      '<div><button class="mini '+(kind==="withdraw"?"reject":"save")+'" data-adm="'+kind+'" data-id="'+id+'">'+(kind==="withdraw"?"Withdraw admission":"Reinstate admission")+'</button> '+
+      '<button class="mini save" data-adm="cancel">Cancel</button> <span id="admMsg" style="font-size:13px"></span></div></div></td>';
+    tr.parentNode.insertBefore(row, tr.nextSibling);
+    var w = document.getElementById("admWhy"); if(w) w.focus();
+  }
+  async function admissionAct(kind, id, btn){
+    var op = (document.getElementById("admOp")||{}).value||"", why = (document.getElementById("admWhy")||{}).value||"";
+    if(op.trim().length < 2){ admOut("Enter your name."); return; }
+    if(why.trim().length < 8){ admOut("Enter a reason of at least 8 characters."); return; }
+    admSetOp(op.trim()); btn.disabled = true; admOut("Working...", true);
+    try{
+      var r = await fetch(WRITE, { method:"POST", headers:{ "x-admin-token": token, "Content-Type":"application/json" },
+        body: JSON.stringify({ action: kind==="withdraw" ? "admission_withdraw" : "admission_reinstate", founder_id: id, operator: op.trim(), reason: why.trim() }) });
+      var j = await r.json().catch(function(){ return {}; });
+      if(!r.ok || j.error){ btn.disabled = false; admOut(ADM_ERR[j.error] || ("Not done: " + (j.detail || j.error || r.status))); return; }
+      msg(kind==="withdraw"
+        ? (j.warning==="checkout_close_failed" ? "Admission withdrawn. An open Stripe checkout could not be closed: expire it in Stripe." : "Admission withdrawn." + (j.closed_sessions && j.closed_sessions.length ? " Open checkout closed." : ""))
+        : "Admission reinstated.", j.warning ? false : true);
+      await load();
+    }catch(e){ btn.disabled = false; admOut("Not done: " + e.message); }
+  }
+  var ADM_INP = 'style="width:100%;box-sizing:border-box;background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px"';
+  function admOut(t, ok){ var e = document.getElementById("admMsg"); if(!e) return; e.style.color = ok ? "var(--ok)" : "var(--bad)"; e.textContent = t || ""; }
+  var ADM_ERR = { admission_not_withdrawable: "Not done: this admission has been paid or is active, so it cannot be withdrawn.",
+    admission_already_withdrawn: "Already withdrawn.", admission_not_withdrawn: "Not done: this admission is not withdrawn.",
+    admission_reason_required: "Enter a reason of at least 8 characters.", operator_required: "Enter your name." };
+  var ADM_KIND = { withdrawn: "Withdrawn", reinstated: "Reinstated", paid_after_withdrawal: "Paid after withdrawal", checkout_closed: "Open checkout closed", checkout_close_failed: "Open checkout NOT closed" };
+  async function loadAdmissionRecord(){
+    var host = document.getElementById("admHist"); if(!host) return;
+    try{
+      var r = await fetch(WRITE, { method:"POST", headers:{ "x-admin-token": token, "Content-Type":"application/json" }, body: JSON.stringify({ action:"admission_history" }) });
+      var j = await r.json(); if(!r.ok || !j.events){ host.innerHTML = ""; return; }
+      if(!j.events.length){ host.innerHTML = ""; return; }
+      host.innerHTML = '<h3 style="margin:22px 0 8px;font-size:15px">Admission record</h3><table><thead><tr><th>When</th><th>Founder</th><th>What</th><th>By</th><th>Reason</th></tr></thead><tbody>'+
+        j.events.map(function(e){
+          var by = e.party==="founder" ? "the founder" : (e.party==="system" ? "Stripe" : "the Foundry");
+          var flag = (e.kind==="paid_after_withdrawal"||e.kind==="checkout_close_failed") ? ' <span class="pill warn">needs attention</span>' : '';
+          return '<tr><td>'+esc(when(e.at))+'</td><td>'+esc(e.founder_name||"—")+'<div class="em">'+esc(e.founder_email||"")+'</div></td><td>'+esc(ADM_KIND[e.kind]||e.kind)+flag+'</td>'+
+            '<td>'+esc(by)+(e.actor?'<div class="em">'+esc(e.actor)+'</div>':'')+'</td><td>'+esc(e.reason||"")+'</td></tr>'; }).join("")+'</tbody></table>';
+    }catch(e){ host.innerHTML = ""; }
+  }
+  document.getElementById("view").addEventListener("click", function(e){
+    var b = e.target && e.target.closest ? e.target.closest("button[data-adm]") : null; if(!b) return;
+    var k = b.getAttribute("data-adm");
+    if(k==="cancel"){ var row = b.closest("tr.admform"); if(row) row.parentNode.removeChild(row); return; }
+    admissionAct(k, b.getAttribute("data-id"), b);
+  });
   function renderFounders(f, coaches){
     if(!f.length) return '<div class="empty">No founders yet. Admitting an application opens a seat here; payment turns it active.</div>';
     return '<table><thead><tr><th>Name</th><th>Email</th><th>Chamber</th><th>Week</th><th>Standing</th><th>Coach</th><th>Placement</th></tr></thead><tbody>'+
@@ -274,7 +337,10 @@
         '<td><div class="cellacts">'+stageSel("fstage", x.id, x.stage||"Seeker")+
         '<input class="fweek" data-id="'+x.id+'" type="number" min="1" value="'+(x.week||1)+'" style="width:56px" />'+
         '<button class="mini save" data-fact="place" data-id="'+x.id+'">Save</button>'+
-        '<button class="mini" data-fact="certify" data-id="'+x.id+'" title="Confer certificate + publish to registry">Certify</button></div></td></tr>'; }).join("")+
+        '<button class="mini" data-fact="certify" data-id="'+x.id+'" title="Confer certificate + publish to registry">Certify</button>'+
+        (has(x.status,["awaiting_payment","unpaid"])?'<button class="mini reject" data-fact="withdraw" data-id="'+x.id+'" title="Withdraw this unpaid admission">Withdraw admission</button>':'')+
+        (x.status==="withdrawn"?'<button class="mini save" data-fact="reinstate" data-id="'+x.id+'" title="Reinstate this admission (back to awaiting payment)">Reinstate</button>':'')+
+        '</div></td></tr>'; }).join("")+
       '</tbody></table>';
   }
   function coachSelect(f, coaches){
@@ -571,6 +637,8 @@
     } else if(b.getAttribute("data-fact")==="place"){
       var st=document.querySelector('.fstage[data-id="'+id+'"]'), wk=document.querySelector('.fweek[data-id="'+id+'"]');
       doWrite({ action:"place", founder_id:id, stage: st?st.value:undefined, week: wk?parseInt(wk.value,10):undefined }, b);
+    } else if(b.getAttribute("data-fact")==="withdraw" || b.getAttribute("data-fact")==="reinstate"){
+      openAdmissionForm(id, b.getAttribute("data-fact"), b);
     } else if(b.getAttribute("data-fact")==="certify"){
       doCertify(id, b);
     }
