@@ -92,7 +92,7 @@
   /* T9 package: required unprinted readings, read-only and watermarked (Terms of Service, section 11) */
   .rd-list{margin:8px 0 4px; display:flex; flex-direction:column; gap:6px}
   .rd-item{display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:13px; color:var(--dim)}
-  .rd-item button{font-size:12.5px; padding:5px 11px; width:auto; margin:0}
+  .rd-item button{font-size:12.5px; padding:5px 11px}
   .rd-held{color:var(--dim); font-size:13px; border:1px dashed var(--line, #2a2523); border-radius:10px; padding:10px 12px; margin:10px 0}
   .rd-panel{position:relative; margin:10px 0; border:1px solid var(--line, #2a2523); border-radius:12px; padding:18px 18px 10px; max-height:70vh; overflow:auto;
     -webkit-user-select:none; user-select:none}
@@ -314,7 +314,7 @@ Each code is yours alone and works once. If a code does not work, use Report a p
 
 What we ask: use the Foundry normally, at your own pace through the weekly units. Report anything that blocks you, confuses you or looks wrong. Answer the short check-ins when they appear below (about a minute each; you can skip any). At the end there is a short exit review.</div></details>
     <details class="v2d"><summary>What it costs</summary><div class="v2b" id="pgCost">$1 for each five-week Seeker block, charged when the block begins, for at most three blocks: $3 in total. The pilot covers the Seeker stage only. There is no Builder billing in the pilot, and nothing is charged after your third block.</div></details>
-    <details class="v2d"><summary>Where your books and readings appear</summary><div class="v2b">Each unit under Your Program shows its reading. Your books are under Your books: choose print or audiobook once, and the Foundry sends each movement's books in that format whenever it is available. Print copies are mailed and may be good used copies. Audiobooks come as AudiobooksNow gift codes that you redeem from that list. Books written by Ethan Starke are sent by Ethan personally. Readings from his books not yet in print appear in the unit: read them here, or download your own copy (EPUB), which opens in any ebook app, such as Apple Books, Google Play Books, Kobo or Calibre. Some units have required readings that are not yet available in the pilot. Those units say the reading is held, and they cannot be submitted until it is available. That is expected, not a fault, but tell us if it stops you.</div></details>
+    <details class="v2d"><summary>Where your books and readings appear</summary><div class="v2b">Each unit under Your Program shows its reading. Your books are under Your books: choose print or audiobook once, and the Foundry sends each movement's books in that format whenever it is available. Print copies are mailed and may be good used copies. Audiobooks come as AudiobooksNow gift codes that you redeem from that list. Books written by Ethan Starke are sent by Ethan personally. A few later units have required readings that are not yet available in the pilot. Those units say the reading is held, and they cannot be submitted until it is available. That is expected, not a fault, but tell us if it stops you.</div></details>
     <details class="v2d"><summary>How coaching and review work</summary><div class="v2b">Your coach's messages appear under Messages with your coach. When you submit a unit, it is reviewed and the outcome appears on that unit. Your coaching, your submissions and your reviews are never attached to a support report.</div></details>
     <details class="v2d"><summary>Getting help, and what is urgent</summary><div class="v2b">Use Report a problem below. You get a reference number at once. Replies appear here under Your reports, and an email tells you when a reply is waiting. You can add to a report at any time.
 
@@ -521,7 +521,6 @@ Urgent: if you were charged unexpectedly, cannot get in after paying, see someth
       if(btn){ btn.addEventListener("click", function(){ submitDeliverable(w.week); }); }
     });
     Array.prototype.forEach.call(host.querySelectorAll(".rdOpen"), function(b){ b.addEventListener("click", function(){ openReading(Number(b.getAttribute("data-w")), b); }); });
-    Array.prototype.forEach.call(host.querySelectorAll(".rdDown"), function(b){ b.addEventListener("click", function(){ downloadReading(Number(b.getAttribute("data-w")), b.getAttribute("data-b"), b.getAttribute("data-l"), b); }); });
     var sel = document.getElementById("desWeek");
     if(sel){
       var keep = sel.value;
@@ -539,20 +538,6 @@ Urgent: if you were charged unexpectedly, cannot get in after paying, see someth
       if(m){ var f = figBy[m[1]]; return f ? '<img alt="'+esc(f.caption||f.name)+'" src="data:'+esc(f.mime)+';base64,'+esc(f.b64)+'">' : ''; }
       return par.trim() ? '<p>'+mdInline(par.trim())+'</p>' : '';
     }).join("");
-  }
-  // P68: the founder's own EPUB copy of an available unprinted reading; opens in any ebook app. Each copy carries the licence line.
-  async function downloadReading(week, book, label, btn){
-    var r = await sb.auth.getSession(); var t = r.data.session && r.data.session.access_token; if(!t) return;
-    var old = btn ? btn.textContent : ""; if(btn){ btn.disabled = true; btn.textContent = "Preparing\u2026"; }
-    try{
-      var res = await fetch(CURR, { method:"POST", headers:{ Authorization:"Bearer "+t, "Content-Type":"application/json" }, body: JSON.stringify({ download_week: week, book_title: book, chapter_label: label }) });
-      var panel = document.getElementById("rdPanel"+week);
-      if(!res.ok){ var j = await res.json().catch(function(){ return {}; }); if(panel){ panel.innerHTML = '<div class="rd-held">This reading could not be downloaded ('+esc(j.error||res.status)+').</div>'; } return; }
-      var cd = res.headers.get("Content-Disposition") || ""; var m = cd.match(/filename="([^"]+)"/);
-      var blob = await res.blob(); var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = m ? m[1] : "reading.epub";
-      document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-    }catch(e){ var p2 = document.getElementById("rdPanel"+week); if(p2){ p2.innerHTML = '<div class="rd-held">This reading could not be downloaded. Refresh to try again.</div>'; } }
-    finally{ if(btn){ btn.disabled = false; btn.textContent = old; } }
   }
   async function openReading(week, btn){
     var panel = document.getElementById("rdPanel"+week); if(!panel) return;
@@ -586,7 +571,7 @@ Urgent: if you were charged unexpectedly, cannot get in after paying, see someth
     if((w.readings||[]).length){
       body += '<div class="rd-list">' + w.readings.map(function(r, i){
         return '<div class="rd-item"><span>'+esc(r.book_title)+', '+esc(r.chapter_label)+' <em>'+esc(r.chapter_title)+'</em></span>'+
-          (r.available ? '<button class="rdOpen" data-w="'+esc(wk)+'">Read in the portal</button><button class="rdDown" data-w="'+esc(wk)+'" data-b="'+esc(r.book_title)+'" data-l="'+esc(r.chapter_label)+'">Download (EPUB)</button>' : '<span class="chip">Not yet available in the portal</span>')+'</div>';
+          (r.available ? '<button class="rdOpen" data-w="'+esc(wk)+'">Read in the portal</button>' : '<span class="chip">Not yet available in the portal</span>')+'</div>';
       }).join("") + '</div><div id="rdPanel'+esc(wk)+'"></div>';
     }
     if(w.deliverable_prompt){ body += '<div class="wk-prompt">'+esc(w.deliverable_prompt)+'</div>'; }
