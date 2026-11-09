@@ -243,15 +243,29 @@
           <label class="bk-opt"><input type="radio" name="bkFormat" value="print"><span><b>Print</b><em>Mailed to you.</em></span></label>
           <label class="bk-opt"><input type="radio" name="bkFormat" value="audiobook"><span><b>Audiobook</b><em>A gift code you redeem at AudiobooksNow.</em></span></label>
         </div>
-        <p class="bk-promise">We send your choice whenever it is available. A title with no audiobook comes in print. Print copies may be good used copies: we buy used first when a copy in good condition or better costs less. Books written by Ethan Starke are sent by Ethan personally.</p>
+        <p class="bk-promise">We send your choice whenever it is available. A title with no audiobook comes in print. Print copies may be good used copies: we buy used first when a copy in good condition or better costs less. Books written by Ethan Starke are sent by Ethan personally. If a print copy would arrive late or cost more than our limit, we may send the Kindle edition instead, with your agreement below.</p>
         <button id="bkSave" style="width:auto;padding:11px 20px">Save my choice</button>
         <div id="bkMsg" class="msg"></div>
+      </div>
+      <!-- P69: the founder's agreement to the Kindle fallback (the wording comes from founder-books and is recorded as agreed) -->
+      <div id="bkKindle" class="wk wk-form hide">
+        <div class="wk-t">Kindle as a fallback</div>
+        <p id="bkKindleText" style="color:var(--dim);font-size:13.5px;margin:6px 0 10px"></p>
+        <div id="bkKindleAsk">
+          <label class="bk-opt" style="min-width:0"><input type="checkbox" id="bkKindleOk"><span><b>I agree</b><em>I have the free Kindle app on a device, or will install it before a Kindle copy arrives.</em></span></label>
+          <button id="bkKindleSave" style="width:auto;padding:11px 20px">Agree</button>
+        </div>
+        <div id="bkKindleMsg" class="msg"></div>
       </div>
       <div id="booksList"></div>
       <details class="v2d" id="booksAbn"><summary>Listening with AudiobooksNow</summary><div class="v2b">1. When an audiobook is ready it shows here with a Redeem button, and we email you to say something is waiting.
 2. Redeem opens AudiobooksNow. Sign in, or create a free account with your email address, and the audiobook is added to your library.
 3. Listen in the AudiobooksNow app on your phone, or on the AudiobooksNow website.
 Each code is yours alone and works once. If a code does not work, use Report a problem and we will sort it out.</div></details>
+      <details class="v2d hide" id="booksKindle"><summary>Reading a Kindle copy</summary><div class="v2b">1. When a Kindle copy is ready it shows here with a Redeem button, and we email you to say something is waiting.
+2. Redeem opens Amazon. Sign in to your own Amazon account and accept the book; it is added to your Kindle library.
+3. Read it in the free Kindle app on your phone, tablet or computer, or on a Kindle.
+Each link is yours alone and works once. If it does not work, use Report a problem and we will sort it out.</div></details>
     </div>
     <!-- Culmination surface: hidden by default; revealed only on an authorized 200
          from culmination-member (feature flag on). Dark by construction. -->
@@ -314,7 +328,7 @@ Each code is yours alone and works once. If a code does not work, use Report a p
 
 What we ask: use the Foundry normally, at your own pace through the weekly units. Report anything that blocks you, confuses you or looks wrong. Answer the short check-ins when they appear below (about a minute each; you can skip any). At the end there is a short exit review.</div></details>
     <details class="v2d"><summary>What it costs</summary><div class="v2b" id="pgCost">$1 for each five-week Seeker block, charged when the block begins, for at most three blocks: $3 in total. The pilot covers the Seeker stage only. There is no Builder billing in the pilot, and nothing is charged after your third block.</div></details>
-    <details class="v2d"><summary>Where your books and readings appear</summary><div class="v2b">Each unit under Your Program shows its reading. Your books are under Your books: choose print or audiobook once, and the Foundry sends each movement's books in that format whenever it is available. Print copies are mailed and may be good used copies. Audiobooks come as AudiobooksNow gift codes that you redeem from that list. Books written by Ethan Starke are sent by Ethan personally. Readings from his books not yet in print appear in the unit: read them here, or download your own copy (EPUB), which opens in any ebook app, such as Apple Books, Google Play Books, Kobo or Calibre. Some units have required readings that are not yet available in the pilot. Those units say the reading is held, and they cannot be submitted until it is available. That is expected, not a fault, but tell us if it stops you.</div></details>
+    <details class="v2d"><summary>Where your books and readings appear</summary><div class="v2b">Each unit under Your Program shows its reading. Your books are under Your books: choose print or audiobook once, and the Foundry sends each movement's books in that format whenever it is available. Print copies are mailed and may be good used copies. Audiobooks come as AudiobooksNow gift codes that you redeem from that list. If a print copy would arrive late or cost more than the Foundry's limit, and you have agreed to it, a Kindle copy may come instead, redeemed on Amazon from that list. Books written by Ethan Starke are sent by Ethan personally. Readings from his books not yet in print appear in the unit: read them here, or download your own copy (EPUB), which opens in any ebook app, such as Apple Books, Google Play Books, Kobo or Calibre. Some units have required readings that are not yet available in the pilot. Those units say the reading is held, and they cannot be submitted until it is available. That is expected, not a fault, but tell us if it stops you.</div></details>
     <details class="v2d"><summary>How coaching and review work</summary><div class="v2b">Your coach's messages appear under Messages with your coach. When you submit a unit, it is reviewed and the outcome appears on that unit. Your coaching, your submissions and your reviews are never attached to a support report.</div></details>
     <details class="v2d"><summary>Getting help, and what is urgent</summary><div class="v2b">Use Report a problem below. You get a reference number at once. Replies appear here under Your reports, and an email tells you when a reply is waiting. You can add to a report at any time.
 
@@ -969,7 +983,9 @@ Urgent: if you were charged unexpectedly, cannot get in after paying, see someth
   function tok(){try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(/sb-.*-auth-token/.test(k)){var v=JSON.parse(localStorage.getItem(k));return (v&&(v.access_token||(v.currentSession&&v.currentSession.access_token)))||null;}}}catch(e){}return null;}
   async function call(body){var t=tok();if(!t)return {s:0,j:{}};try{var r=await fetch(FB,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+t},body:JSON.stringify(body)});return {s:r.status,j:await r.json().catch(function(){return {};})};}catch(e){return {s:0,j:{}};}}
   var STATE={preparing:"Being prepared",on_the_way:"On its way",delivered:"Delivered",ready:"Ready to redeem",cancelled:"Cancelled"};
-  var FMT={print:"Print",audiobook:"Audiobook",author_copy:"From Ethan Starke"};
+  var FMT={print:"Print",audiobook:"Audiobook",author_copy:"From Ethan Starke",kindle:"Kindle edition"};
+  var KW="";
+  function day(s){try{return new Date(s).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});}catch(e){return "";}}
   function render(d){
     var pref=d.preference||"";
     document.querySelectorAll('input[name="bkFormat"]').forEach(function(r){r.checked=(r.value===pref);});
@@ -982,7 +998,7 @@ Urgent: if you were charged unexpectedly, cannot get in after paying, see someth
       var sub=FMT[l.format]||l.format;
       if(l.format==="print"&&l.used_copy) sub+=" &middot; good used copy"; else sub=esc(sub);
       sub+=" &middot; "+esc(STATE[l.state]||l.state);
-      var act=l.redeem_url?'<a class="bk-go" href="'+esc(l.redeem_url)+'" target="_blank" rel="noopener">Redeem</a>'
+      var act=l.redeem_url?'<a class="bk-go" href="'+esc(l.redeem_url)+'" target="_blank" rel="noopener">'+(l.format==="kindle"?"Redeem on Amazon":"Redeem")+'</a>'
         :(l.tracking_url?'<a class="bk-go ghosty" href="'+esc(l.tracking_url)+'" target="_blank" rel="noopener">Track</a>':'');
       html+='<div class="bk-row"><div><div class="bk-t">'+esc(l.title)+'</div><div class="bk-s">'+sub+'</div></div>'+act+'</div>';
     });
@@ -990,6 +1006,14 @@ Urgent: if you were charged unexpectedly, cannot get in after paying, see someth
       :'<div class="empty">Your books appear here when each movement begins.</div>';
     $("booksList").innerHTML=html;
     $("booksAbn").classList.toggle("hide",!(pref==="audiobook"||lines.some(function(l){return l.format==="audiobook";})));
+    // the Kindle fallback: asked once; after agreeing, the founder sees the date
+    KW=d.kindle_wording||KW;
+    if(KW){
+      $("bkKindleText").textContent=d.kindle_agreed_at?("You agreed on "+day(d.kindle_agreed_at)+": "+KW):KW;
+      $("bkKindleAsk").classList.toggle("hide",!!d.kindle_agreed_at);
+      $("bkKindle").classList.remove("hide");
+    }
+    $("booksKindle").classList.toggle("hide",!lines.some(function(l){return l.format==="kindle";}));
     $("booksWrap").classList.remove("hide");
   }
   var shown=false;
@@ -1002,6 +1026,14 @@ Urgent: if you were charged unexpectedly, cannot get in after paying, see someth
       var r=await call({action:"set_preference",format:sel.value}); b.disabled=false;
       if(r.s===200&&r.j&&r.j.founder===true){render(r.j);m.className="msg ok";m.textContent="Saved. "+(sel.value==="audiobook"?"Audiobooks":"Print books")+" it is.";}
       else{m.className="msg bad";m.textContent="Could not save. Please try again.";}
+    });
+    $("bkKindleSave").addEventListener("click",async function(){
+      var m=$("bkKindleMsg"), b=$("bkKindleSave");
+      if(!$("bkKindleOk").checked){m.className="msg bad";m.textContent="Tick I agree first.";return;}
+      b.disabled=true;m.className="msg";m.textContent="Saving…";
+      var r=await call({action:"kindle_agree",wording:KW}); b.disabled=false;
+      if(r.s===200&&r.j&&r.j.founder===true){render(r.j);m.className="msg ok";m.textContent="Thank you. Your agreement is recorded.";}
+      else{m.className="msg bad";m.textContent=(r.j&&r.j.error==="kindle_wording_changed")?"The wording changed. Please reload the page and read it again.":"Could not save. Please try again.";}
     });
     var tries=0; (async function poll(){ if(shown) return; if(tok()&&(await load())) return; if(++tries<20) setTimeout(poll,1500); })();
   }
