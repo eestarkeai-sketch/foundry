@@ -509,25 +509,6 @@
   // Fail-safe: if the backend save fails for any reason, we fall back to emailing Ethan the full
   // application (native FormSubmit) so an application can never be silently lost.
   var EP = "https://dxkmdjdkwmarifzelakr.supabase.co/functions/v1/";
-  // P70 / ECR-WORK-0030: a sponsored application. The founder's link from their sponsor's invitation carries a single-use
-  // sponsor claim in the URL fragment (#sponsor=...), which no server sees on the way in. It is read once, kept only in
-  // this tab's session storage until the application is sent, removed from the address bar, and sent with the application.
-  // It does not change the application or its review: Starke Foundry decides admission exactly as for any applicant.
-  var SPONSOR = (function(){
-    try{
-      var m=/(?:^|[#&])sponsor=([A-Za-z0-9_-]{43})(?:&|$)/.exec(location.hash||"");
-      if(m){ try{ sessionStorage.setItem("fsp", m[1]); }catch(_){} try{ history.replaceState(null,"",location.pathname+location.search); }catch(_){} return m[1]; }
-      try{ return sessionStorage.getItem("fsp")||""; }catch(_){ return ""; }
-    }catch(_){ return ""; }
-  })();
-  if(SPONSOR){
-    try{
-      var sn=document.createElement("p"); sn.id="sponsorBanner";
-      sn.style.cssText="border:1px solid rgba(201,162,74,.5);padding:12px 14px;margin:0 0 18px;font-size:15px;line-height:1.5";
-      sn.textContent="You are applying with a sponsored place. Starke Foundry reviews every application the same way and decides admission itself; your sponsored place is confirmed only if you are admitted.";
-      var host=document.getElementById("app"); if(host&&host.parentNode){ host.parentNode.insertBefore(sn, host); }
-    }catch(_){}
-  }
   // Populate the "referred by a coach" dropdown from the public coach list.
   (function loadReferrers(){
     var sel=document.getElementById("n_referrer"); if(!sel) return;
@@ -583,7 +564,6 @@
     var btn=document.getElementById("submitBtn");
     if(btn){ btn.disabled=true; btn.textContent="Submitting…"; }
     var data; try{ data=gatherApplication(); }catch(err){ appForm.submit(); return; }
-    if(SPONSOR) data.sponsorClaim = SPONSOR;
     // Record a coach referral (fire-and-forget). Converts to credit only if this founder is later admitted.
     try{ if(data.referredByCoachId){ fetch(EP+"record-referral?cb="+Date.now(), {method:"POST", cache:"no-store",
       body: JSON.stringify({ coach_id:data.referredByCoachId, email:data.email }) }).catch(function(){}); } }catch(_){}
@@ -602,19 +582,8 @@
       e.textContent="We couldn’t submit just now — please try again, or email hello@starkefoundry.com and we’ll take it from there.";
     }
     fetch(EP+"apply-intake?cb="+Date.now(), {method:"POST", cache:"no-store", body: JSON.stringify(data)})
-      .then(function(r){ return r.ok ? r.json().then(function(j){ return {ok:true, j:j||{}}; }).catch(function(){ return {ok:true, j:{}}; }) : {ok:false}; })
-      .then(function(x){
-        if(!x.ok) return failOpen();
-        if(SPONSOR){
-          try{ sessionStorage.removeItem("fsp"); }catch(_){}
-          if(x.j.sponsorship!=="recorded"){
-            try{ var t=document.getElementById("thanks"); var p=document.createElement("p"); p.id="sponsorNote";
-              p.textContent="Your application was received. Your sponsorship could not be attached to it automatically; reply to the email that invited you and the office will connect it.";
-              if(t) t.appendChild(p); }catch(_){}
-          }
-        }
-        showThanks();
-      })
+      .then(function(r){ return r.ok; })
+      .then(function(ok){ ok ? showThanks() : failOpen(); })
       .catch(function(){ failOpen(); });
     setTimeout(function(){ if(!done) failOpen(); }, 12000);
   }, true);

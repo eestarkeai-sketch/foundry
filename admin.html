@@ -126,7 +126,6 @@
       <div class="tab" data-t="culminations">Culminations</div>
       <div class="tab" data-t="v2">Curriculum v2</div>
       <div class="tab" data-t="pilot">Pilot support</div>
-      <div class="tab" data-t="sponsored">Sponsored</div>
     </div>
     <div id="view"></div>
     <div class="foot">Operating desk on the Supabase backend. Admit &amp; place opens an awaiting-payment seat; payment turns it active.</div>
@@ -201,7 +200,6 @@
     else if(TAB==="sessions"){ v.innerHTML = '<div class="empty">Loading sessions…</div>'; loadOps("sessions"); }
     else if(TAB==="deliverables"){ v.innerHTML = '<div class="empty">Loading deliverables…</div>'; loadOps("deliverables"); }
     else if(TAB==="support"){ v.innerHTML = '<div class="empty">Loading support…</div>'; loadOps("support"); }
-    else if(TAB==="sponsored"){ v.innerHTML = '<div class="empty">Loading sponsored applications…</div>'; loadSponsored(); }
     else if(TAB==="payments") v.innerHTML = renderPayments(fq(DATA.payments));
     else if(TAB==="culminations"){ v.innerHTML = '<div class="empty">Loading culminations…</div>'; loadCulminations(); }
   }
@@ -447,69 +445,6 @@
     if(kind==="support") return rows.map(function(t){ return '<div class="card"><div class="row1"><div><div class="nm">'+esc(t.subject||t.type||"Ticket")+'</div><div class="em">'+esc(t.from_email||"")+(t.kind?(" &middot; "+esc(t.kind)):"")+'</div><div class="meta">'+when(t.created_at)+'</div></div><div>'+stPill(t.status||"open")+'</div></div>'+(t.body?('<pre>'+esc(t.body)+'</pre>'):'')+'</div>'; }).join('');
     return '<div class="empty">—</div>';
   }
-  // ===== P70 / ECR-WORK-0030: sponsored applications. Admission is decided in Applications exactly as for any applicant;
-  //       this tab only shows where each sponsored application stands at ESCOS, and offers sponsored activation (HELD). =====
-  var SPONSOR = BASE + "sponsorship-desk";
-  // r2 (DEC-WORK-0030-02 R): this tab has its own key, held by the sponsorship operator, not the admissions Desk key.
-  // It is kept only for this browser tab, and the server lists only applications whose admission is already decided.
-  var SPKEY = (function(){ try{ return sessionStorage.getItem("fsp_desk_key")||""; }catch(_){ return ""; } })();
-  function spKeyForm(note){
-    return '<div class="meta" style="margin:0 0 12px">'+esc(note||"Sponsored applications are kept apart from admission review. Enter the sponsorship key to open them.")+'</div>'
-      +'<input id="spKey" type="password" autocomplete="off" placeholder="Sponsorship key" style="width:260px"> <button class="btn" id="spKeyGo">Open</button>';
-  }
-  document.addEventListener("click", function(e){
-    var b=e.target.closest&&e.target.closest("#spKeyGo"); if(!b) return;
-    var k=(document.getElementById("spKey")||{}).value||""; k=k.trim(); if(!k) return;
-    SPKEY=k; try{ sessionStorage.setItem("fsp_desk_key", k); }catch(_){} loadSponsored();
-  });
-  var SP_CLAIM = {presented:"sent to ESCOS", accepted:"sponsorship confirmed", unavailable:"sponsorship not honoured", closed:"closed (refused)"};
-  var SP_GRANT = {none:"not granted yet", scheduled:"granted, starts later", live:"granted and live", released:"ended (released)", revoked:"ended (revoked)", expired:"ended (expired)", unavailable:"ESCOS could not answer", not_found:"ESCOS found no match"};
-  function loadSponsored(){
-    var v=document.getElementById("view");
-    if(!SPKEY){ v.innerHTML = spKeyForm(); return; }
-    fetch(SPONSOR, { headers:{ "x-sponsorship-token": SPKEY } })
-      .then(function(r){
-        if(r.status===401){ SPKEY=""; try{ sessionStorage.removeItem("fsp_desk_key"); }catch(_){} throw {form:"That key was not accepted."}; }
-        if(r.status===503) throw new Error("The sponsorship Desk has no key of its own yet; it stays closed.");
-        if(r.status===404) throw new Error("The sponsorship-desk function is not deployed."); if(!r.ok) throw new Error("Server error ("+r.status+")."); return r.json(); })
-      .then(function(j){ if(TAB!=="sponsored") return; v.innerHTML = renderSponsored((j&&j.rows)||[]); })
-      .catch(function(e){ if(TAB!=="sponsored") return; v.innerHTML = (e&&e.form) ? spKeyForm(e.form) : '<div class="empty">'+esc(e.message||"error")+'</div>'; });
-  }
-  function renderSponsored(rows){
-    var held = rows.length ? !rows[0].activation_enabled : true;
-    var head = '<div class="meta" style="margin:0 0 12px">A sponsored applicant is reviewed and admitted or refused in Applications like any other. A refusal is reported to ESCOS, and no sponsored place follows. Activation on sponsorship needs a live ESCOS grant read in the last hour'+(held?'; it is <b>held</b> until its rules are ruled.':'.')+'</div>';
-    if(!rows.length) return head+'<div class="empty">No sponsored application yet.</div>';
-    return head+'<table><thead><tr><th>Applied</th><th>Applicant</th><th>Application</th><th>Sponsorship</th><th>Founder</th><th>ESCOS grant</th><th>Read</th><th></th></tr></thead><tbody>'+rows.map(function(x){
-      var act = (!held && x.founder_id && x.founder_status==="awaiting_payment" && x.claim_state==="accepted" && x.grant_state==="live" && !x.placement_activated_at)
-        ? '<input class="spOp" data-id="'+esc(x.founder_id)+'" placeholder="Your name" style="width:110px"> <button class="btn spAct" data-id="'+esc(x.founder_id)+'">Activate on sponsorship</button>'
-        : ((x.founder_id && (x.placement_grant_ended_at || (!x.placement_activated_at && /^(released|revoked|expired|not_found)$/.test(x.grant_state||""))))
-          ? '<input class="spOp" data-id="'+esc(x.founder_id)+'" placeholder="Your name" style="width:110px"> <input class="spWhy" data-id="'+esc(x.founder_id)+'" placeholder="Reason (governed conversion)" style="width:170px"> <button class="btn spConv" data-id="'+esc(x.founder_id)+'">Allow direct payment</button>' : '');
-      return '<tr><td class="meta">'+when(x.applied_at)+'</td><td>'+esc(x.applicant_name||"—")+'</td><td>'+stPill(x.application_status)+'</td><td>'+esc(SP_CLAIM[x.claim_state]||x.claim_state)+(x.claim_reference?(' <span class="meta">'+esc(x.claim_reference)+'</span>'):'')+'</td><td>'+(x.founder_id?stPill(x.founder_status):'<span class="meta">not admitted</span>')+(x.placement_activated_at?(' <span class="meta">placed '+when(x.placement_activated_at)+'</span>'):'')+(x.placement_grant_ended_at?(' <span class="pill warn">grant ended</span>'):'')+'</td><td>'+esc(SP_GRANT[x.grant_state]||"not read yet")+(x.grant_reference?(' <span class="meta">'+esc(x.grant_reference)+'</span>'):'')+'</td><td class="meta">'+when(x.grant_read_at)+'</td><td>'+act+'</td></tr>';
-    }).join('')+'</tbody></table>';
-  }
-  document.addEventListener("click", function(e){
-    var b=e.target.closest&&e.target.closest(".spAct"); if(!b) return;
-    var id=b.getAttribute("data-id"); var op=document.querySelector('.spOp[data-id="'+id+'"]'); var name=op?(op.value||"").trim():"";
-    if(name.length<2){ msg("Enter your name to activate.", false); return; }
-    b.disabled=true;
-    fetch(SPONSOR, { method:"POST", headers:{ "x-sponsorship-token": SPKEY, "Content-Type":"application/json" }, body: JSON.stringify({ action:"activate", founder_id:id, operator:name }) })
-      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
-      .then(function(x){ if(x.ok){ msg("Activated on sponsorship.", true); loadSponsored(); } else { b.disabled=false; msg(x.j.error||"Refused.", false); } })
-      .catch(function(){ b.disabled=false; msg("Could not reach the Desk.", false); });
-  });
-  document.addEventListener("click", function(e){
-    var b=e.target.closest&&e.target.closest(".spConv"); if(!b) return;
-    var id=b.getAttribute("data-id");
-    var name=((document.querySelector('.spOp[data-id="'+id+'"]')||{}).value||"").trim();
-    var why=((document.querySelector('.spWhy[data-id="'+id+'"]')||{}).value||"").trim();
-    if(name.length<2||why.length<8){ msg("Enter your name and a reason of at least 8 characters.", false); return; }
-    b.disabled=true;
-    fetch(SPONSOR, { method:"POST", headers:{ "x-sponsorship-token": SPKEY, "Content-Type":"application/json" }, body: JSON.stringify({ action:"convert_to_self_pay", founder_id:id, operator:name, reason:why }) })
-      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
-      .then(function(x){ if(x.ok){ msg("Direct payment allowed for this founder.", true); loadSponsored(); } else { b.disabled=false; msg(x.j.error||"Refused.", false); } })
-      .catch(function(){ b.disabled=false; msg("Could not reach the Desk.", false); });
-  });
-
   function goTab(name){ Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(o){ o.classList.toggle("on", o.getAttribute("data-t")===name); }); TAB=name; render(); }
 
   // ===== Culminations (C1) — full Desk interface. Reuses token, BASE, esc,
