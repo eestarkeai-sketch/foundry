@@ -855,6 +855,8 @@
     if(l.route==="author"&&l.status==="awaiting_dispatch") a.push("dispatched");
     if(l.format==="audiobook"&&l.status==="awaiting_code") a.push("print_instead");
     if(l.route==="zinc"&&l.status==="failed") a.push("requeue");
+    // P69c: Zinc stops at Amazon's acceptance; a person who sees on Amazon that the order did not go through says so here
+    if(l.route==="zinc"&&["submitted","ordered","shipped"].indexOf(l.status)>=0) a.push("not_completed");
     // a title with Zinc is followed automatically; by hand only when it never reached Zinc or failed there
     if(l.format!=="audiobook"&&["planned","failed"].indexOf(l.status)>=0) a.push("ordered");
     if(l.route!=="zinc"&&l.format!=="audiobook"&&["ordered","dispatched"].indexOf(l.status)>=0) a.push("shipped");
@@ -862,9 +864,9 @@
     if(["delivered","issued","cancelled"].indexOf(l.status)<0) a.push("cancelled");
     return a;
   };
-  var LLABEL={dispatched:"Record sent",print_instead:"Send print instead",requeue:"Buy again (Zinc)",ordered:"Record bought by hand",shipped:"Record shipped",delivered:"Record delivered",cancelled:"Cancel title"};
+  var LLABEL={dispatched:"Record sent",print_instead:"Send print instead",requeue:"Buy again (Zinc)",not_completed:"Amazon did not complete it",ordered:"Record bought by hand",shipped:"Record shipped",delivered:"Record delivered",cancelled:"Cancel title"};
   var LNEED={dispatched:["tracking","Tracking number (optional)"],print_instead:["note","Why no audiobook (required)"],ordered:["reference","Vendor and order number (required)"],
-    shipped:["tracking","Tracking number (optional)"],cancelled:["note","Why it is cancelled (required)"]};
+    shipped:["tracking","Tracking number (optional)"],cancelled:["note","Why it is cancelled (required)"],not_completed:["note","What Amazon or the bank said (required)"]};
   var BOOK=null;
   function money(c){return c==null?"":"$"+(c/100).toFixed(2);}
   function lineSummary(o){
