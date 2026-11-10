@@ -133,6 +133,13 @@
   .bk-t{font-size:14.5px} .bk-s{font-size:12px; color:var(--faint); margin-top:2px}
   .bk-go{flex:none; font-size:13px; font-weight:600; padding:7px 14px; border-radius:9px; background:linear-gradient(180deg,var(--ember2),var(--ember)); color:#1a120c}
   .bk-go.ghosty{background:transparent; border:1px solid var(--line); color:var(--dim); font-weight:500}
+  /* B1: founder report and confirmation controls */
+  .bk-acts{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; align-items:center}
+  button.bk-go{width:auto; cursor:pointer; font-family:inherit}
+  .bk-rep{flex-basis:100%; margin-top:8px; display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+  .bk-rep select,.bk-rep input{font:inherit; font-size:13px; padding:7px 9px; border-radius:8px; border:1px solid var(--line); background:var(--panel); color:inherit; min-width:0}
+  .bk-rep input{flex:1 1 180px}
+  .bk-row.bk-wrap{flex-wrap:wrap}
   details.v2d{margin:8px 0; border:1px solid var(--line); border-radius:11px; padding:8px 12px; background:var(--bg)}
   details.v2d summary{cursor:pointer; color:var(--dim); font-size:13px}
   details.v2d .v2b{white-space:pre-wrap; font-size:13.5px; color:var(--dim); margin-top:8px; line-height:1.55}
@@ -243,7 +250,7 @@
           <label class="bk-opt"><input type="radio" name="bkFormat" value="print"><span><b>Print</b><em>Mailed to you.</em></span></label>
           <label class="bk-opt"><input type="radio" name="bkFormat" value="audiobook"><span><b>Audiobook</b><em>A gift code you redeem at AudiobooksNow.</em></span></label>
         </div>
-        <p class="bk-promise">We send your choice whenever it is available. A title with no audiobook comes in print. Print copies may be good used copies: we buy used first when a copy in good condition or better costs less. Books written by Ethan Starke are sent by Ethan personally. If a print copy would arrive late or cost more than our limit, we may send the Kindle edition instead, with your agreement below.</p>
+        <p class="bk-promise">We send your choice whenever it is available. A title with no audiobook comes in print. Print copies may be good used copies: we buy used first when a copy in good condition or better costs less. Books written by Ethan Starke are sent by Ethan personally.<span id="bkPromiseKindle" class="hide"> If a print copy would arrive late or cost more than our limit, we may send the Kindle edition instead, with your agreement below.</span></p>
         <button id="bkSave" style="width:auto;padding:11px 20px">Save my choice</button>
         <div id="bkMsg" class="msg"></div>
       </div>
@@ -997,17 +1004,27 @@ Urgent: if you were charged unexpectedly, cannot get in after paying, see someth
       if(key!==mv){mv=key; html+='<div class="bk-mv">'+esc(l.stage)+' &middot; movement '+esc(l.movement)+'</div>';}
       var sub=FMT[l.format]||l.format;
       if(l.format==="print"&&l.used_copy) sub+=" &middot; good used copy"; else sub=esc(sub);
-      sub+=" &middot; "+esc(STATE[l.state]||l.state);
+      sub+=" &middot; "+esc(l.words||STATE[l.state]||l.state);
+      // B1: the date the founder can hold us to, and the day it arrived
+      if(l.delivered_on) sub+=" &middot; arrived "+esc(day(l.delivered_on+"T12:00:00Z"));
+      else if(l.expected_by) sub+=" &middot; expected by "+esc(day(l.expected_by+"T12:00:00Z"));
       var act=l.redeem_url?'<a class="bk-go" href="'+esc(l.redeem_url)+'" target="_blank" rel="noopener">'+(l.format==="kindle"?"Redeem on Amazon":"Redeem")+'</a>'
         :(l.tracking_url?'<a class="bk-go ghosty" href="'+esc(l.tracking_url)+'" target="_blank" rel="noopener">Track</a>':'');
-      html+='<div class="bk-row"><div><div class="bk-t">'+esc(l.title)+'</div><div class="bk-s">'+sub+'</div></div>'+act+'</div>';
+      var id=esc(l.line||"");
+      if(l.line&&l.can_confirm) act+='<button type="button" class="bk-go" data-bk-confirm="'+id+'">It arrived</button>';
+      if(l.line&&l.can_report) act+='<button type="button" class="bk-go ghosty" data-bk-open="'+id+'" data-bk-kinds="book">Report a problem</button>';
+      if(l.line&&l.can_report_code) act+='<button type="button" class="bk-go ghosty" data-bk-open="'+id+'" data-bk-kinds="code">Code not working</button>';
+      html+='<div class="bk-row bk-wrap" data-bk-line="'+id+'"><div><div class="bk-t">'+esc(l.title)+'</div><div class="bk-s">'+sub+'</div></div><div class="bk-acts">'+act+'</div></div>';
     });
     if(!lines.length) html=d.waiting_for_preference?'<div class="empty">Your first books are ready to go as soon as you choose a format above.</div>'
       :'<div class="empty">Your books appear here when each movement begins.</div>';
     $("booksList").innerHTML=html;
     $("booksAbn").classList.toggle("hide",!(pref==="audiobook"||lines.some(function(l){return l.format==="audiobook";})));
     // the Kindle fallback: asked once; after agreeing, the founder sees the date
-    KW=d.kindle_wording||KW;
+    // B1 (Q1): the Kindle fallback is shown only while it is offered
+    KW=d.kindle_offered?(d.kindle_wording||KW):"";
+    $("bkPromiseKindle").classList.toggle("hide",!d.kindle_offered);
+    $("bkKindle").classList.toggle("hide",!KW);
     if(KW){
       $("bkKindleText").textContent=d.kindle_agreed_at?("You agreed on "+day(d.kindle_agreed_at)+": "+KW):KW;
       $("bkKindleAsk").classList.toggle("hide",!!d.kindle_agreed_at);
@@ -1034,6 +1051,36 @@ Urgent: if you were charged unexpectedly, cannot get in after paying, see someth
       var r=await call({action:"kindle_agree",wording:KW}); b.disabled=false;
       if(r.s===200&&r.j&&r.j.founder===true){render(r.j);m.className="msg ok";m.textContent="Thank you. Your agreement is recorded.";}
       else{m.className="msg bad";m.textContent=(r.j&&r.j.error==="kindle_wording_changed")?"The wording changed. Please reload the page and read it again.":"Could not save. Please try again.";}
+    });
+    // B1: report a missing, damaged or wrong book, or a code that does not work; confirm a book sent by hand arrived
+    var BKERR={not_reportable_now:"This book cannot be reported right now. Reports open three days after it ships and close thirty days after it arrives.",not_confirmable:"This book is not waiting for your confirmation.",not_your_book:"This book is not on your account."};
+    $("booksList").addEventListener("click",async function(ev){
+      var t=ev.target.closest("button"); if(!t) return;
+      var row=t.closest("[data-bk-line]"); if(!row) return;
+      var line=row.getAttribute("data-bk-line");
+      if(t.hasAttribute("data-bk-open")){
+        var f=row.querySelector(".bk-rep"); if(f){f.remove();return;}
+        var code=t.getAttribute("data-bk-kinds")==="code";
+        var opts=code?'<option value="code_invalid">The code does not work</option>'
+          :'<option value="not_received">It has not arrived</option><option value="damaged_or_wrong">It arrived damaged, or it is the wrong book</option>';
+        row.insertAdjacentHTML("beforeend",'<div class="bk-rep"><select aria-label="What went wrong">'+opts+'</select><input maxlength="500" placeholder="Anything we should know (optional)" aria-label="Note"><button type="button" class="bk-go" data-bk-send="1">Send report</button><div class="msg"></div></div>');
+        return;
+      }
+      if(t.hasAttribute("data-bk-send")){
+        var box=t.closest(".bk-rep"), m=box.querySelector(".msg");
+        t.disabled=true;m.className="msg";m.textContent="Sending…";
+        var r=await call({action:"report",line:line,kind:box.querySelector("select").value,note:box.querySelector("input").value});
+        t.disabled=false;
+        if(r.s===200&&r.j&&r.j.founder===true){render(r.j);var nm=$("bkMsg");nm.className="msg ok";nm.textContent="Thank you. We are on it and will write to you.";}
+        else{m.className="msg bad";m.textContent=BKERR[r.j&&r.j.error]||"Could not send. Please try again.";}
+        return;
+      }
+      if(t.hasAttribute("data-bk-confirm")){
+        t.disabled=true;
+        var c=await call({action:"confirm",line:line});
+        if(c.s===200&&c.j&&c.j.founder===true){render(c.j);var cm=$("bkMsg");cm.className="msg ok";cm.textContent="Thank you. We have recorded that it arrived.";}
+        else{t.disabled=false;var em=$("bkMsg");em.className="msg bad";em.textContent=BKERR[c.j&&c.j.error]||"Could not record that. Please try again.";}
+      }
     });
     var tries=0; (async function poll(){ if(shown) return; if(tok()&&(await load())) return; if(++tries<20) setTimeout(poll,1500); })();
   }

@@ -926,7 +926,7 @@
       f("stuck_hours","Treat an unfinished Zinc order as stuck after (hours)")+f("preorder_days","Order the next movement's books this many days early (0 = at payment)")+
       '<label style="font-size:12px;color:#b8afa5;display:flex;gap:6px;align-items:center">Most a book may cost, shipping included (dollars) <input id="bks-max_title_usd" '+I+' inputmode="decimal" value="'+esc(s.max_title_cents!=null?(s.max_title_cents/100).toFixed(2):"")+'"></label>'+
       '<label style="font-size:12px;color:#b8afa5;display:flex;gap:6px;align-items:center">Pay at most this much more for a faster copy (dollars) <input id="bks-speed_usd" '+I+' inputmode="decimal" value="'+esc(s.speed_allowance_cents!=null?(s.speed_allowance_cents/100).toFixed(2):"")+'"></label>'+
-      '<label style="font-size:12px;color:#b8afa5;display:flex;gap:6px;align-items:center"><input type="checkbox" id="bks-kindle_fallback"'+(s.kindle_fallback?" checked":"")+'> When print is late or over the limit, suggest the Kindle copy if it costs the same or less (only for founders who agreed)</label>'+
+      '<label style="font-size:12px;color:#b8afa5;display:flex;gap:6px;align-items:center"><input type="checkbox" id="bks-kindle_fallback"'+(s.kindle_fallback?" checked":" disabled")+'> Kindle copies'+(s.kindle_fallback?': on. Untick to switch off; it cannot be switched back on until the Terms permit Kindle copies.':': off. Not offered until the Terms permit them (FOUNDRY design, 9 Nov 2026).')+'</label>'+
       '<label style="font-size:12px;color:#b8afa5;display:flex;gap:6px;align-items:center"><input type="checkbox" id="bks-fallback_zinc_wallet"'+(s.fallback_zinc_wallet?" checked":"")+'> If the Amazon card cannot pay or sign in, buy the same titles at once through Zinc\'s accounts from the Zinc wallet, never above their original prices</label>'+
       '<div style="font-size:11px;color:#6b625c">Own Amazon account '+(d.own_amazon_configured?"connected":"not set: every order already uses Zinc's accounts")+'. Last changed by '+esc(s.updated_by||"")+' '+esc(s.updated_at?hhmm(s.updated_at):"")+'.</div>'+
       '<div><button id="bksSave" style="font-size:12px;padding:5px 12px;border-radius:7px;border:0;background:#c9a46a;color:#111;cursor:pointer">Save rules</button> <span id="bksOut" style="font-size:12px"></span></div>'+
@@ -934,16 +934,31 @@
       '<div style="display:flex;gap:6px;flex-wrap:wrap"><input id="bkqAsins" style="flex:1;min-width:220px;background:#151210;border:1px solid #2a2523;color:#eee;border-radius:7px;padding:5px 8px;font-size:12px" placeholder="ASINs, separated by spaces"><button id="bkqGo" style="'+'font-size:11.5px;padding:4px 10px;border-radius:7px;border:1px solid #2a2523;background:#1a1614;color:#ddd;cursor:pointer'+'">Check</button></div><div id="bkqOut" style="font-size:12px"></div>'+
       '</div></details>';
   }
+  // B1: book exceptions (held, exceptions, unclear orders), the month's budget and reserve, and who may act
+  async function loadBookExceptions(){
+    var box=document.getElementById("bkExc"); if(!box) return;
+    var r=await aw({action:"book_exceptions"}); if(!r.ok){box.innerHTML='<div style="color:#d9705f;font-size:12px;padding:4px 0">Book exceptions: '+esc(r.j.error||r.s)+'</div>';return;}
+    var d=r.j, b=d.budget||{}, rs=d.reserve||{}, q=d.queue||[];
+    var SW={held:"Held",exception:"Needs a person",awaiting_reconciliation:"Order unclear, being checked"};
+    var head='<div style="font-size:12px;color:#b8afa5;margin:2px 0 6px">Book budget this month: '+money(b.available)+' left of '+money(b.authority)+' · replacement reserve: '+money(rs.available)+' left of '+money(rs.authority)+
+      ' · daily digest '+(d.books_ops_configured?'<span style="color:#7bbf6a">on</span>':'<span style="color:#8a807a">off until the books inbox is set up</span>')+'</div>';
+    if(!q.length){box.innerHTML='<div style="margin:6px 0 10px;padding:10px 12px;border:1px solid #2a2523;border-radius:8px">'+head+'<div style="font-size:12px;color:#7bbf6a">No book exceptions.</div></div>';return;}
+    var rows=q.map(function(x){return '<tr style="border-top:1px solid #241f1d;font-size:12px"><td style="padding:5px 10px">'+esc(String(x.founder_name||"").split(" ")[0])+', '+esc(String(x.stage||"").slice(0,1))+esc(x.movement)+'</td><td>'+esc(x.title)+'</td><td>'+esc(SW[x.state]||x.state)+
+      (x.code?'<div style="font-size:10.5px;color:#8a807a">'+esc(String(x.code).replace(/_/g," "))+'</div>':'')+(x.hold_reason?'<div style="font-size:10.5px;color:#8a807a">held: '+esc(String(x.hold_reason).replace(/_/g," "))+'</div>':'')+'</td><td>'+esc(x.age_days)+' d</td><td>'+esc(x.who_acts)+
+      (x.held_for_person&&x.who_acts==="books operations lead"?'<div style="font-size:10.5px;color:#e8a33e">waiting: no books operations lead named yet</div>':'')+'</td></tr>';}).join("");
+    box.innerHTML='<div style="margin:6px 0 10px;padding:10px 12px;border:1px solid #6b3a2a;border-radius:8px;background:#1c1210">'+head+'<div style="font-size:13px;color:#f0a35e;margin-bottom:4px">Book exceptions ('+q.length+')</div>'+
+      '<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%"><tr style="text-align:left;color:#8a807a;font-size:11.5px"><th style="padding:4px 10px">Founder</th><th>Title</th><th>State</th><th>Age</th><th>Who acts</th></tr>'+rows+'</table></div></div>';
+  }
   async function loadTitles(rows){
     var box=document.getElementById("shipTitles"); if(!box) return;
     box.innerHTML='<div style="color:#8a807a;padding:10px 0">Loading titles...</div>';
     var r=await aw({action:"book_overview"}); if(!r.ok){box.innerHTML='<div style="color:#d9705f;padding:8px 0">Titles: '+esc(r.j.error||r.s)+'</div>';return;}
-    BOOK=r.j; var d=r.j;
+    BOOK=r.j; var d=r.j; setTimeout(loadBookExceptions, 0);
     var zinc='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:22px 0 8px"><div style="font-size:15px;color:#eee">Titles</div>'+
       '<span style="font-size:12px;color:'+(d.zinc_configured?"#7bbf6a":"#e8a33e")+'">Zinc '+(d.zinc_configured?"connected":"not connected: print titles wait")+'</span>'+
       '<span style="font-size:12px;color:#7bbf6a">Checked and retried automatically every 5 minutes</span>'+
       (d.wallet?'<span style="font-size:12px;color:#8a807a">Zinc wallet '+(d.wallet.spendable_cents!=null?money(d.wallet.spendable_cents):esc(d.wallet.error||"unread"))+'</span>':'')+
-      '<button id="bkTick" style="'+'font-size:11.5px;padding:4px 10px;border-radius:7px;border:1px solid #2a2523;background:#1a1614;color:#ddd;cursor:pointer'+'">Check and fix now</button><span id="bkSyncOut" style="font-size:12px;color:#8a807a"></span></div>'+bookAttention(d)+bookSettings(d);
+      '<button id="bkTick" style="'+'font-size:11.5px;padding:4px 10px;border-radius:7px;border:1px solid #2a2523;background:#1a1614;color:#ddd;cursor:pointer'+'">Check and fix now</button><span id="bkSyncOut" style="font-size:12px;color:#8a807a"></span></div>'+bookAttention(d)+'<div id="bkExc"></div>'+bookSettings(d);
     var th='<tr style="text-align:left;color:#8a807a;font-size:12px"><th style="padding:6px 10px">Founder</th><th>Mv</th><th>Title</th><th>Format</th><th>State</th><th>Bought as</th><th>Vendor / tracking</th><th>Latest step</th><th></th></tr>';
     var tb=(d.lines||[]).map(function(l){
       var dec=l.condition_policy?(esc(l.condition_policy)+" "+money(l.chosen_total_cents)+(l.offer_used_cents!=null||l.offer_new_cents!=null?'<div style="font-size:10.5px;color:#6b625c">used '+money(l.offer_used_cents)+' · new '+money(l.offer_new_cents)+'</div>':'')):"";
